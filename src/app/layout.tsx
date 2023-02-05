@@ -2,7 +2,6 @@ import '@/styles/globals.css';
 import React from 'react';
 import AddressBar from '@/ui/AddressBar';
 import GlobalNav from './GlobalNav';
-
 export default function RootLayout({
   children,
 }: {
@@ -13,6 +12,7 @@ export default function RootLayout({
       <head>
         <title>Next.js Turbopack App Directory Playground</title>
       </head>
+
       <body className="overflow-y-scroll bg-zinc-900">
         <div className="grid grid-cols-[1fr,minmax(auto,240px),min(800px,100%),1fr] gap-x-8 py-8">
           <div className="col-start-2">
