@@ -1,0 +1,26 @@
+name: Lint
+
+on: push
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get pkg.json
+        id: package-json
+        run: echo "content=$(cat ./package.json | tr -d '\n')" >> $GITHUB_OUTPUT
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{fromJson(steps.package-json.outputs.content).engines.node}}
+          cache: yarn
+
+      - name: Install Dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: yarn install --immutable --immutable-cache --check-cache
+
+      - run: next lint
