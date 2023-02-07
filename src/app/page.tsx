@@ -1,10 +1,13 @@
-import { demos } from '@/lib/demos';
-import Link from 'next/link';
+'use client'
+
+import { MyMapComponent } from '@/ui/googleMap'
 
 export default function Page() {
   return (
     <div className="space-y-6">
-      <div className="space-y-8 text-white">
+      <MyMapComponent />
+      {/* <div id="map" className="h-screen w-full"></div> */}
+      {/* <div className="space-y-8 text-white">
         {demos
           .filter((section) =>
             section.items.some((x) => typeof x.isDisabled === 'undefined'),
@@ -40,7 +43,7 @@ export default function Page() {
               </div>
             );
           })}
-      </div>
+      </div> */}
     </div>
-  );
+  )
 }
