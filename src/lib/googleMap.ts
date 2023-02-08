@@ -2,7 +2,6 @@ let map: google.maps.Map
 let infowindow: google.maps.InfoWindow
 
 /**
- *
  *  googleマップにmakerを刺す
  */
 export const createMarker = (place: google.maps.places.PlaceResult) => {

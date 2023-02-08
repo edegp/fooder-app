@@ -1,11 +1,11 @@
-// import { Wrapper, Status } from '@googlemaps/react-wrapper'
-// import { Spinner } from '@/ui/Spinner'
 import { useCallback, memo, useState } from 'react'
 import { useGeoLocation } from '@/lib/useGeoLocation'
-import { GoogleMap, useJsApiLoader, InfoWindow } from '@react-google-maps/api'
-import { Spinner } from './Spinner'
+import { GoogleMap, useJsApiLoader } from '@react-google-maps/api'
+import { Spinner } from '@/ui/Spinner'
+import { InfoWindows } from '@/ui/InfoWindow'
+import PlaceDetail from './PlaceDetail'
 
-// const ErrorComponent = () => <div>マップの読み込みに失敗しました</div>
+const mapContainerClassName = 'w-full h-[calc(100vh-300px)] md:h-[500px]'
 
 export const MyMapComponent = memo(() => {
   const center = useGeoLocation()
@@ -15,8 +15,9 @@ export const MyMapComponent = memo(() => {
     version: 'weekly',
     libraries: ['places']
   })
-  // const [map, setMap] = useState<google.maps.Map | null>(null)
+  const [service, setService] = useState<google.maps.places.PlacesService | null>(null)
   const [makersLocation, setMakersLocation] = useState<google.maps.places.PlaceResult[] | null>(null)
+  const [detail, setDetail] = useState<google.maps.places.PlaceResult | null>(null)
   /**
    *  検索結果のcallback
    */
@@ -24,18 +25,6 @@ export const MyMapComponent = memo(() => {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
       setMakersLocation(results)
     }
-  }
-  console.log(makersLocation)
-  const Makers = () => {
-    return (
-      <>
-        {makersLocation?.map((place: google.maps.places.PlaceResult, i) => (
-          <InfoWindow key={i} position={place?.geometry?.location}>
-            <p>{place.name}</p>
-          </InfoWindow>
-        ))}
-      </>
-    )
   }
   const onLoad = useCallback(
     (map: google.maps.Map) => {
@@ -46,17 +35,19 @@ export const MyMapComponent = memo(() => {
       }
       const service = new window.google.maps.places.PlacesService(map)
       service.textSearch(request, callback)
-      // setMap(map)
+      setService(service)
     },
     [center]
   )
 
   const onUnmount = useCallback(() => {
-    // setMap(null)
+    setService(null)
   }, [])
+
   return isLoaded ? (
-    <GoogleMap mapContainerClassName={'w-full h-[500px]'} center={center} zoom={14} onLoad={onLoad} onUnmount={onUnmount}>
-      <Makers />
+    <GoogleMap mapContainerClassName={mapContainerClassName} center={center} zoom={15} onLoad={onLoad} onUnmount={onUnmount}>
+      <InfoWindows makersLocation={makersLocation} service={service} setDetail={setDetail} />
+      <PlaceDetail detail={detail} />
     </GoogleMap>
   ) : (
     <Spinner />
