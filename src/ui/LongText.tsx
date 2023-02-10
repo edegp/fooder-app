@@ -9,10 +9,13 @@ export const LongText = ({ children, className, isEllipsis }: Props) => {
   const [open, setOpen] = useState<boolean>(false)
   const handleClick = () => setOpen(true)
   if (!open && isEllipsis && typeof children === 'string') {
-    if (children.length > 50) {
+    if (children.length > 60) {
       return (
         <div className={className}>
-          {children.slice(0, 50)}…<span onClick={handleClick}>続きを読む</span>
+          {children.slice(0, 50)}
+          <span className="cursor-pointer underline hover:opacity-30" onClick={handleClick}>
+            …続きを読む
+          </span>
         </div>
       )
     }

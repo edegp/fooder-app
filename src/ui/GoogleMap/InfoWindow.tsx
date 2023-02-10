@@ -1,9 +1,29 @@
 import { InfoWindowF, MarkerF } from '@react-google-maps/api'
 import { Dispatch, Fragment, memo, SetStateAction, useCallback, useState } from 'react'
 import Image from 'next/image'
-import { Star } from './star'
+import { Star } from '../star'
 import { imageLoader } from '@/lib/imageLoader'
+import { mediaQueryPc, useIsPcBrowser } from '@/lib/mediaQuery'
+import styled from 'styled-components'
 
+const WindowContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 140px;
+  row-gap: 10px;
+  height: auto;
+  justify-items: center;
+  text-align: center;
+  > img,
+  > div {
+    margin: 0 auto;
+  }
+  ${mediaQueryPc} {
+    font-size: 16px;
+    row-gap: 14px;
+    width: 280px;
+  }
+`
 /* レコメンドした場所をwindowで表示**/
 export const InfoWindows = memo(
   ({
@@ -15,6 +35,7 @@ export const InfoWindows = memo(
     service: google.maps.places.PlacesService | null
     setDetail: Dispatch<SetStateAction<google.maps.places.PlaceResult | null>>
   }) => {
+    const isPcBrowser = useIsPcBrowser()
     const placeNames = makersLocation?.map((place: google.maps.places.PlaceResult) => [place.name, false]) || [[]]
     const placeObj = Object.fromEntries(placeNames)
     const [openList, setOpenList] = useState<{ [key: string]: boolean }>(placeObj)
@@ -76,23 +97,25 @@ export const InfoWindows = memo(
                   />
                   {openList[name] && (
                     <InfoWindowF position={geometry?.location}>
-                      <div className="flex flex-col space-y-2">
+                      <WindowContainer>
                         <p>{name}</p>
                         <Star rating={rating} className="flex space-x-2" isDisplayRatingNum />
                         <Image
                           loader={imageLoader}
                           src={photos?.[0]?.getUrl() || ''}
-                          width={60}
+                          width={isPcBrowser ? 160 : 80}
                           sizes="auto"
-                          height={40}
+                          height={isPcBrowser ? 90 : 45}
                           alt={name || 'icon画像'}
                         />
-
-                        <div onClick={() => handleClickDetail(place_id)} className="underline hover:opacity-30">
+                        <div
+                          onClick={() => handleClickDetail(place_id)}
+                          className="text-[15px] underline hover:opacity-30"
+                        >
                           詳細を見る
                         </div>
                         <a href={googleMapUrl}>GoogleMapで確認する</a>
-                      </div>
+                      </WindowContainer>
                     </InfoWindowF>
                   )}
                 </Fragment>
