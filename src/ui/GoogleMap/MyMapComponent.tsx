@@ -1,19 +1,13 @@
 import { useCallback, memo, useState, useEffect, useMemo } from 'react'
 import { useGeoLocation } from '@/lib/useGeoLocation'
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api'
-import { InfoWindows } from '@/ui/InfoWindow'
-import { PlaceDetail } from '@/ui/PlaceDetail'
+import { InfoWindows } from '@/ui/GoogleMap/InfoWindow'
+import { PlaceDetail } from '@/ui/GoogleMap/PlaceDetail'
 import { RingLoader } from 'react-spinners'
 
-const mapContainerClassName =
-  'z-10 relative w-full h-screen md:h-[500px] md:w-[calc(100vw-300px)]'
+const mapContainerClassName = 'z-10 relative w-full h-screen md:h-screen md:w-full'
 
-type Library =
-  | 'places'
-  | 'drawing'
-  | 'geometry'
-  | 'localContext'
-  | 'visualization'
+type Library = 'places' | 'drawing' | 'geometry' | 'localContext' | 'visualization'
 
 export const MyMapComponent = memo(() => {
   const center = useGeoLocation()
@@ -27,15 +21,10 @@ export const MyMapComponent = memo(() => {
     []
   )
   const { isLoaded } = useJsApiLoader(loaderOptions)
-  const [service, setService] =
-    useState<google.maps.places.PlacesService | null>(null)
-  const [makersLocation, setMakersLocation] = useState<
-    google.maps.places.PlaceResult[] | null
-  >(null)
+  const [service, setService] = useState<google.maps.places.PlacesService | null>(null)
+  const [makersLocation, setMakersLocation] = useState<google.maps.places.PlaceResult[] | null>(null)
 
-  const [detail, setDetail] = useState<google.maps.places.PlaceResult | null>(
-    null
-  )
+  const [detail, setDetail] = useState<google.maps.places.PlaceResult | null>(null)
   const [loading, setLoading] = useState(true)
 
   /** 検索結果のcallback */
@@ -62,7 +51,6 @@ export const MyMapComponent = memo(() => {
   /** 現在位置が更新された時に，再度検索 */
   useEffect(() => {
     textSearch()
-    // setLoading(false)
   }, [center])
 
   /** mapロード後のコールバック */
@@ -96,7 +84,7 @@ export const MyMapComponent = memo(() => {
           }}
         />
       )}
-      <div className="z-50 flex">
+      <div className="z-40 flex">
         <GoogleMap
           mapContainerClassName={mapContainerClassName}
           center={center}
@@ -104,12 +92,8 @@ export const MyMapComponent = memo(() => {
           onLoad={onLoad}
           onUnmount={onUnmount}
         >
-          <InfoWindows
-            makersLocation={makersLocation}
-            service={service}
-            setDetail={setDetail}
-          />
-          {detail && <PlaceDetail detail={detail} handleClose={handleClose} />}
+          <InfoWindows makersLocation={makersLocation} service={service} setDetail={setDetail} />
+          <PlaceDetail detail={detail} handleClose={handleClose} />
         </GoogleMap>
       </div>
     </>
