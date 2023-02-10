@@ -1,13 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './src/app/**/*.{js,ts,jsx,tsx}',
-    './src/page/**/*.{js,ts,jsx,tsx}',
-    './src/ui/**/*.{js,ts,jsx,tsx}'
-  ],
+  content: ['./src/app/**/*.{js,ts,jsx,tsx}', './src/page/**/*.{js,ts,jsx,tsx}', './src/ui/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
-      // https://vercel.com/design/color
+      fontSize: {
+        'body-lg': '1.4rem',
+        'body-md': '1.2rem',
+        body: '.9rem'
+      },
       colors: {
         vercel: {
           pink: '#FF0080',
