@@ -2,15 +2,14 @@
   "extends": [
     "next",
     "next/core-web-vitals",
-    "plugin:import/recommended",
-    "plugin:import/warnings",
     "prettier",
     "plugin:@typescript-eslint/recommended",
     "plugin:tailwindcss/recommended"
   ],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["prettier", "@typescript-eslint", "import", "tailwindcss"],
+  "plugins": ["prettier", "@typescript-eslint", "import", "tailwindcss", "unused-imports"],
   "rules": {
+    "unused-imports/no-unused-imports": "error",
     "prettier/prettier": [
       "error",
       {
@@ -23,13 +22,51 @@
         "arrowParens": "avoid"
       }
     ],
+    // importの並び順設定
     "import/order": [
       "error",
       {
-        "alphabetize": {
-          "order": "asc"
-        }
+        "groups": ["builtin", "external", "internal", ["parent", "sibling"], "object", "type", "index"],
+        "pathGroups": [
+          {
+            "pattern": "react",
+            "group": "external",
+            "position": "before"
+          },
+          {
+            "pattern": "next/**",
+            "group": "external",
+            "position": "before"
+          },
+          {
+            "pattern": "API",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "graphql/**",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "ui-components/**",
+            "group": "index",
+            "position": "after"
+          },
+          {
+            "pattern": "**\\.css",
+            "group": "index",
+            "position": "after"
+          }
+        ],
+        "pathGroupsExcludedImportTypes": ["react", "next/**"],
+        "newlines-between": "always",
+        "alphabetize": { "order": "asc", "caseInsensitive": false }
       }
-    ]
+    ],
+    // importをファイル先頭に記述
+    "import/first": "error",
+    // 最後のimportの後に空行を追加
+    "import/newline-after-import": "error"
   }
 }
