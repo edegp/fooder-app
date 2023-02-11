@@ -3,7 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 @import '@splidejs/react-splide/css';
-@import 'swiper/css';
 
 @layer base {
   body {

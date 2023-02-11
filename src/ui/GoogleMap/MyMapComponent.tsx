@@ -1,15 +1,17 @@
 import { useCallback, memo, useState, useEffect, useMemo } from 'react'
-import { useGeoLocation } from '@/lib/useGeoLocation'
+
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api'
+import { RingLoader } from 'react-spinners'
+
+import { useGeoLocation } from '@/lib/useGeoLocation'
 import { InfoWindows } from '@/ui/GoogleMap/InfoWindow'
 import { PlaceDetail } from '@/ui/GoogleMap/PlaceDetail'
-import { RingLoader } from 'react-spinners'
 
 const mapContainerClassName = 'z-10 relative w-full h-screen md:h-screen md:w-full'
 
 type Library = 'places' | 'drawing' | 'geometry' | 'localContext' | 'visualization'
 
-export const MyMapComponent = memo(() => {
+export const MyMapComponent = memo(function MyMapComponent() {
   const center = useGeoLocation()
   const loaderOptions = useMemo(
     () => ({

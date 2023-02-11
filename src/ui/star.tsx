@@ -1,4 +1,3 @@
-import { IconContext } from 'react-icons'
 import { BsStarFill, BsStarHalf, BsStar } from 'react-icons/bs'
 
 export const Star = ({
