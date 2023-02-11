@@ -22,4 +22,4 @@ jobs:
       - name: Install Dependencies
         run: yarn install --immutable --immutable-cache --check-cache
 
-      - run: next lint
+      - run: yarn lint
