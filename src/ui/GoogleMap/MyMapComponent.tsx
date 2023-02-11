@@ -11,7 +11,7 @@ const mapContainerClassName = 'z-10 relative w-full h-screen md:h-screen md:w-fu
 
 type Library = 'places' | 'drawing' | 'geometry' | 'localContext' | 'visualization'
 
-export const MyMapComponent = memo(() => {
+export const MyMapComponent = memo(function MyMapComponent() {
   const center = useGeoLocation()
   const loaderOptions = useMemo(
     () => ({
