@@ -1,6 +1,8 @@
-import { mediaQueryPc } from '@/lib/mediaQuery'
-import { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { ReactNode, useCallback, useRef, useState } from 'react'
+
 import styled from 'styled-components'
+
+import { mediaQueryPc } from '@/lib/mediaQuery'
 
 const Swiper = styled.div<{ height: number }>`
   width: 100%;

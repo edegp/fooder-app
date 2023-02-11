@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { StyleRegistry, createStyleRegistry } from 'styled-jsx'
+
 import { ServerStyleSheet, StyleSheetManager } from 'styled-components'
+import { StyleRegistry, createStyleRegistry } from 'styled-jsx'
 
 type ChildProps = { children: React.ReactNode }
 
@@ -15,7 +16,9 @@ export function useStyledComponentsRegistry() {
 
   function StyledComponentsRegistry({ children }: ChildProps) {
     if (typeof window !== 'undefined') return <>{children}</>
-    return <StyleSheetManager sheet={styledComponentsStyleSheet.instance}>{children as React.ReactChild}</StyleSheetManager>
+    return (
+      <StyleSheetManager sheet={styledComponentsStyleSheet.instance}>{children as React.ReactChild}</StyleSheetManager>
+    )
   }
 
   return [StyledComponentsRegistry, styledComponentsFlushEffect] as const

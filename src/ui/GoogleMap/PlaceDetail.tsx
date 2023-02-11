@@ -1,15 +1,18 @@
-import { getDate } from '@/lib/getDate'
-import Image from 'next/image'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
+
+import Image from 'next/image'
+
+import { Options, Splide, SplideSlide } from '@splidejs/react-splide'
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md'
 import { RxCross1 } from 'react-icons/rx'
-import { Options, Splide, SplideSlide } from '@splidejs/react-splide'
-import { Star } from '@/ui/star'
-import { imageLoader } from '@/lib/imageLoader'
-import { LongText } from '@/ui/LongText'
 import styled from 'styled-components'
+
+import { getDate } from '@/lib/getDate'
+import { imageLoader } from '@/lib/imageLoader'
 import { mediaQueryPc } from '@/lib/mediaQuery'
+import { LongText } from '@/ui/LongText'
 import { Swiperable } from '@/ui/Swiperable'
+import { Star } from '@/ui/star'
 
 const Container = styled.div`
   padding: 0 32px;

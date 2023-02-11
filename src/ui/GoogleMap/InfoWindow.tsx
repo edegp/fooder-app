@@ -1,10 +1,14 @@
-import { InfoWindowF, MarkerF } from '@react-google-maps/api'
 import { Dispatch, Fragment, memo, SetStateAction, useCallback, useState } from 'react'
+
 import Image from 'next/image'
-import { Star } from '../star'
+
+import { InfoWindowF, MarkerF } from '@react-google-maps/api'
+import styled from 'styled-components'
+
 import { imageLoader } from '@/lib/imageLoader'
 import { mediaQueryPc, useIsPcBrowser } from '@/lib/mediaQuery'
-import styled from 'styled-components'
+
+import { Star } from '../star'
 
 const WindowContainer = styled.div`
   display: flex;
