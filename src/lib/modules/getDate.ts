@@ -7,7 +7,7 @@ export const getDate = (time: number) => {
   } else if (diff > 30) {
     return `${(diff / 30) | 0}ヶ月前`
   } else if (diff > 7) {
-    return `${diff / 7}週間前`
+    return `${(diff / 7) | 0}週間前`
   }
   return `${diff}日前`
 }

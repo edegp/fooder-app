@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useLayoutEffect, useState } from 'react'
 
 export const useGeoLocation = () => {
   const [id, setId] = useState(0)
@@ -19,10 +19,12 @@ export const useGeoLocation = () => {
     alert('位置情報の読み込みに失敗しました')
     navigator.geolocation.clearWatch(id)
   }, [id])
-  useEffect(
+  // 描画前に実行
+  useLayoutEffect(
     () =>
       // 位置情報の更新をsubscribe 返り値がidなので保存してcallbackを読んだ時にsubscribeを解除
       setId(navigator.geolocation.watchPosition(successCallback, errorCallback)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
   return location
