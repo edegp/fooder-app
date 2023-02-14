@@ -5,7 +5,6 @@ import styled from 'styled-components'
 
 import { clientSize } from '@/lib/recoil/state'
 import { CloseButton } from '@/ui/CloseButton'
-// import { useWindowSize } from '@/lib/hooks/useWindowSize'
 
 const OverLay = styled.div`
   background-color: gray;
