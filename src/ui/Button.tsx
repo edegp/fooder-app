@@ -1,17 +1,36 @@
-import clsx from 'clsx'
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import styled from 'styled-components'
+
+import { Colors, colors } from '@/lib/modules/colors'
+
+const ButtonComponent = styled.button`
+  border-radius: 12px;
+  height: 36px;
+  padding: 7px 6px;
+  font-size: 18px;
+  line-height: 1.2;
+  text-align: center;
+  justify-self: center;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.3;
+  }
+`
 
 export default function Button({
-  kind = 'default',
+  backgroundColor = 'blue',
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  kind?: 'default' | 'error'
+  backgroundColor?: keyof Colors
 }) {
   return (
-    <button
-      className={clsx('rounded-lg  px-3 py-1 text-sm font-medium', {
-        'bg-zinc-700 text-zinc-100 hover:bg-zinc-500 hover:text-white': kind === 'default',
-        'bg-red-600 text-red-50 hover:bg-red-500 hover:text-white': kind === 'error'
-      })}
+    <ButtonComponent
+      style={{
+        // @ts-ignore
+        backgroundColor: colors[backgroundColor]?.['500'],
+        // @ts-ignore
+        color: colors[backgroundColor]?.['50']
+      }}
       {...props}
     />
   )
