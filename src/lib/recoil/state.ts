@@ -1,4 +1,8 @@
+import { string } from '@recoiljs/refine'
 import { atom, selector } from 'recoil'
+import { urlSyncEffect } from 'recoil-sync'
+
+import { currentUserState } from '@/lib/hooks/useUser'
 
 const clientSize = atom({
   key: 'clientSize',
@@ -19,4 +23,14 @@ const mapState = atom<google.maps.Map | null>({
   dangerouslyAllowMutability: true
 })
 
-export { clientSize, isPcBrowser, mapState }
+const urlState = atom<string>({
+  key: 'url',
+  effects: [
+    ({ getPromise, setSelf }) => {
+      getPromise(currentUserState).then(result => (!!result ? setSelf('/') : setSelf('/signup')))
+    },
+    urlSyncEffect({ storeKey: 'url', refine: string() })
+  ]
+})
+
+export { clientSize, isPcBrowser, mapState, urlState }

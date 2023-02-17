@@ -2,15 +2,12 @@ import { useCallback, useLayoutEffect, useState } from 'react'
 
 export const useGeoLocation = () => {
   const [id, setId] = useState(0)
-  const [location, setLocation] = useState<google.maps.LatLngLiteral>({
-    lat: 36,
-    lng: 140
-  })
+  const [location, setLocation] = useState<google.maps.LatLngLiteral | null>(null)
   const successCallback = useCallback(
     (position: GeolocationPosition) => {
       const { latitude: lat, longitude: lng } = position.coords
       // 差異があった場合のみ更新
-      if (location.lat !== lat || location.lng !== lng) setLocation({ lat, lng })
+      if (!location || location.lat !== lat || location.lng !== lng) setLocation({ lat, lng })
       navigator.geolocation.clearWatch(id)
     },
     [id]

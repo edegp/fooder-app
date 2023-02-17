@@ -39,7 +39,6 @@ const Form = styled.form`
 `
 
 export const UserLogin = memo(function UserLogin({ userStatus }: { userStatus: string }) {
-  useUser()
   const router = useRouter()
   const [errorMessage, setErrorMessage] = useState<string>('')
 
