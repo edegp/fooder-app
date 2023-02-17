@@ -1,8 +1,12 @@
+import { onAuthStateChanged } from '@firebase/auth'
 import { string } from '@recoiljs/refine'
 import { atom, selector } from 'recoil'
 import { urlSyncEffect } from 'recoil-sync'
 
-import { currentUserState } from '@/lib/hooks/useUser'
+import { auth } from '../firebase/firebase'
+
+import { currentUserInfo } from '@/lib/hooks/useUser'
+import { localStorageEffect } from '@/lib/recoil/localstrageEffect'
 
 const clientSize = atom({
   key: 'clientSize',
@@ -24,13 +28,44 @@ const mapState = atom<google.maps.Map | null>({
 })
 
 const urlState = atom<string>({
-  key: 'url',
+  key: 'urlState',
   effects: [
     ({ getPromise, setSelf }) => {
-      getPromise(currentUserState).then(result => (!!result ? setSelf('/') : setSelf('/signup')))
+      getPromise(currentUserInfo).then(user => {
+        getPromise(loginStatus).then(login => {
+          if (user) {
+            setSelf(login ? '/' : 'signin')
+          } else {
+            setSelf('signup')
+          }
+        })
+      })
     },
     urlSyncEffect({ storeKey: 'url', refine: string() })
   ]
 })
 
-export { clientSize, isPcBrowser, mapState, urlState }
+const loginStatus = atom<boolean>({
+  key: 'loginStatus',
+  default: false,
+  effects: [
+    ({ setSelf }) => {
+      const unsubscribe = onAuthStateChanged(auth, user => {
+        if (user) {
+          setSelf(true)
+        } else {
+          setSelf(false)
+        }
+      })
+      return () => unsubscribe()
+    }
+  ]
+})
+
+const emailState = atom<string>({
+  key: 'emailState',
+  default: '',
+  effects: [localStorageEffect('emailState')]
+})
+
+export { clientSize, isPcBrowser, mapState, urlState, emailState, loginStatus }

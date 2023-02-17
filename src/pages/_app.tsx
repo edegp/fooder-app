@@ -4,7 +4,7 @@ import { AppProps } from 'next/app'
 
 import { RecoilRoot } from 'recoil'
 
-import { RecoilURLSyncNext } from '@/lib/recoil/RecilURLSyyncNext'
+import { RecoilURLSyncNext } from '@/lib/recoil/RecilURLSyncNext'
 
 import '@/styles/globals.css'
 

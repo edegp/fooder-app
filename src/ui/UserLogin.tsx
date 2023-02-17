@@ -2,20 +2,28 @@
 
 import { FormEvent, memo, useCallback, useState } from 'react'
 
+import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 import { FirebaseError } from 'firebase/app'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+import { useRecoilState } from 'recoil'
 import styled from 'styled-components'
 
 import { auth, isFirebaseError } from '@/lib/firebase/firebase'
-import { useUser } from '@/lib/hooks/useUser'
 import { getJpErrorMessage } from '@/lib/modules/getJpErrorMessage'
+import { emailState } from '@/lib/recoil/state'
 import Button from '@/ui/Button'
 import { ErrorModal } from '@/ui/ErrorModal'
-import { Header } from '@/ui/Header'
+// import { Header } from '@/ui/Header'
 import { Input } from '@/ui/Input'
+import { LoadingRing } from '@/ui/LoadingRing'
+
+const Header = dynamic(
+  import('@/ui/Header').then(module => module.Header),
+  { ssr: false, loading: () => <LoadingRing /> }
+)
 
 type userForm = EventTarget & {
   email: HTMLInputElement
@@ -38,40 +46,46 @@ const Form = styled.form`
   }
 `
 
-export const UserLogin = memo(function UserLogin({ userStatus }: { userStatus: string }) {
+export const UserLogin = memo(function UserLogin() {
   const router = useRouter()
-  const [errorMessage, setErrorMessage] = useState<string>('')
+  const pathname = usePathname()
+  const [error, setError] = useState<{ message: string; code: string }>({ message: '', code: '' })
+  const [email, setEmail] = useRecoilState(emailState)
 
   const handleError = useCallback((error: unknown) => {
     if (error instanceof FirebaseError && isFirebaseError(error)) {
-      let errorMessage
-      if (error.code === 'EMAIL_NOT_FOUND') {
-        errorMessage = getJpErrorMessage(error.message)
+      let errorMessage = ''
+      if (error.code === 'EMAIL_NOT_FOUND' || error.code === 'auth/email-already-in-use') {
+        errorMessage = getJpErrorMessage(error.code)
       }
-      setErrorMessage(errorMessage || error.message)
+      setError({ message: errorMessage, code: error.code })
       throw new Error(error.message)
     }
-    throw new Error('通信エラーです。')
+    console.log(error)
+    throw new Error('通信エラーです。お手数ですが，サポートまでお問い合わせください。')
   }, [])
 
   const handleSubmit = useCallback(
     async (event: FormEvent) => {
       event.preventDefault()
       const { email, password }: { email: HTMLInputElement; password: HTMLInputElement } = event.target as userForm
+      setEmail(email.value)
       if (email && password) {
         try {
           const result =
-            userStatus === 'signup'
+            pathname === '/signup'
               ? await createUserWithEmailAndPassword(auth, email.value, password.value)
-              : userStatus === 'signin' && (await signInWithEmailAndPassword(auth, email.value, password.value))
-          if (result) router.push('/')
+              : await signInWithEmailAndPassword(auth, email.value, password.value)
+          if (result) {
+            router.push('/')
+          }
         } catch (error) {
           handleError(error)
         }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [router, userStatus]
+    [router, pathname]
   )
 
   return (
@@ -80,9 +94,9 @@ export const UserLogin = memo(function UserLogin({ userStatus }: { userStatus: s
         <title>Fooder Login</title>
       </Head>
       <Header />
-      <ErrorModal message={errorMessage} />
+      <ErrorModal error={error} />
       <Form onSubmit={handleSubmit}>
-        <Input name="email" id="email" defaultValue="" placeholder="メールアドレス" />
+        <Input name="email" id="email" defaultValue={email} placeholder="メールアドレス" />
         <Input
           name="password"
           id="password"
@@ -91,7 +105,7 @@ export const UserLogin = memo(function UserLogin({ userStatus }: { userStatus: s
           minLength={8}
           required
         />
-        <Button type="submit">{userStatus === 'signup' ? '登録' : 'ログイン'}</Button>
+        <Button type="submit">{pathname === '/signup' ? '登録' : 'ログイン'}</Button>
       </Form>
     </>
   )

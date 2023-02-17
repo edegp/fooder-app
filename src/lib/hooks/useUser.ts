@@ -4,8 +4,9 @@ import { atom, useRecoilValue } from 'recoil'
 import { auth } from '@/lib/firebase/firebase'
 import { localStorageEffect } from '@/lib/recoil/localstrageEffect'
 
-export const currentUserState = atom<User>({
-  key: 'currentUserState',
+export const currentUserInfo = atom<User | null>({
+  key: 'currentUserInfo',
+  default: null,
   effects: [
     ({ setSelf }) => {
       const unsubscribe = onAuthStateChanged(auth, user => {
@@ -19,4 +20,4 @@ export const currentUserState = atom<User>({
   ]
 })
 
-export const useUser = () => useRecoilValue(currentUserState)
+export const useUser = () => useRecoilValue(currentUserInfo)

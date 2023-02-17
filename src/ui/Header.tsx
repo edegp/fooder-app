@@ -1,13 +1,24 @@
 'use client'
 
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
+import { signOut } from 'firebase/auth'
 import { HiOutlineMenuAlt4 } from 'react-icons/hi'
+import { useRecoilState } from 'recoil'
 import styled from 'styled-components'
 
+import { auth } from '@/lib/firebase/firebase'
+import { loginStatus } from '@/lib/recoil/state'
 import { Drawer } from '@/ui/Drawer'
+
+type Menu = {
+  wording: string
+  path?: string
+  onClick?: () => Promise<void>
+}
 
 const HeadContainer = styled.header`
   height: 64px;
@@ -28,12 +39,34 @@ export const Header = memo(function Header() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleClick = useCallback(() => setOpen(true), [])
   const [open, setOpen] = useState<boolean | null>(null)
-  const menuList = [
-    { wording: 'ログイン', path: '/signin' },
-    { wording: '新規登録', path: '/signup' },
-    { wording: 'FAQ', path: '/faq' },
-    { wording: 'Support', path: '/help' }
-  ]
+  const [isLogin, setIsLogin] = useRecoilState(loginStatus)
+  const router = useRouter()
+
+  const loginList = useMemo(
+    () =>
+      isLogin
+        ? [
+            {
+              wording: 'ログアウト',
+              onClick: async () => {
+                await signOut(auth)
+                setIsLogin(false)
+                router.push('/signin')
+              }
+            }
+          ]
+        : [
+            { wording: 'ログイン', path: '/signin' },
+            { wording: '新規登録', path: '/signup' }
+          ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isLogin]
+  )
+
+  const menuList: Menu[] = useMemo(
+    () => [...loginList, { wording: 'FAQ', path: '/faq' }, { wording: 'Support', path: '/help' }],
+    [loginList]
+  )
   return (
     <>
       <HeadContainer>
@@ -44,7 +77,7 @@ export const Header = memo(function Header() {
         <ul className="space-y-6">
           {menuList.map((menu, i) => (
             <li key={i}>
-              <Link href={menu.path}>{menu.wording}</Link>
+              {menu.path ? <Link href={menu.path}>{menu.wording}</Link> : <a onClick={menu?.onClick}>{menu.wording}</a>}
             </li>
           ))}
         </ul>

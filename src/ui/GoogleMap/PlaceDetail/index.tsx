@@ -11,9 +11,9 @@ import { imageLoader } from '@/lib/modules/imageLoader'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
 import { CloseButton } from '@/ui/CloseButton'
 import { Drawer } from '@/ui/Drawer'
+import { LongText } from '@/ui/LongText'
 import { OpeningTimeTab } from '@/ui/googleMap/PlaceDetail/OpningTimeTab'
 import { SlideImages } from '@/ui/googleMap/PlaceDetail/SlideImages'
-import { LongText } from '@/ui/LongText'
 import { Star } from '@/ui/star'
 
 const Container = styled.div`
