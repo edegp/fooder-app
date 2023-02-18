@@ -22,9 +22,8 @@ export const SlideImages = memo(function SlideImages({
             loader={imageLoader}
             src={photo.getUrl() || ''}
             width="375"
-            height="400"
+            height="250"
             alt={`${name}の画像${i + 1}`}
-            className="h-auto w-auto object-cover"
           />
         </SplideSlide>
       ))}

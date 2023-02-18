@@ -5,25 +5,26 @@ import Image from 'next/image'
 import { useRecoilValue, useSetRecoilState } from 'recoil'
 import styled from 'styled-components'
 
-import Button from '../Button'
-import Modal from '../Modal'
+import Modal from '../atom/Modal'
+import Button from '../atom/Button'
 
+import { useOpenState } from '@/lib/hooks/useOpenState'
 import { imageLoader } from '@/lib/modules/imageLoader'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
-import { isPcBrowser, mapState, placeDetailState } from '@/lib/recoil/state'
-import { InfoWindow } from '@/ui/googleMap/InfoWindow'
-import { Marker } from '@/ui/googleMap/Marker'
-import { Star } from '@/ui/star'
+import { mapState, placeDetailState } from '@/lib/recoil/state'
+import { Star } from '@/ui/components/Star'
+import { InfoWindow } from '@/ui/googleMap/components/InfoWindow'
+import { Marker } from '@/ui/googleMap/components/Marker'
 
 const WindowContainer = styled.div`
   display: flex;
   flex-direction: column;
-  width: 140px;
+  width: 160px;
   row-gap: 10px;
   height: auto;
   justify-items: center;
   text-align: center;
-  overflow-x: hidden;
+  overflow: hidden;
   > img,
   > div {
     margin: 0 auto;
@@ -48,7 +49,7 @@ export const InfoWindows = memo(function InfoWindows({
   const placeNames = makersLocation?.map((place: google.maps.places.PlaceResult) => [place.name, false]) || [[]]
   const placeObj = Object.fromEntries(placeNames)
   const [openList, setOpenList] = useState<{ [key: string]: boolean }>(placeObj)
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false)
+  const { isOpen, handleClose, handleOpen } = useOpenState()
   const map = useRecoilValue(mapState)
   const setDetail = useSetRecoilState(placeDetailState)
 
@@ -82,8 +83,9 @@ export const InfoWindows = memo(function InfoWindows({
         }
       }
     },
-    [map]
+    [detailCallback, map]
   )
+
   return (
     <>
       {makersLocation
@@ -112,13 +114,13 @@ export const InfoWindows = memo(function InfoWindows({
                   <InfoWindow position={geometry?.location}>
                     <WindowContainer>
                       <p>{name}</p>
-                      <Star rating={rating} className="flex space-x-2" isDisplayRatingNum />
+                      <Star rating={rating} className="flex space-x-2" isDisplayRatingNum size={18} />
                       <Image
                         loader={imageLoader}
                         src={photos?.[0]?.getUrl() || ''}
-                        width={isPcBrowser ? 160 : 80}
-                        sizes="auto"
-                        height={isPcBrowser ? 90 : 45}
+                        width={112}
+                        height={64}
+                        className="h-[100px] object-cover"
                         alt={name || 'icon画像'}
                       />
                       <div
@@ -127,13 +129,13 @@ export const InfoWindows = memo(function InfoWindows({
                       >
                         詳細を見る
                       </div>
-                      <a onClick={() => setIsOpenModal(true)} className="leading-3">
+                      <a onClick={handleOpen} className="leading-3">
                         GoogleMapで確認する
                       </a>
                     </WindowContainer>
                   </InfoWindow>
                 )}
-                <Modal open={isOpenModal} close={() => setIsOpenModal(false)}>
+                <Modal isOpen={isOpen} handleClose={handleClose}>
                   <p>Google Mapに移動しますか？</p>
                   <ButtonContainer>
                     <a href={googleMapUrl} target="blank" rel="noreferrer">

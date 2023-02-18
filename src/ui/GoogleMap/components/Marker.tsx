@@ -7,7 +7,7 @@ import { useRecoilValue } from 'recoil'
 
 import { mapState } from '@/lib/recoil/state'
 
-export const Marker = memo(function Marker({ position, options, icon, onClick }: MarkerProps) {
+export const Marker = memo(function Marker({ position, options, clickable, icon, onClick }: MarkerProps) {
   const map = useRecoilValue(mapState)
   const [instance, setInstance] = useState<google.maps.Marker | null>(null)
   const [clickListener, setClickListener] = useState<google.maps.MapsEventListener | null>(null)
@@ -21,6 +21,12 @@ export const Marker = memo(function Marker({ position, options, icon, onClick }:
       instance.setOptions(options)
     }
   }, [instance, options])
+
+  useEffect(() => {
+    if (clickable && instance !== null) {
+      instance.setClickable(clickable)
+    }
+  }, [instance, clickable])
 
   useEffect(() => {
     if (position && instance !== null) {
@@ -47,7 +53,7 @@ export const Marker = memo(function Marker({ position, options, icon, onClick }:
     marker.setMap(map)
     if (position) marker.setPosition(position)
     if (icon) marker.setIcon(icon)
-
+    if (clickable) marker.setClickable(clickable)
     if (onClick) setClickListener(google.maps.event.addListener(marker, 'click', onClick))
     setInstance(marker)
 

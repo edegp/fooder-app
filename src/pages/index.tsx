@@ -1,7 +1,8 @@
 import Head from 'next/head'
 
 import { useWindowSize } from '@/lib/hooks/useWindowSize'
-import { Header } from '@/ui/Header'
+import { Header } from '@/ui/atom/Header'
+import { LoginModal } from '@/ui/components/LoginModal'
 import { MyMapComponent } from '@/ui/googleMap/MyMapComponent'
 
 export default function Page() {
@@ -14,6 +15,7 @@ export default function Page() {
       </Head>
       <Header />
       <MyMapComponent />
+      <LoginModal />
     </>
   )
 }

@@ -8,9 +8,9 @@ const ButtonComponent = styled.button`
   height: 36px;
   padding: 7px 6px;
   font-size: 18px;
-  line-height: 1.2;
   text-align: center;
   justify-self: center;
+  line-height: 22px;
   cursor: pointer;
   &:hover {
     opacity: 0.3;

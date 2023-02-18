@@ -1,11 +1,11 @@
 import { onAuthStateChanged } from '@firebase/auth'
 import { string } from '@recoiljs/refine'
+import { User } from 'firebase/auth'
 import { atom, selector } from 'recoil'
 import { urlSyncEffect } from 'recoil-sync'
 
 import { auth } from '../firebase/firebase'
 
-import { currentUserInfo } from '@/lib/hooks/useUser'
 import { localStorageEffect } from '@/lib/recoil/localstrageEffect'
 
 const clientSize = atom({
@@ -27,7 +27,7 @@ const mapState = atom<google.maps.Map | null>({
   dangerouslyAllowMutability: true
 })
 
-const placeDetailState = atom<google.maps.Map | null>({
+const placeDetailState = atom<google.maps.places.PlaceResult | null>({
   key: 'placeDetailState',
   default: null,
   dangerouslyAllowMutability: true
@@ -74,4 +74,20 @@ const emailState = atom<string>({
   effects: [localStorageEffect('emailState')]
 })
 
-export { clientSize, isPcBrowser, mapState, placeDetailState, urlState, emailState, loginStatus }
+const currentUserInfo = atom<User | null>({
+  key: 'currentUserInfo',
+  default: null,
+  effects: [
+    ({ setSelf }) => {
+      const unsubscribe = onAuthStateChanged(auth, user => {
+        if (user) {
+          setSelf(user)
+        }
+      })
+      return () => unsubscribe()
+    },
+    localStorageEffect('currentUserState')
+  ]
+})
+
+export { clientSize, isPcBrowser, mapState, placeDetailState, urlState, emailState, loginStatus, currentUserInfo }

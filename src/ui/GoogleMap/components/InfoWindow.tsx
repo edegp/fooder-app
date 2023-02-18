@@ -33,7 +33,7 @@ export const InfoWindow = ({ children, anchor, position, options }: InfoWindowPr
     if (position && instance !== null) {
       instance.setPosition(position)
     }
-  }, [position])
+  }, [instance, position])
 
   useEffect(() => {
     const infoWindow = new google.maps.InfoWindow({

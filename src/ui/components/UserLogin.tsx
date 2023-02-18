@@ -8,19 +8,20 @@ import { usePathname, useRouter } from 'next/navigation'
 
 import { FirebaseError } from 'firebase/app'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+import { MdOutlineVisibility, MdOutlineVisibilityOff } from 'react-icons/md'
 import { useRecoilState } from 'recoil'
 import styled from 'styled-components'
 
 import { auth, isFirebaseError } from '@/lib/firebase/firebase'
 import { getJpErrorMessage } from '@/lib/modules/getJpErrorMessage'
 import { emailState } from '@/lib/recoil/state'
-import Button from '@/ui/Button'
-import { ErrorModal } from '@/ui/ErrorModal'
-import { Input } from '@/ui/Input'
-import { LoadingRing } from '@/ui/LoadingRing'
+import Button from '@/ui/atom/Button'
+import { Input } from '@/ui/atom/Input'
+import { LoadingRing } from '@/ui/atom/Loading'
+import { ErrorModal } from '@/ui/components/ErrorModal'
 
 const Header = dynamic(
-  import('@/ui/Header').then(module => module.Header),
+  import('@/ui/atom/Header').then(module => module.Header),
   { ssr: false, loading: () => <LoadingRing /> }
 )
 
@@ -35,7 +36,7 @@ const Form = styled.form`
   height: 100vh;
   z-index: 0;
   overflow: hidden;
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
   flex-direction: column;
   padding: 0 48px;
@@ -50,6 +51,7 @@ export const UserLogin = memo(function UserLogin() {
   const pathname = usePathname()
   const [error, setError] = useState<{ message: string; code: string }>({ message: '', code: '' })
   const [email, setEmail] = useRecoilState(emailState)
+  const [isShowPassword, setIsShowPassword] = useState(true)
 
   const handleError = useCallback((error: unknown) => {
     if (error instanceof FirebaseError && isFirebaseError(error)) {
@@ -86,6 +88,8 @@ export const UserLogin = memo(function UserLogin() {
     [router, pathname]
   )
 
+  const handleShowPassWord = useCallback(() => setIsShowPassword(prev => !prev), [setIsShowPassword])
+
   return (
     <>
       <Head>
@@ -94,13 +98,22 @@ export const UserLogin = memo(function UserLogin() {
       <Header />
       <ErrorModal error={error} />
       <Form onSubmit={handleSubmit}>
-        <Input name="email" id="email" defaultValue={email} placeholder="メールアドレス" />
+        <Input name="email" id="email" type="email" defaultValue={email} placeholder="メールアドレス" required />
         <Input
           name="password"
           id="password"
+          type="password"
           defaultValue=""
           placeholder="8文字以上のパスワード"
           minLength={8}
+          isShowPassword={isShowPassword}
+          endAdornment={
+            isShowPassword ? (
+              <MdOutlineVisibility onClick={handleShowPassWord} size={28} />
+            ) : (
+              <MdOutlineVisibilityOff onClick={handleShowPassWord} size={28} />
+            )
+          }
           required
         />
         <Button type="submit">{pathname === '/signup' ? '登録' : 'ログイン'}</Button>

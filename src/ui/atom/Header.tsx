@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import { memo, useEffect, useMemo } from 'react'
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -11,8 +11,9 @@ import { useRecoilState } from 'recoil'
 import styled from 'styled-components'
 
 import { auth } from '@/lib/firebase/firebase'
+import { useOpenState } from '@/lib/hooks/useOpenState'
 import { loginStatus } from '@/lib/recoil/state'
-import { Drawer } from '@/ui/Drawer'
+import { Drawer } from '@/ui/atom/Drawer'
 
 type Menu = {
   wording: string
@@ -29,16 +30,14 @@ const HeadContainer = styled.header`
   align-items: center;
 `
 
-const Title = styled.span`
+const Title = styled.h1`
   font-size: 18px;
   font-weight: bold;
   margin: 0 10px;
 `
 
 export const Header = memo(function Header() {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleClick = useCallback(() => setOpen(true), [])
-  const [open, setOpen] = useState<boolean | null>(null)
+  const { nullableIsOpen, setIsOpen, handleClose, handleOpen } = useOpenState(null)
   const [isLogin, setIsLogin] = useRecoilState(loginStatus)
   const router = useRouter()
   const pathname = usePathname()
@@ -71,7 +70,10 @@ export const Header = memo(function Header() {
 
   //　画面遷移後にヘッダーのDrawerを閉める
   useEffect(() => {
-    setOpen(false)
+    // first renderingは発火しない nullでアニメーションを無効にして閉じる
+    typeof nullableIsOpen === 'boolean' && setIsOpen(null)
+    //pathnameが変更された時のみ発火
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
   return (
@@ -80,9 +82,9 @@ export const Header = memo(function Header() {
         <Link href="/">
           <Title className="no-underline">Fooder</Title>
         </Link>
-        <HiOutlineMenuAlt4 onClick={handleClick} className="mr-6 h-9 w-9 text-lg" />
+        <HiOutlineMenuAlt4 onClick={handleOpen} className="mr-6 h-9 w-9 text-lg" />
       </HeadContainer>
-      <Drawer handleClose={() => setOpen(false)} isOpen={open} className="p-10">
+      <Drawer handleClose={handleClose} isOpen={nullableIsOpen} className="p-10">
         <ul className="space-y-6">
           {menuList.map((menu, i) => (
             <li key={i}>

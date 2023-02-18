@@ -4,7 +4,7 @@ import { useRecoilValue } from 'recoil'
 import styled from 'styled-components'
 
 import { clientSize } from '@/lib/recoil/state'
-import { CloseButton } from '@/ui/CloseButton'
+import { CloseButton } from '@/ui/components/CloseButton'
 
 const OverLay = styled.div`
   background-color: gray;
@@ -49,21 +49,21 @@ const ModalContainer = styled(
   }
 `
 export default function Modal({
-  open,
-  close,
+  isOpen,
+  handleClose,
   radius = 15,
   padding = '12px',
   children
 }: {
-  open: boolean
-  close: () => void
+  isOpen: boolean
+  handleClose: () => void
   radius?: number
   padding?: string
   children: ReactNode
 }) {
   const [clientWidth] = useRecoilValue(clientSize)
 
-  if (!open) {
+  if (!isOpen) {
     return <></>
   }
 
@@ -71,7 +71,7 @@ export default function Modal({
     <>
       <OverLay />
       <ModalContainer radius={radius} padding={padding} clientWidth={clientWidth}>
-        <CloseButton close={close} />
+        <CloseButton handleClose={handleClose} />
         {children}
       </ModalContainer>
     </>

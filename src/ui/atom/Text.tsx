@@ -1,13 +1,15 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode, useState, memo, useCallback } from 'react'
 
 type Props = {
   children: ReactNode | string
   className: string
   isEllipsis?: boolean
 }
-export const LongText = ({ children, className, isEllipsis }: Props) => {
+
+export const Text = memo(function Text({ children, className, isEllipsis }: Props) {
   const [open, setOpen] = useState<boolean>(false)
-  const handleClick = () => setOpen(true)
+  const handleClick = useCallback(() => setOpen(true), [setOpen])
+
   if (!open && isEllipsis && typeof children === 'string') {
     if (children.length > 60) {
       return (
@@ -21,4 +23,4 @@ export const LongText = ({ children, className, isEllipsis }: Props) => {
     }
   }
   return <div className={className}>{children}</div>
-}
+})

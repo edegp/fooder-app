@@ -3,16 +3,16 @@
 import { useCallback, memo, useState, useMemo, useRef, useEffect } from 'react'
 
 import { Loader } from '@googlemaps/js-api-loader'
-import { useRecoilState, useSetRecoilState } from 'recoil'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
 import useSWR from 'swr'
 
-import { LoadingRing } from '../LoadingRing'
+import { LoadingRing } from '../atom/Loading'
 
 import { useGeoLocation } from '@/lib/hooks/useGeoLocation'
 import { mapState, placeDetailState } from '@/lib/recoil/state'
-import { InfoWindows } from '@/ui/googleMap/InfoWindows'
-import { Marker } from '@/ui/googleMap/Marker'
+import { InfoWindows } from '@/ui/googleMap/MarkerAndInfoWindows'
 import { PlaceDetail } from '@/ui/googleMap/PlaceDetail'
+import { Marker } from '@/ui/googleMap/components/Marker'
 
 const mapContainerClassName = 'z-10 relative w-full h-full overflow-hidden'
 
@@ -41,12 +41,15 @@ export const MyMapComponent = memo(function MyMapComponent() {
   // swrでフェッチすることでキャッシュ化・suspenseに対応
   // const map = ref.current ? use(fetcher([loader, ref.current, mapOptions])) : undefined
   const { data: map } = useSWR(ref.current ? [loader, ref.current, mapOptions] : null, fetcher, {
+    revalidateOnMount: false,
     onSuccess: data => setMap(data)
   })
   const [makersLocation, setMakersLocation] = useState<google.maps.places.PlaceResult[] | null>(null)
-  const [detail, setDetail] = useRecoilState(placeDetailState)
   const [isLoading, setIsLoading] = useState(true)
   const setMap = useSetRecoilState(mapState)
+  const detail = useRecoilValue(placeDetailState)
+  const clickable = useMemo(() => !!detail, [detail])
+
   /** 検索結果のcallback */
   const callback = useCallback(
     (results: google.maps.places.PlaceResult[] | null, status: google.maps.places.PlacesServiceStatus) => {
@@ -81,7 +84,11 @@ export const MyMapComponent = memo(function MyMapComponent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center, map])
 
-  const handleClose = () => setDetail(null)
+  useEffect(() => {
+    if (map && clickable) {
+      map.setClickableIcons(clickable)
+    }
+  }, [map, clickable])
 
   return (
     <>
@@ -89,16 +96,17 @@ export const MyMapComponent = memo(function MyMapComponent() {
       <div className="flex h-[calc(100vh-64px)] overflow-hidden">
         <div className={mapContainerClassName} ref={ref}>
           {center && map && (
-            <div>
+            <>
               <Marker
                 position={center}
                 icon={{ scaledSize: new google.maps.Size(24, 24), url: '/navigate-circle-outline.svg' }}
+                clickable={clickable}
               />
               <InfoWindows makersLocation={makersLocation} />
-              <PlaceDetail handleClose={handleClose} />
-            </div>
+            </>
           )}
         </div>
+        {center && map && <PlaceDetail />}
       </div>
     </>
   )

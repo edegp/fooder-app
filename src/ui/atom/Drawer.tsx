@@ -33,18 +33,18 @@ const KeyFrame = ({ width }: { width: string }) => (
       }
       @keyframes BottomToFadeIn {
         0% {
-          transform: translateY(calc(90vh - 65px));
+          transform: translateY(90vh);
         }
         100% {
-          transform: translateY(0);
+          transform: translateY(65px);
         }
       }
       @keyframes BottomToFadeOut {
         0% {
-          transform: translateY(0);
+          transform: translateY(65px);
         }
         100% {
-          transform: translateY(calc(90vh - 65px));
+          transform: translateY(90vh);
         }
       }
     `}
@@ -64,7 +64,7 @@ const SwiperComponent = styled(Swiper)`
   height: ${({ isVertical }) => (isVertical ? '90vh' : '100vh')};
   z-index: 30;
   position: absolute;
-  top: 0;
+  top: ${({ isVertical }) => (isVertical ? 'calc(5vh + 65px)' : 0)};
   left: ${({ isVertical, width }) => (isVertical ? '0' : `calc(100vw - ${width})`)};
   color: black;
   overflow-y: scroll;
@@ -117,7 +117,7 @@ const OverLay = styled.div`
 type Props = {
   children: ReactNode
   handleClose: () => void
-  isOpen: boolean
+  isOpen: boolean | null
   width?: number
   isVertical?: boolean
   className?: string
@@ -133,7 +133,7 @@ export const Drawer = memo(function Drawer({
 }: Props) {
   const ref = useRef<HTMLDivElement | null>(null)
   const [touchPosition, setTouchPosition] = useState<number>(0)
-  const [moveDistance, setMoveDistance] = useState<number>(0)
+  const [moveDistance, setMoveDistance] = useState<number>(isVertical ? 65 : 0)
   const [stopScroll, setStopScroll] = useState<boolean>(false)
   const width = `${widthPercent}vw`
 
@@ -158,7 +158,7 @@ export const Drawer = memo(function Drawer({
   const handleTouchEnd = useCallback(
     async (event: React.TouchEvent) => {
       const touch = event?.changedTouches?.[0]
-      if (touch) {
+      if (touch && stopScroll) {
         const { clientY, clientX } = touch
         const closeBoundary = isVertical
           ? clientY > (window.screen.height * 1) / 2
@@ -170,7 +170,7 @@ export const Drawer = memo(function Drawer({
       await setTimeout(() => {
         setStopScroll(false)
       }, 100)
-      setMoveDistance(0)
+      setMoveDistance(isVertical ? 65 : 0)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [handleClose]
@@ -195,25 +195,23 @@ export const Drawer = memo(function Drawer({
         if (isOpen) {
           return { animation: '0.5s ease BottomToFadeIn' }
         } else {
-          // 垂直でない場合アニメーションを削除
           return {
             animation: '0.5s ease BottomToFadeOut',
-            transform: `translateY(calc(90vh - 65px))`
+            transform: `translateY(90vh)`
           }
         }
       } else {
         if (isOpen) {
           return { animation: '0.5s ease LeftToFadeIn' }
         } else {
-          // 垂直でない場合アニメーションを削除
           return {
             animation: '0.5s ease LeftToFadeOut',
-            transform: `translateX(${width})}`
+            transform: `translateX(${width})`
           }
         }
       }
     } else {
-      return { transform: `translate${isVertical ? 'Y(calc(90vh - 65px))' : `X(${width})`}` }
+      return { transform: `translate${isVertical ? 'Y(90vh)' : `X(${width})`}` }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, moveDistance, stopScroll, isVertical])
@@ -221,22 +219,24 @@ export const Drawer = memo(function Drawer({
   // dynamic styling
   const styles = useMemo(
     () => ({
-      overflowY: stopScroll || !isVertical ? 'hidden' : 'scroll',
+      ...(stopScroll || !isVertical ? { overflowY: 'hidden' } : {}),
       ...animation(),
-      display: typeof isOpen === 'boolean' ? 'block' : 'none',
-      visibility: typeof isOpen === 'boolean' ? 'visible' : 'hidden'
+      // 初回はheaderを非表示
+      ...(typeof isOpen === 'boolean'
+        ? { display: 'block', visibility: 'visible', opacity: 1 }
+        : { display: 'none', visibility: 'none', opacity: 0 })
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [animation, isOpen, stopScroll]
   )
   return (
-    <div>
+    <>
       <KeyFrame width={width} />
-      {isOpen && !isVertical && <OverLay onClick={() => handleClose()} />}
+      {isOpen && <OverLay onClick={handleClose} />}
       <SwiperComponent
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onTouchMove={(event: React.TouchEvent) => handleTouchMove(event)}
+        onTouchMove={handleTouchMove}
         className={className}
         style={styles}
         width={width}
@@ -251,6 +251,6 @@ export const Drawer = memo(function Drawer({
         )}
         {children}
       </SwiperComponent>
-    </div>
+    </>
   )
 })

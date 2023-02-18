@@ -1,6 +1,6 @@
 import { differenceInDays, fromUnixTime } from 'date-fns'
 
-export const getDate = (time: number) => {
+export const getDiffDate = (time: number) => {
   const diff = differenceInDays(new Date(), fromUnixTime(time))
   if (diff > 365) {
     return `${(diff / 365) | 0}年前`
