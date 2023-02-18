@@ -15,6 +15,8 @@ import { LongText } from '@/ui/LongText'
 import { OpeningTimeTab } from '@/ui/googleMap/PlaceDetail/OpningTimeTab'
 import { SlideImages } from '@/ui/googleMap/PlaceDetail/SlideImages'
 import { Star } from '@/ui/star'
+import { placeDetailState } from '@/lib/recoil/state'
+import { useRecoilValue } from 'recoil'
 
 const Container = styled.div`
   padding: 0 32px;
@@ -37,21 +39,16 @@ const ReviewWrap = styled.div`
 `
 
 /* レコメンドした場所をタップした場合に表示する詳細画面**/
-export const PlaceDetail = memo(function PlaceDetail({
-  detail,
-  handleClose
-}: {
-  detail: google.maps.places.PlaceResult | null
-  handleClose: () => void
-}) {
+export const PlaceDetail = memo(function PlaceDetail({ handleClose }: { handleClose: () => void }) {
   const [openingOpen, setOpeningOpen] = useState(false)
-  const handleOpeningClick = useCallback(() => setOpeningOpen(!openingOpen), [openingOpen])
+  const slidesRef = useRef<Splide>(null)
+  const thumbsRef = useRef<Splide>(null)
+  const detail = useRecoilValue(placeDetailState)
+
   const slideOptions: Options = {
     type: 'fade',
     rewind: true
   }
-  const slidesRef = useRef<Splide>(null)
-  const thumbsRef = useRef<Splide>(null)
   const thumbsOptions: Options = {
     type: 'slide',
     rewind: true,
@@ -63,13 +60,22 @@ export const PlaceDetail = memo(function PlaceDetail({
     focus: 'center',
     isNavigation: true
   }
+
+  // thumbとスライドを同期
   useEffect(() => {
     if (slidesRef.current && thumbsRef.current && thumbsRef.current.splide) {
       slidesRef.current.sync(thumbsRef.current.splide)
     }
   }, [])
-  return detail ? (
-    <Drawer handleClose={handleClose} isOpen={!!detail}>
+
+  const handleOpeningClick = useCallback(() => setOpeningOpen(!openingOpen), [openingOpen])
+
+  if (!detail) {
+    return <></>
+  }
+
+  return (
+    <Drawer handleClose={handleClose} isOpen={!!detail} isVertical>
       <CloseButton close={handleClose} />
       <div className="mb-8 w-full">
         <Splide options={slideOptions} ref={slidesRef} aria-label="place photos">
@@ -108,6 +114,7 @@ export const PlaceDetail = memo(function PlaceDetail({
                   width={30}
                   height={30}
                   alt={`${review.author_name}のアイコン画像`}
+                  className="h-auto w-auto object-cover"
                 />
                 <div className="grow">{review.author_name}</div>
                 <div>{getDate(review.time)}</div>
@@ -121,15 +128,13 @@ export const PlaceDetail = memo(function PlaceDetail({
             </div>
           ))}
         </ReviewWrap>
-        <a href={detail.website} />
-        <div>
+        <a href={detail.website}>webサイト</a>
+        <p>
           {detail.business_status === google.maps.places.BusinessStatus.CLOSED_TEMPORARILY
             ? '一時休業中'
             : detail.business_status === google.maps.places.BusinessStatus.CLOSED_PERMANENTLY && '閉店'}
-        </div>
+        </p>
       </Container>
     </Drawer>
-  ) : (
-    <></>
   )
 })

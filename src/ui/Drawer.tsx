@@ -1,23 +1,77 @@
 'use client'
 
-import { ReactNode, useCallback, useMemo, useRef, useState } from 'react'
+import { forwardRef, ReactNode, useCallback, useMemo, useRef, useState } from 'react'
+import { memo } from 'react'
 
 import styled from 'styled-components'
 
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
 
-const Swiper = styled.div<{ width: string; isvertical: boolean }>`
-  width: 100%;
-  height: 100vh;
+type SwiperProps = React.PropsWithChildren & {
+  width: string
+  isVertical: boolean
+}
+
+const KeyFrame = ({ width }: { width: string }) => (
+  <style jsx>
+    {`
+      @keyframes LeftToFadeIn {
+        0% {
+          transform: translateX(${width});
+        }
+        100% {
+          transform: translateX(0);
+        }
+      }
+      @keyframes LeftToFadeOut {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(${width});
+        }
+      }
+      @keyframes BottomToFadeIn {
+        0% {
+          transform: translateY(calc(90vh - 65px));
+        }
+        100% {
+          transform: translateY(0);
+        }
+      }
+      @keyframes BottomToFadeOut {
+        0% {
+          transform: translateY(0);
+        }
+        100% {
+          transform: translateY(calc(90vh - 65px));
+        }
+      }
+    `}
+  </style>
+)
+
+// no recommend var in reactの対策
+const Swiper = forwardRef<HTMLDivElement, SwiperProps>(function Swiper(
+  { isVertical: _isVertical, width: _width, ...props },
+  _ref
+) {
+  return <div {...props}></div>
+})
+
+const SwiperComponent = styled(Swiper)`
+  width: ${({ isVertical, width }) => (isVertical ? '100%' : width)};
+  height: ${({ isVertical }) => (isVertical ? '90vh' : '100vh')};
   z-index: 30;
   position: absolute;
-  top: ${({ isvertical }) => (isvertical ? '16px' : '0')};
-  left: ${({ isvertical, width }) => (isvertical ? '0' : `calc(100vw - ${width})`)};
+  top: 0;
+  left: ${({ isVertical, width }) => (isVertical ? '0' : `calc(100vw - ${width})`)};
   color: black;
   overflow-y: scroll;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  border-radius: 8px;
+  border-radius: ${({ isVertical }) => (isVertical ? '8px;' : '0')};
   background-color: white;
   ${mediaQueryPc} {
     top: 0;
@@ -63,13 +117,20 @@ const OverLay = styled.div`
 type Props = {
   children: ReactNode
   handleClose: () => void
-  isOpen: boolean | null
+  isOpen: boolean
   width?: number
-  vertical?: boolean
+  isVertical?: boolean
   className?: string
 }
 
-export const Drawer = ({ children, handleClose, isOpen, vertical, className, width: widthPercent = 65 }: Props) => {
+export const Drawer = memo(function Drawer({
+  children,
+  handleClose,
+  isOpen,
+  isVertical,
+  className,
+  width: widthPercent = 65
+}: Props) {
   const ref = useRef<HTMLDivElement | null>(null)
   const [touchPosition, setTouchPosition] = useState<number>(0)
   const [moveDistance, setMoveDistance] = useState<number>(0)
@@ -80,9 +141,9 @@ export const Drawer = ({ children, handleClose, isOpen, vertical, className, wid
     (event: React.TouchEvent) => {
       if (stopScroll) {
         const { clientY, clientX } = event?.touches?.[0]
-        const distance = vertical ? clientY - touchPosition : clientX - touchPosition
+        const distance = isVertical ? clientY - touchPosition : clientX - touchPosition
         if (distance > 0) setMoveDistance(distance)
-        const closeBoundary = vertical
+        const closeBoundary = isVertical
           ? clientY > (window.screen.height * 3) / 4
           : clientX > (window.screen.width * 4) / 5
         if (closeBoundary && typeof window !== 'undefined') {
@@ -99,17 +160,16 @@ export const Drawer = ({ children, handleClose, isOpen, vertical, className, wid
       const touch = event?.changedTouches?.[0]
       if (touch) {
         const { clientY, clientX } = touch
-        const closeBoundary = vertical
+        const closeBoundary = isVertical
           ? clientY > (window.screen.height * 1) / 2
           : clientX > (window.screen.width * 2) / 3
         if (closeBoundary && typeof window !== 'undefined') {
           handleClose()
         }
       }
-      !vertical &&
-        (await setTimeout(() => {
-          setStopScroll(false)
-        }, 100))
+      await setTimeout(() => {
+        setStopScroll(false)
+      }, 100)
       setMoveDistance(0)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -117,85 +177,80 @@ export const Drawer = ({ children, handleClose, isOpen, vertical, className, wid
   )
 
   const handleTouchStart = useCallback(() => {
-    const startPosition = vertical ? ref?.current?.offsetTop : ref?.current?.offsetLeft
-    setTouchPosition(startPosition || 10)
-    !vertical && setStopScroll(true)
+    const startPosition = isVertical ? ref?.current?.offsetTop : ref?.current?.offsetLeft
+    setTouchPosition(startPosition || 0)
+    !isVertical && setStopScroll(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ref?.current])
 
   // animationのロジック
   const animation = useCallback(() => {
     if (isOpen && stopScroll) {
-      return { transform: `translate${vertical ? 'Y' : 'X'}(${moveDistance}px)` }
+      return { transform: `translate${isVertical ? 'Y' : 'X'}(${moveDistance}px)` }
     }
     // 初回表示時はアニメーションを発火しない
-    if (!vertical && typeof isOpen === 'boolean') {
-      if (isOpen) {
-        return { animation: '0.5s ease LeftToFadeIn' }
+    if (typeof isOpen === 'boolean') {
+      // ドロワーが垂直でない場合
+      if (isVertical) {
+        if (isOpen) {
+          return { animation: '0.5s ease BottomToFadeIn' }
+        } else {
+          // 垂直でない場合アニメーションを削除
+          return {
+            animation: '0.5s ease BottomToFadeOut',
+            transform: `translateY(calc(90vh - 65px))`
+          }
+        }
       } else {
-        return {
-          animation: '0.5s ease LeftToFadeOut',
-          transform: `translate${vertical ? 'Y(100vh)' : `X(${width})`}`
+        if (isOpen) {
+          return { animation: '0.5s ease LeftToFadeIn' }
+        } else {
+          // 垂直でない場合アニメーションを削除
+          return {
+            animation: '0.5s ease LeftToFadeOut',
+            transform: `translateX(${width})}`
+          }
         }
       }
     } else {
-      return { transform: `translate${vertical ? 'Y(100vh)' : `X(${width})`}` }
+      return { transform: `translate${isVertical ? 'Y(calc(90vh - 65px))' : `X(${width})`}` }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, moveDistance, stopScroll, vertical])
+  }, [isOpen, moveDistance, stopScroll, isVertical])
 
   // dynamic styling
   const styles = useMemo(
     () => ({
-      overflowY: stopScroll || vertical ? 'hidden' : 'scroll',
-      overflowX: 'hidden',
+      overflowY: stopScroll || !isVertical ? 'hidden' : 'scroll',
       ...animation(),
-      width
+      display: typeof isOpen === 'boolean' ? 'block' : 'none',
+      visibility: typeof isOpen === 'boolean' ? 'visible' : 'hidden'
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [moveDistance, isOpen, stopScroll]
+    [animation, isOpen, stopScroll]
   )
   return (
-    <>
-      <style jsx>
-        {`
-          @keyframes LeftToFadeIn {
-            0% {
-              transform: translateX(${width});
-            }
-            100% {
-              transform: translateX(0);
-            }
-          }
-          @keyframes LeftToFadeOut {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(${width});
-            }
-          }
-        `}
-      </style>
-      {isOpen && <OverLay onClick={() => handleClose()} />}
-      <Swiper
+    <div>
+      <KeyFrame width={width} />
+      {isOpen && !isVertical && <OverLay onClick={() => handleClose()} />}
+      <SwiperComponent
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onTouchMove={(event: React.TouchEvent) => handleTouchMove(event)}
         className={className}
         style={styles}
         width={width}
-        isvertical={vertical}
+        isVertical={isVertical}
         ref={ref}
       >
-        {vertical && (
+        {isVertical && (
           <Puller
             onTouchStart={() => setStopScroll(true)}
             onTouchEnd={() => setTimeout(() => setStopScroll(false), 100)}
           />
         )}
         {children}
-      </Swiper>
-    </>
+      </SwiperComponent>
+    </div>
   )
-}
+})

@@ -3,13 +3,13 @@
 import { useCallback, memo, useState, useMemo, useRef, useEffect } from 'react'
 
 import { Loader } from '@googlemaps/js-api-loader'
-import { useSetRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState } from 'recoil'
 import useSWR from 'swr'
 
 import { LoadingRing } from '../LoadingRing'
 
 import { useGeoLocation } from '@/lib/hooks/useGeoLocation'
-import { mapState } from '@/lib/recoil/state'
+import { mapState, placeDetailState } from '@/lib/recoil/state'
 import { InfoWindows } from '@/ui/googleMap/InfoWindows'
 import { Marker } from '@/ui/googleMap/Marker'
 import { PlaceDetail } from '@/ui/googleMap/PlaceDetail'
@@ -44,7 +44,7 @@ export const MyMapComponent = memo(function MyMapComponent() {
     onSuccess: data => setMap(data)
   })
   const [makersLocation, setMakersLocation] = useState<google.maps.places.PlaceResult[] | null>(null)
-  const [detail, setDetail] = useState<google.maps.places.PlaceResult | null>(null)
+  const [detail, setDetail] = useRecoilState(placeDetailState)
   const [isLoading, setIsLoading] = useState(true)
   const setMap = useSetRecoilState(mapState)
   /** 検索結果のcallback */
@@ -82,20 +82,21 @@ export const MyMapComponent = memo(function MyMapComponent() {
   }, [center, map])
 
   const handleClose = () => setDetail(null)
+
   return (
     <>
       {isLoading && <LoadingRing />}
       <div className="flex h-[calc(100vh-64px)] overflow-hidden">
         <div className={mapContainerClassName} ref={ref}>
           {center && map && (
-            <>
+            <div>
               <Marker
                 position={center}
                 icon={{ scaledSize: new google.maps.Size(24, 24), url: '/navigate-circle-outline.svg' }}
               />
-              <InfoWindows makersLocation={makersLocation} map={map} setDetail={setDetail} />
-              <PlaceDetail detail={detail} handleClose={handleClose} />
-            </>
+              <InfoWindows makersLocation={makersLocation} />
+              <PlaceDetail handleClose={handleClose} />
+            </div>
           )}
         </div>
       </div>

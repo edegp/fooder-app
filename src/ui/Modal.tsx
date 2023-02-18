@@ -1,11 +1,10 @@
-import { ReactNode } from 'react'
+import { DetailedHTMLProps, HTMLAttributes, ReactNode } from 'react'
 
 import { useRecoilValue } from 'recoil'
 import styled from 'styled-components'
 
 import { clientSize } from '@/lib/recoil/state'
 import { CloseButton } from '@/ui/CloseButton'
-// import { useWindowSize } from '@/lib/hooks/useWindowSize'
 
 const OverLay = styled.div`
   background-color: gray;
@@ -14,8 +13,19 @@ const OverLay = styled.div`
   height: 100vh;
   z-index: 900;
 `
-
-const ModalContainer = styled.div<{ padding: string; radius: number; clientWidth: number; clientHeight: number }>`
+const ModalContainer = styled(
+  // no recoment var in reactの対策
+  ({
+    padding: _padding,
+    radius: _radius,
+    clientWidth: _clientWidth,
+    ...props
+  }: DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
+    padding: string
+    radius: number
+    clientWidth: number
+  }) => <div {...props} />
+)`
   position: absolute;
   z-index: 1000;
   top: calc(50% - 80px);
@@ -51,16 +61,19 @@ export default function Modal({
   padding?: string
   children: ReactNode
 }) {
-  const [clientWidth, clientHeight] = useRecoilValue(clientSize)
-  return open ? (
+  const [clientWidth] = useRecoilValue(clientSize)
+
+  if (!open) {
+    return <></>
+  }
+
+  return (
     <>
       <OverLay />
-      <ModalContainer radius={radius} padding={padding} clientWidth={clientWidth} clientHeight={clientHeight}>
+      <ModalContainer radius={radius} padding={padding} clientWidth={clientWidth}>
         <CloseButton close={close} />
         {children}
       </ModalContainer>
     </>
-  ) : (
-    <></>
   )
 }

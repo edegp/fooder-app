@@ -16,7 +16,6 @@ import { getJpErrorMessage } from '@/lib/modules/getJpErrorMessage'
 import { emailState } from '@/lib/recoil/state'
 import Button from '@/ui/Button'
 import { ErrorModal } from '@/ui/ErrorModal'
-// import { Header } from '@/ui/Header'
 import { Input } from '@/ui/Input'
 import { LoadingRing } from '@/ui/LoadingRing'
 
@@ -61,7 +60,6 @@ export const UserLogin = memo(function UserLogin() {
       setError({ message: errorMessage, code: error.code })
       throw new Error(error.message)
     }
-    console.log(error)
     throw new Error('通信エラーです。お手数ですが，サポートまでお問い合わせください。')
   }, [])
 

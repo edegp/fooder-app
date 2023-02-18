@@ -28,7 +28,7 @@
       @apply text-body-md;
     }
   }
-  a {
+  a:not(:has(.no-underline)) {
     text-decoration: underline;
     &:hover {
       opacity: 0.3;

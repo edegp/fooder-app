@@ -27,6 +27,12 @@ const mapState = atom<google.maps.Map | null>({
   dangerouslyAllowMutability: true
 })
 
+const placeDetailState = atom<google.maps.Map | null>({
+  key: 'placeDetailState',
+  default: null,
+  dangerouslyAllowMutability: true
+})
+
 const urlState = atom<string>({
   key: 'urlState',
   effects: [
@@ -68,4 +74,4 @@ const emailState = atom<string>({
   effects: [localStorageEffect('emailState')]
 })
 
-export { clientSize, isPcBrowser, mapState, urlState, emailState, loginStatus }
+export { clientSize, isPcBrowser, mapState, placeDetailState, urlState, emailState, loginStatus }

@@ -1,7 +1,8 @@
-import { Dispatch, Fragment, memo, SetStateAction, useCallback, useState } from 'react'
+import { Fragment, memo, useCallback, useState } from 'react'
 
 import Image from 'next/image'
 
+import { useRecoilValue, useSetRecoilState } from 'recoil'
 import styled from 'styled-components'
 
 import Button from '../Button'
@@ -9,7 +10,7 @@ import Modal from '../Modal'
 
 import { imageLoader } from '@/lib/modules/imageLoader'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
-import { isPcBrowser } from '@/lib/recoil/state'
+import { isPcBrowser, mapState, placeDetailState } from '@/lib/recoil/state'
 import { InfoWindow } from '@/ui/googleMap/InfoWindow'
 import { Marker } from '@/ui/googleMap/Marker'
 import { Star } from '@/ui/star'
@@ -40,18 +41,17 @@ const ButtonContainer = styled.div`
 `
 /* レコメンドした場所をwindowで表示**/
 export const InfoWindows = memo(function InfoWindows({
-  makersLocation,
-  map,
-  setDetail
+  makersLocation
 }: {
   makersLocation: google.maps.places.PlaceResult[] | null
-  map?: google.maps.Map
-  setDetail: Dispatch<SetStateAction<google.maps.places.PlaceResult | null>>
 }) {
   const placeNames = makersLocation?.map((place: google.maps.places.PlaceResult) => [place.name, false]) || [[]]
   const placeObj = Object.fromEntries(placeNames)
   const [openList, setOpenList] = useState<{ [key: string]: boolean }>(placeObj)
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false)
+  const map = useRecoilValue(mapState)
+  const setDetail = useSetRecoilState(placeDetailState)
+
   const detailCallback = useCallback(
     (result: google.maps.places.PlaceResult | null, status: google.maps.places.PlacesServiceStatus) => {
       if (status == google.maps.places.PlacesServiceStatus.OK) {

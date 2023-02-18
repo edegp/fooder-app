@@ -1,9 +1,9 @@
 'use client'
 
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 import { signOut } from 'firebase/auth'
 import { HiOutlineMenuAlt4 } from 'react-icons/hi'
@@ -41,6 +41,7 @@ export const Header = memo(function Header() {
   const [open, setOpen] = useState<boolean | null>(null)
   const [isLogin, setIsLogin] = useRecoilState(loginStatus)
   const router = useRouter()
+  const pathname = usePathname()
 
   const loginList = useMemo(
     () =>
@@ -67,10 +68,18 @@ export const Header = memo(function Header() {
     () => [...loginList, { wording: 'FAQ', path: '/faq' }, { wording: 'Support', path: '/help' }],
     [loginList]
   )
+
+  //　画面遷移後にヘッダーのDrawerを閉める
+  useEffect(() => {
+    setOpen(false)
+  }, [pathname])
+
   return (
     <>
       <HeadContainer>
-        <Title>Fooder</Title>
+        <Link href="/">
+          <Title className="no-underline">Fooder</Title>
+        </Link>
         <HiOutlineMenuAlt4 onClick={handleClick} className="mr-6 h-9 w-9 text-lg" />
       </HeadContainer>
       <Drawer handleClose={() => setOpen(false)} isOpen={open} className="p-10">

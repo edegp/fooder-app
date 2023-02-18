@@ -16,8 +16,16 @@ export const SlideImages = memo(function SlideImages({
   return (
     <>
       {photos?.map((photo, i) => (
-        <SplideSlide key={i} className="relative aspect-square">
-          <Image key={i} loader={imageLoader} src={photo.getUrl() || ''} fill alt={`${name}の画像${i + 1}`} />
+        <SplideSlide key={i}>
+          <Image
+            key={i}
+            loader={imageLoader}
+            src={photo.getUrl() || ''}
+            width="375"
+            height="400"
+            alt={`${name}の画像${i + 1}`}
+            className="h-auto w-auto object-cover"
+          />
         </SplideSlide>
       ))}
     </>
