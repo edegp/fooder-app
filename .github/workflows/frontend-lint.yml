@@ -39,6 +39,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
+          run: yarn clear cache
           node-version: ${{fromJson(steps.package-json.outputs.content).engines.node}}
           cache: yarn
 
