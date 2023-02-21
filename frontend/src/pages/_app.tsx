@@ -13,10 +13,7 @@ export default function Myapp({ Component, pageProps }: AppProps) {
     <RecoilRoot>
       <RecoilURLSyncNext
         location={{ part: 'href' }}
-        serialize={x => {
-          console.log(x)
-          return JSON.stringify(x)
-        }}
+        serialize={x => JSON.stringify(x)}
         deserialize={x => ({ pathname: x })}
         storeKey="url"
       >

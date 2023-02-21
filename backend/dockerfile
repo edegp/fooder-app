@@ -1,0 +1,27 @@
+# step 1: build go app
+# 参考 https://qiita.com/sky0621/items/58fa2bcfc0935f6186cb
+FROM golang:1.20.1-alpine3.17 as build-step
+
+# for go mod download
+RUN apk add --update --no-cache ca-certificates git bash
+RUN mkdir /app
+WORKDIR /app
+COPY app/go.mod app/go.sum ./
+
+RUN CGO_ENABLED=0 go install github.com/cosmtrek/air@latest
+RUN CGO_ENABLED=0 go install github.com/go-delve/delve/cmd/dlv@latest
+# RUN CGO_ENABLED=0 go install github.com/99designs/gqlgen@latest
+RUN go mod download && go mod verify && go mod tidy
+COPY app .
+# hotreload
+CMD ["air","-c","./app/.air.toml"]
+# -----------------------------------------------------------------------------
+# build
+# RUN cd server && CGO_ENABLED=0 go build -o /go/bin/app
+
+# -----------------------------------------------------------------------------
+# step 2: exec
+# FROM scratch
+# COPY --from=build-step /go/bin/app /go/bin/app
+# EXPOSE 8080
+# ENTRYPOINT ["/go/bin/app"]
