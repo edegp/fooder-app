@@ -3,24 +3,34 @@ name: Lint
 on: push
 
 jobs:
-  lint:
+  changes:
     runs-on: ubuntu-latest
 
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v3.0.0
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          token: ${{ github.token }}
+          filters: .github/filters.yml
+  lint:
+    needs: changes
+    if: steps.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Check for file changes
-        uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          token: ${{ github.token }}
-          filters: .github/filters.yml
 
       - name: Get pkg.json
         id: package-json
-        run: echo "content=$(cat ./frontend/package.json | tr -d '\n')" >> $GITHUB_OUTPUT
+        run: echo "content=$(cat ./package.json | tr -d '\n')" >> $GITHUB_OUTPUT
       - uses: actions/setup-node@v3
         with:
           node-version: ${{fromJson(steps.package-json.outputs.content).engines.node}}
@@ -29,5 +39,4 @@ jobs:
       - name: Install Dependencies
         run: yarn install --immutable --immutable-cache --check-cache
 
-      - if: steps.changes.outputs.frontend == 'true'
-        run: yarn lint
+      - run: yarn lint
