@@ -44,5 +44,5 @@ jobs:
 
       - name: Install Dependencies
         run: yarn cache clean
-      - run: yarn install --immutable
+      - run: yarn install
       - run: yarn lint
