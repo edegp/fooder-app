@@ -3,21 +3,20 @@ name: Lint
 on: push
 
 jobs:
+  # JOB to run change detection
   changes:
     runs-on: ubuntu-latest
-    # Required permissions
-    permissions:
-      pull-requests: read
     # Set job outputs to values from filter step
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
     steps:
-      - uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          token: ${{ github.token }}
-          filters: .github/filters.yml
+    # For pull requests it's not necessary to checkout the code
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        token: ${{ github.token }}
+        filters: .github/filters.yml
   lint:
     needs: changes
     if: steps.changes.outputs.frontend == 'true'
@@ -33,6 +32,7 @@ jobs:
       - name: Get pkg.json
         id: package-json
         run: echo "content=$(cat ./package.json | tr -d '\n')" >> $GITHUB_OUTPUT
+
       - uses: actions/setup-node@v3
         with:
           node-version: ${{fromJson(steps.package-json.outputs.content).engines.node}}
@@ -40,5 +40,4 @@ jobs:
 
       - name: Install Dependencies
         run: yarn install --immutable --immutable-cache --check-cache
-
       - run: yarn lint
