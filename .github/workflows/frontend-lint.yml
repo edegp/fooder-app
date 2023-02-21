@@ -43,5 +43,6 @@ jobs:
           cache: yarn
 
       - name: Install Dependencies
-        run: yarn install --immutable --immutable-cache --check-cache
+        run: yarn cache clean
+      - run: yarn install --immutable --immutable-cache --check-cache
       - run: yarn lint
