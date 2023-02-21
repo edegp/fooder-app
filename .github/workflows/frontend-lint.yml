@@ -36,6 +36,7 @@ jobs:
       - name: Get pkg.json
         id: package-json
         run: echo "content=$(cat ./package.json | tr -d '\n')" >> $GITHUB_OUTPUT
+
       - name: cache clear
         run: yarn cache clean
 
@@ -45,6 +46,5 @@ jobs:
           cache: yarn
 
       - name: Install Dependencies
-
-      - run: yarn install
+        run: yarn install
       - run: yarn lint
