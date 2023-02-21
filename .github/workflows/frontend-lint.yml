@@ -19,7 +19,7 @@ jobs:
         filters: .github/filters.yml
   lint:
     needs: changes
-    if: steps.changes.outputs.frontend == 'true'
+    if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:

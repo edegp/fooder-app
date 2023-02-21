@@ -9,9 +9,9 @@ import useSWR from 'swr'
 import { useGeoLocation } from '@/lib/hooks/useGeoLocation'
 import { mapState, placeDetailState } from '@/lib/recoil/state'
 import { LoadingRing } from '@/ui/atom/Loading'
-import { Marker } from '@/ui/googleMap/components/Marker'
 import { InfoWindows } from '@/ui/googleMap/MarkerAndInfoWindows'
 import { PlaceDetail } from '@/ui/googleMap/PlaceDetail'
+import { Marker } from '@/ui/googleMap/components/Marker'
 
 const mapContainerClassName = 'z-10 relative w-full h-full overflow-hidden'
 
