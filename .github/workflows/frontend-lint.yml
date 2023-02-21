@@ -14,11 +14,13 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
     steps:
-    # For pull requests it's not necessary to checkout the code
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        filters: .github/filters.yml
+      - uses: actions/checkout@v3.0.0
+      # For pull requests it's not necessary to checkout the code
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          token: ${{ github.token }}
+          filters: .github/filters.yml
   lint:
     needs: changes
     if: ${{ needs.changes.outputs.backend == 'true' }}
