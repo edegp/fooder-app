@@ -39,9 +39,9 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          run: yarn clear cache
           node-version: ${{fromJson(steps.package-json.outputs.content).engines.node}}
           cache: yarn
+          cache-dependency-path: frontend/yarn.lock
 
       - name: Install Dependencies
         run: yarn install --immutable --immutable-cache --check-cache
