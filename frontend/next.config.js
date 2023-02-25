@@ -8,9 +8,6 @@ const nextConfig = withInterceptStdout(
   {
     reactStrictMode: true,
     swcMinify: true,
-    experimental: {
-      optimizeFonts: true
-    },
     webpack(config) {
       config.resolve.alias['@'] = path.join(__dirname, 'src')
       config.resolve.alias['~'] = path.join(__dirname, 'public')

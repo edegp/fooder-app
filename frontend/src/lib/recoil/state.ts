@@ -7,6 +7,15 @@ import { urlSyncEffect } from 'recoil-sync'
 import { auth } from '@/lib/firebase/firebase'
 import { localStorageEffect } from '@/lib/recoil/localstrageEffect'
 
+// // predicate
+// const isRecoilState = (
+//   recoilState: RecoilState<unknown> | boolean | null = false
+// ): recoilState is RecoilState<unknown> => {
+//   const maybeType: RecoilState<unknown> | null =
+//     recoilState !== null && typeof recoilState !== 'boolean' && 'key' in recoilState ? recoilState : null
+//   return !!maybeType
+// }
+
 const clientSize = atom({
   key: 'clientSize',
   default: [0, 0]
@@ -20,6 +29,20 @@ const isPcBrowser = selector({
   }
 })
 
+const geoLocation = atom<google.maps.LatLngLiteral | null>({
+  key: 'geoLocation',
+  default: null
+})
+
+const mapOptionsState = selector({
+  key: 'mapOptionsState',
+  get: ({ get }) => ({
+    zoom: 15,
+    center: get(geoLocation)
+  }),
+  dangerouslyAllowMutability: true
+})
+
 const mapState = atom<google.maps.Map | null>({
   key: 'mapState',
   default: null,
@@ -28,6 +51,12 @@ const mapState = atom<google.maps.Map | null>({
 
 const placeDetailState = atom<google.maps.places.PlaceResult | null>({
   key: 'placeDetailState',
+  default: null,
+  dangerouslyAllowMutability: true
+})
+
+const makersLocationState = atom<google.maps.places.PlaceResult[] | null>({
+  key: 'makersLocationState',
   default: null,
   dangerouslyAllowMutability: true
 })
@@ -78,7 +107,7 @@ const currentUserInfo = atom<User | null>({
   default: null,
   effects: [
     ({ setSelf }) => {
-      const unsubscribe = onAuthStateChanged(auth, user => {
+      const unsubscribe = onAuthStateChanged(auth, async user => {
         if (user) {
           setSelf(user)
         }
@@ -89,4 +118,25 @@ const currentUserInfo = atom<User | null>({
   ]
 })
 
-export { clientSize, isPcBrowser, mapState, placeDetailState, urlState, emailState, loginStatus, currentUserInfo }
+// const openSelectorFamily = selectorFamily({
+//   key: 'open',
+//   get:
+//     (state: RecoilState<unknown>) =>
+//     ({ get }: { get: GetRecoilValue }) =>
+//       !!get(state),
+//   set: ({ set }: { set: any }, newValue: boolean) => set(newValue)
+// })
+
+export {
+  clientSize,
+  isPcBrowser,
+  mapState,
+  placeDetailState,
+  makersLocationState,
+  geoLocation,
+  mapOptionsState,
+  urlState,
+  emailState,
+  loginStatus,
+  currentUserInfo
+}

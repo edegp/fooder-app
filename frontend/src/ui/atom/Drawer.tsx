@@ -1,11 +1,11 @@
 'use client'
 
-import { forwardRef, ReactNode, useCallback, useMemo, useRef, useState } from 'react'
-import { memo } from 'react'
+import { forwardRef, memo, ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 
 import styled from 'styled-components'
 
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
+import { OverLay } from '@/ui/atom/OverLay'
 
 type SwiperProps = React.PropsWithChildren & {
   width: string
@@ -100,18 +100,6 @@ const Puller = styled.div`
     left: -15px;
     border-radius: 50%;
   }
-`
-
-const OverLay = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 15;
-  background-color: black;
-  opacity: 0.3;
-  overflow: hidden;
 `
 
 type Props = {
@@ -214,7 +202,7 @@ export const Drawer = memo(function Drawer({
       return { transform: `translate${isVertical ? 'Y(90vh)' : `X(${width})`}` }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, moveDistance, stopScroll, isVertical])
+  }, [isOpen, moveDistance, isVertical])
 
   // dynamic styling
   const styles = useMemo(

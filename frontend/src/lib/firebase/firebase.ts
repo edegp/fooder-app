@@ -1,6 +1,6 @@
 // import { getAnalytics, isSupported } from 'firebase/analytics'
 import { FirebaseError, initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { connectAuthEmulator, getAuth } from 'firebase/auth'
 
 // predicate
 export const isFirebaseError = (e: Error): e is FirebaseError => {
@@ -20,4 +20,9 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig)
 // Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app)
+export const auth = getAuth()
+
+// emulator setting
+if (process.env.NODE_ENV !== 'production' && !!process.env.FIREBASE_AUTH_EMULATOR_URL) {
+  connectAuthEmulator(auth, process.env.FIREBASE_AUTH_EMULATOR_URL)
+}

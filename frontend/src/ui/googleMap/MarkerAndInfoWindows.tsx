@@ -8,9 +8,9 @@ import styled from 'styled-components'
 import { useOpenState } from '@/lib/hooks/useOpenState'
 import { imageLoader } from '@/lib/modules/imageLoader'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
-import { mapState, placeDetailState } from '@/lib/recoil/state'
-import Button from '@/ui/atom/Button'
-import Modal from '@/ui/atom/Modal'
+import { makersLocationState, mapState, placeDetailState } from '@/lib/recoil/state'
+import { Button } from '@/ui/atom/Button'
+import { Modal } from '@/ui/atom/Modal'
 import { Star } from '@/ui/components/Star'
 import { InfoWindow } from '@/ui/googleMap/components/InfoWindow'
 import { Marker } from '@/ui/googleMap/components/Marker'
@@ -40,11 +40,8 @@ const ButtonContainer = styled.div`
   column-gap: 12px;
 `
 /* レコメンドした場所をwindowで表示**/
-export const InfoWindows = memo(function InfoWindows({
-  makersLocation
-}: {
-  makersLocation: google.maps.places.PlaceResult[] | null
-}) {
+export const MarkerAndInfoWindows = memo(function InfoWindows() {
+  const makersLocation = useRecoilValue(makersLocationState)
   const placeNames = makersLocation?.map((place: google.maps.places.PlaceResult) => [place.name, false]) || [[]]
   const placeObj = Object.fromEntries(placeNames)
   const [openList, setOpenList] = useState<{ [key: string]: boolean }>(placeObj)

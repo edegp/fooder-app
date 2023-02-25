@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import { useRecoilState } from 'recoil'
+
+import { geoLocation } from '@/lib/recoil/state'
+
 export const useGeoLocation = () => {
   const [id, setId] = useState(0)
-  const [location, setLocation] = useState<google.maps.LatLngLiteral | null>(null)
+  const [location, setLocation] = useRecoilState(geoLocation)
   const successCallback = useCallback(
     (position: GeolocationPosition) => {
       const { latitude: lat, longitude: lng } = position.coords

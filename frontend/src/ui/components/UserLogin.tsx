@@ -6,19 +6,19 @@ import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { usePathname, useRouter } from 'next/navigation'
 
-import { FirebaseError } from 'firebase/app'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from 'react-icons/md'
 import { useRecoilState } from 'recoil'
 import styled from 'styled-components'
+import { useMutation } from 'urql'
 
-import { auth, isFirebaseError } from '@/lib/firebase/firebase'
-import { getJpErrorMessage } from '@/lib/modules/getJpErrorMessage'
+import { CreateUser, UpdateUser } from '@/graphql/mutaion'
+import { auth } from '@/lib/firebase/firebase'
+import { useError } from '@/lib/hooks/useError'
 import { emailState } from '@/lib/recoil/state'
-import Button from '@/ui/atom/Button'
+import { Button } from '@/ui/atom/Button'
 import { Input } from '@/ui/atom/Input'
 import { LoadingRing } from '@/ui/atom/Loading'
-import { ErrorModal } from '@/ui/components/ErrorModal'
 
 const Header = dynamic(
   import('@/ui/atom/Header').then(module => module.Header),
@@ -49,21 +49,11 @@ const Form = styled.form`
 export const UserLogin = memo(function UserLogin() {
   const router = useRouter()
   const pathname = usePathname()
-  const [error, setError] = useState<{ message: string; code: string }>({ message: '', code: '' })
+  const { error, handleError } = useError()
   const [email, setEmail] = useRecoilState(emailState)
   const [isShowPassword, setIsShowPassword] = useState(true)
-
-  const handleError = useCallback((error: unknown) => {
-    if (error instanceof FirebaseError && isFirebaseError(error)) {
-      let errorMessage = ''
-      if (error.code === 'EMAIL_NOT_FOUND' || error.code === 'auth/email-already-in-use') {
-        errorMessage = getJpErrorMessage(error.code)
-      }
-      setError({ message: errorMessage, code: error.code })
-      throw new Error(error.message)
-    }
-    throw new Error('通信エラーです。お手数ですが，サポートまでお問い合わせください。')
-  }, [])
+  const [_, createUser] = useMutation(CreateUser)
+  const [updateUserResult, updateUser] = useMutation(UpdateUser)
 
   const handleSubmit = useCallback(
     async (event: FormEvent) => {
@@ -72,14 +62,22 @@ export const UserLogin = memo(function UserLogin() {
       setEmail(email.value)
       if (email && password) {
         try {
-          const result =
-            pathname === '/signup'
-              ? await createUserWithEmailAndPassword(auth, email.value, password.value)
-              : await signInWithEmailAndPassword(auth, email.value, password.value)
-          if (result) {
-            router.push('/')
+          if (pathname === '/signup') {
+            const result = await createUserWithEmailAndPassword(auth, email.value, password.value)
+            if (result) {
+              const idToken = await result.user.getIdToken()
+              await createUser({ idToken })
+              router.push('/')
+            }
+          } else {
+            const result = await signInWithEmailAndPassword(auth, email.value, password.value)
+            if (result) {
+              const id = result.user.uid
+              await updateUser({ id })
+              router.push('/')
+            }
           }
-        } catch (error) {
+        } catch (err) {
           handleError(error)
         }
       }
@@ -96,7 +94,6 @@ export const UserLogin = memo(function UserLogin() {
         <title>Fooder Login</title>
       </Head>
       <Header />
-      <ErrorModal error={error} />
       <Form onSubmit={handleSubmit}>
         <Input name="email" id="email" type="email" defaultValue={email} placeholder="メールアドレス" required />
         <Input
@@ -116,7 +113,9 @@ export const UserLogin = memo(function UserLogin() {
           }
           required
         />
-        <Button type="submit">{pathname === '/signup' ? '登録' : 'ログイン'}</Button>
+        <Button padding="7px 6px" type="submit">
+          {pathname === '/signup' ? '登録' : 'ログイン'}
+        </Button>
       </Form>
     </>
   )
