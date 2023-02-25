@@ -16,7 +16,7 @@
     "no-relative-import-paths/no-relative-import-paths": [
       "error",
       {
-        "rootDir": "./fooder-app/src",
+        "rootDir": "./frontend/src",
         "prefix": "@"
       }
     ],

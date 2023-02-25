@@ -1,20 +1,37 @@
-import React, { useEffect } from 'react'
+import { memo, useCallback, useEffect } from 'react'
 
 import { useOpenState } from '@/lib/hooks/useOpenState'
-import Button from '@/ui/atom/Button'
-import Modal from '@/ui/atom/Modal'
+import { Button } from '@/ui/atom/Button'
+import { Modal } from '@/ui/atom/Modal'
 
-export const ErrorModal = ({ error, ...props }: { error: { message: string; code: string } }) => {
+export const ErrorModal = memo(function ErrorModal({
+  error,
+  resetError,
+  ...props
+}: {
+  error: string | null
+  resetError: () => void
+}) {
   const { isOpen, setIsOpen, handleClose } = useOpenState()
 
   useEffect(() => {
-    setIsOpen(!!error.message || !!error.code)
+    setIsOpen(!!error)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error])
 
+  const handleClick = useCallback(() => {
+    handleClose()
+    resetError()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetError])
+
   return (
-    <Modal handleClose={handleClose} isOpen={isOpen} {...props}>
-      <p>{error.message || error.code}</p>
-      <Button>OK</Button>
-    </Modal>
+    <Modal
+      handleClose={handleClick}
+      isOpen={isOpen}
+      title={error || ''}
+      button={<Button onClick={handleClick}>OK</Button>}
+      {...props}
+    />
   )
-}
+})
