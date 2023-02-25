@@ -4,8 +4,6 @@ package user
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const (
@@ -13,8 +11,6 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldIDToken holds the string denoting the id_token field in the database.
-	FieldIDToken = "id_token"
 	// FieldCreateAt holds the string denoting the create_at field in the database.
 	FieldCreateAt = "create_at"
 	// FieldLatestLoginAt holds the string denoting the latest_login_at field in the database.
@@ -26,7 +22,6 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
-	FieldIDToken,
 	FieldCreateAt,
 	FieldLatestLoginAt,
 }
@@ -42,14 +37,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// IDTokenValidator is a validator for the "id_token" field. It is called by the builders before save.
-	IDTokenValidator func(string) error
 	// DefaultCreateAt holds the default value on creation for the "create_at" field.
 	DefaultCreateAt func() time.Time
 	// DefaultLatestLoginAt holds the default value on creation for the "latest_login_at" field.
 	DefaultLatestLoginAt func() time.Time
 	// UpdateDefaultLatestLoginAt holds the default value on update for the "latest_login_at" field.
 	UpdateDefaultLatestLoginAt func() time.Time
-	// DefaultID holds the default value on creation for the "id" field.
-	DefaultID func() uuid.UUID
 )

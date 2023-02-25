@@ -6,12 +6,33 @@ package graph
 
 import (
 	"backend/app/ent"
+	firebase "backend/app/firebase_admin"
 	"context"
+	"log"
+	"time"
 )
 
 // CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, input ent.CreateUserInput) (*ent.User, error) {
-	return r.client.Debug().User.Create().SetInput(input).Save(ctx)
+func (r *mutationResolver) CreateUser(ctx context.Context, idToken *string) (*ent.User, error) {
+	firebaseClient, err := firebase.InitFirebaseClient()
+	if err != nil {
+		log.Fatalf("failed firebase client init %T", err)
+		return nil, err
+	}
+	token, err := firebaseClient.VerifyIDToken(ctx, *idToken)
+	if err != nil {
+		log.Fatalf("failed firebase verify IDToken %T", err)
+		return nil, err
+	}
+	client := ent.FromContext(ctx)
+	userID := token.UID
+	return client.Debug().User.Create().SetID(userID).Save(ctx)
+}
+
+// UpdateUser is the resolver for the updateUser field.
+func (r *mutationResolver) UpdateUser(ctx context.Context, id *string) (*ent.User, error) {
+	client := ent.FromContext(ctx)
+	return client.Debug().User.UpdateOneID(*id).SetLatestLoginAt(time.Now()).Save(ctx)
 }
 
 // Mutation returns MutationResolver implementation.

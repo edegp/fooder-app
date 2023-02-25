@@ -15,7 +15,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/errcode"
-	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/vmihailenco/msgpack/v5"
 )
@@ -145,8 +144,8 @@ type PageInfo struct {
 
 // Cursor of an edge type.
 type Cursor struct {
-	ID    uuid.UUID `msgpack:"i"`
-	Value Value     `msgpack:"v,omitempty"`
+	ID    string `msgpack:"i"`
+	Value Value  `msgpack:"v,omitempty"`
 }
 
 // MarshalGQL implements graphql.Marshaler interface.
@@ -440,16 +439,6 @@ func (u *UserQuery) Paginate(
 }
 
 var (
-	// UserOrderFieldIDToken orders User by id_token.
-	UserOrderFieldIDToken = &UserOrderField{
-		field: user.FieldIDToken,
-		toCursor: func(u *User) Cursor {
-			return Cursor{
-				ID:    u.ID,
-				Value: u.IDToken,
-			}
-		},
-	}
 	// UserOrderFieldCreateAt orders User by create_at.
 	UserOrderFieldCreateAt = &UserOrderField{
 		field: user.FieldCreateAt,
@@ -476,8 +465,6 @@ var (
 func (f UserOrderField) String() string {
 	var str string
 	switch f.field {
-	case user.FieldIDToken:
-		str = "ID_TOKEN"
 	case user.FieldCreateAt:
 		str = "CREATED_AT"
 	case user.FieldLatestLoginAt:
@@ -498,8 +485,6 @@ func (f *UserOrderField) UnmarshalGQL(v interface{}) error {
 		return fmt.Errorf("UserOrderField %T must be a string", v)
 	}
 	switch str {
-	case "ID_TOKEN":
-		*f = *UserOrderFieldIDToken
 	case "CREATED_AT":
 		*f = *UserOrderFieldCreateAt
 	case "LATEST_LOGIN_AT":

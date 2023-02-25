@@ -1,7 +1,6 @@
 # Where are all the schema files located? globs are supported eg  src/**/*.graphqls
 schema:
-  - "graph/ent.graphql"
-  - "graph/user.graphql"
+  - "graph/*.graphql"
 
 exec:
   filename: graph/generated.go
