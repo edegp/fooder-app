@@ -8,14 +8,12 @@ import (
 
 // CreateUserInput represents a mutation input for creating users.
 type CreateUserInput struct {
-	IDToken       string
 	CreateAt      *time.Time
 	LatestLoginAt *time.Time
 }
 
 // Mutate applies the CreateUserInput on the UserMutation builder.
 func (i *CreateUserInput) Mutate(m *UserMutation) {
-	m.SetIDToken(i.IDToken)
 	if v := i.CreateAt; v != nil {
 		m.SetCreateAt(*v)
 	}
@@ -32,15 +30,11 @@ func (c *UserCreate) SetInput(i CreateUserInput) *UserCreate {
 
 // UpdateUserInput represents a mutation input for updating users.
 type UpdateUserInput struct {
-	IDToken       *string
 	LatestLoginAt *time.Time
 }
 
 // Mutate applies the UpdateUserInput on the UserMutation builder.
 func (i *UpdateUserInput) Mutate(m *UserMutation) {
-	if v := i.IDToken; v != nil {
-		m.SetIDToken(*v)
-	}
 	if v := i.LatestLoginAt; v != nil {
 		m.SetLatestLoginAt(*v)
 	}

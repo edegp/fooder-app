@@ -8,7 +8,7 @@ tmp_dir = "tmp"
 [build]
 # Just plain old shell command. You could use `make` as well.
 # app directoryを使用することを考慮
-cmd = "cd app && go build -o ../tmp/main ./server"
+cmd = "go build -o ./tmp/main ./server"
 # Binary file yields from `cmd`.
 bin = "tmp/main"
 # Customize binary, can setup environment variables when run your app.

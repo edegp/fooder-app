@@ -5,15 +5,21 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
-      - .:/app
+      - ./app:/app
   db:
     # mac対応
     platform: linux/x86_64
     image: mysql:latest
     container_name: mysql_host
     restart: always
+    # 起動チェック
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 5
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
       - 3307:3306
@@ -26,8 +32,24 @@ services:
       MYSQL_PASSWORD: password
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       TZ: Asia/Tokyo
-    # 永続化
     volumes:
+      # volumeの作成
       - data-volume:/var/lib/mysql
+      # bind mountでconfig 反映
+      - ./sql:/var/lib/mysql/conf.d
+  # firebase emulator
+  # https://zenn.dev/ucwork/articles/f006150468b109のコピー
+  firebase:
+    build:
+      context: ./firebase
+    container_name: firebase
+    ports:
+      - 4000:4000
+      - 9099:9099
+    volumes:
+      - ./firebase:/opt/workspace
+    working_dir: /opt/workspace
+    command: "firebase emulators:start --only=auth --import=./firebase/data --export-on-exit=./firebase/data --project fooder"
+    tty: true
 volumes:
   data-volume:

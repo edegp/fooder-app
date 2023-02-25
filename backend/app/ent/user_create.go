@@ -11,7 +11,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -19,12 +18,6 @@ type UserCreate struct {
 	config
 	mutation *UserMutation
 	hooks    []Hook
-}
-
-// SetIDToken sets the "id_token" field.
-func (uc *UserCreate) SetIDToken(s string) *UserCreate {
-	uc.mutation.SetIDToken(s)
-	return uc
 }
 
 // SetCreateAt sets the "create_at" field.
@@ -56,16 +49,8 @@ func (uc *UserCreate) SetNillableLatestLoginAt(t *time.Time) *UserCreate {
 }
 
 // SetID sets the "id" field.
-func (uc *UserCreate) SetID(u uuid.UUID) *UserCreate {
-	uc.mutation.SetID(u)
-	return uc
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (uc *UserCreate) SetNillableID(u *uuid.UUID) *UserCreate {
-	if u != nil {
-		uc.SetID(*u)
-	}
+func (uc *UserCreate) SetID(s string) *UserCreate {
+	uc.mutation.SetID(s)
 	return uc
 }
 
@@ -112,22 +97,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultLatestLoginAt()
 		uc.mutation.SetLatestLoginAt(v)
 	}
-	if _, ok := uc.mutation.ID(); !ok {
-		v := user.DefaultID()
-		uc.mutation.SetID(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.IDToken(); !ok {
-		return &ValidationError{Name: "id_token", err: errors.New(`ent: missing required field "User.id_token"`)}
-	}
-	if v, ok := uc.mutation.IDToken(); ok {
-		if err := user.IDTokenValidator(v); err != nil {
-			return &ValidationError{Name: "id_token", err: fmt.Errorf(`ent: validator failed for field "User.id_token": %w`, err)}
-		}
-	}
 	if _, ok := uc.mutation.CreateAt(); !ok {
 		return &ValidationError{Name: "create_at", err: errors.New(`ent: missing required field "User.create_at"`)}
 	}
@@ -149,10 +122,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected User.ID type: %T", _spec.ID.Value)
 		}
 	}
 	uc.mutation.id = &_node.ID
@@ -163,15 +136,11 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
 		_node = &User{config: uc.config}
-		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
+		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeString))
 	)
 	if id, ok := uc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = &id
-	}
-	if value, ok := uc.mutation.IDToken(); ok {
-		_spec.SetField(user.FieldIDToken, field.TypeString, value)
-		_node.IDToken = value
+		_spec.ID.Value = id
 	}
 	if value, ok := uc.mutation.CreateAt(); ok {
 		_spec.SetField(user.FieldCreateAt, field.TypeTime, value)

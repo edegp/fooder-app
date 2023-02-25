@@ -6,8 +6,6 @@ import (
 	"backend/app/ent/schema"
 	"backend/app/ent/user"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -16,22 +14,14 @@ import (
 func init() {
 	userFields := schema.User{}.Fields()
 	_ = userFields
-	// userDescIDToken is the schema descriptor for id_token field.
-	userDescIDToken := userFields[1].Descriptor()
-	// user.IDTokenValidator is a validator for the "id_token" field. It is called by the builders before save.
-	user.IDTokenValidator = userDescIDToken.Validators[0].(func(string) error)
 	// userDescCreateAt is the schema descriptor for create_at field.
-	userDescCreateAt := userFields[2].Descriptor()
+	userDescCreateAt := userFields[1].Descriptor()
 	// user.DefaultCreateAt holds the default value on creation for the create_at field.
 	user.DefaultCreateAt = userDescCreateAt.Default.(func() time.Time)
 	// userDescLatestLoginAt is the schema descriptor for latest_login_at field.
-	userDescLatestLoginAt := userFields[3].Descriptor()
+	userDescLatestLoginAt := userFields[2].Descriptor()
 	// user.DefaultLatestLoginAt holds the default value on creation for the latest_login_at field.
 	user.DefaultLatestLoginAt = userDescLatestLoginAt.Default.(func() time.Time)
 	// user.UpdateDefaultLatestLoginAt holds the default value on update for the latest_login_at field.
 	user.UpdateDefaultLatestLoginAt = userDescLatestLoginAt.UpdateDefault.(func() time.Time)
-	// userDescID is the schema descriptor for id field.
-	userDescID := userFields[0].Descriptor()
-	// user.DefaultID holds the default value on creation for the id field.
-	user.DefaultID = userDescID.Default.(func() uuid.UUID)
 }

@@ -41,3 +41,6 @@ yarn-error.log*
 styles/dist.css
 
 **/tmp/
+
+backend/app/firebase/*.json
+*refreshToken.json

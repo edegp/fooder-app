@@ -7,57 +7,51 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uuid.UUID) predicate.User {
+func ID(id string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uuid.UUID) predicate.User {
+func IDEQ(id string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uuid.UUID) predicate.User {
+func IDNEQ(id string) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uuid.UUID) predicate.User {
+func IDIn(ids ...string) predicate.User {
 	return predicate.User(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uuid.UUID) predicate.User {
+func IDNotIn(ids ...string) predicate.User {
 	return predicate.User(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uuid.UUID) predicate.User {
+func IDGT(id string) predicate.User {
 	return predicate.User(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uuid.UUID) predicate.User {
+func IDGTE(id string) predicate.User {
 	return predicate.User(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uuid.UUID) predicate.User {
+func IDLT(id string) predicate.User {
 	return predicate.User(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uuid.UUID) predicate.User {
+func IDLTE(id string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldID, id))
-}
-
-// IDToken applies equality check predicate on the "id_token" field. It's identical to IDTokenEQ.
-func IDToken(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldIDToken, v))
 }
 
 // CreateAt applies equality check predicate on the "create_at" field. It's identical to CreateAtEQ.
@@ -68,71 +62,6 @@ func CreateAt(v time.Time) predicate.User {
 // LatestLoginAt applies equality check predicate on the "latest_login_at" field. It's identical to LatestLoginAtEQ.
 func LatestLoginAt(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldLatestLoginAt, v))
-}
-
-// IDTokenEQ applies the EQ predicate on the "id_token" field.
-func IDTokenEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldIDToken, v))
-}
-
-// IDTokenNEQ applies the NEQ predicate on the "id_token" field.
-func IDTokenNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldIDToken, v))
-}
-
-// IDTokenIn applies the In predicate on the "id_token" field.
-func IDTokenIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldIDToken, vs...))
-}
-
-// IDTokenNotIn applies the NotIn predicate on the "id_token" field.
-func IDTokenNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldIDToken, vs...))
-}
-
-// IDTokenGT applies the GT predicate on the "id_token" field.
-func IDTokenGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldIDToken, v))
-}
-
-// IDTokenGTE applies the GTE predicate on the "id_token" field.
-func IDTokenGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldIDToken, v))
-}
-
-// IDTokenLT applies the LT predicate on the "id_token" field.
-func IDTokenLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldIDToken, v))
-}
-
-// IDTokenLTE applies the LTE predicate on the "id_token" field.
-func IDTokenLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldIDToken, v))
-}
-
-// IDTokenContains applies the Contains predicate on the "id_token" field.
-func IDTokenContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldIDToken, v))
-}
-
-// IDTokenHasPrefix applies the HasPrefix predicate on the "id_token" field.
-func IDTokenHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldIDToken, v))
-}
-
-// IDTokenHasSuffix applies the HasSuffix predicate on the "id_token" field.
-func IDTokenHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldIDToken, v))
-}
-
-// IDTokenEqualFold applies the EqualFold predicate on the "id_token" field.
-func IDTokenEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldIDToken, v))
-}
-
-// IDTokenContainsFold applies the ContainsFold predicate on the "id_token" field.
-func IDTokenContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldIDToken, v))
 }
 
 // CreateAtEQ applies the EQ predicate on the "create_at" field.
