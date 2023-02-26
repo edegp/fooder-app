@@ -33,7 +33,12 @@ func main() {
 	var entOptions []ent.Option
 	entOptions = append(entOptions, ent.Debug())
 	// open mysql server
-	client, err := ent.Open("mysql", "docker:password@tcp(mysql_host)/fooder", entOptions...)
+	client, err := ent.Open(
+		"mysql",
+		//"?parseTime=true" support scan time https://github.com/go-sql-driver/mysql/issues/9#issuecomment-51552649
+		"docker:password@tcp(mysql_host)/fooder?parseTime=true",
+		entOptions...,
+	)
 	// client, err := OpenMySQL()
 	if err != nil {
 		log.Fatalf("Error: mysql client: %v\n", err)

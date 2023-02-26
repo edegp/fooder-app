@@ -12,7 +12,7 @@ import styled from 'styled-components'
 import { useMutation, useQuery } from 'urql'
 
 import { CreateUser, UpdateUser } from '@/graphql/mutaion'
-import { getUsers } from '@/graphql/query'
+import { getAllUsers } from '@/graphql/query'
 import { signIn, signUp } from '@/lib/firebase'
 import { handleError } from '@/lib/modules/handleError'
 import { emailState } from '@/lib/recoil/state'
@@ -54,9 +54,9 @@ export const UserLogin = memo(function UserLogin() {
   const [createUserResult, createUser] = useMutation(CreateUser)
   const [updateUserResult, updateUser] = useMutation(UpdateUser)
   const [users, reexecuteQuery] = useQuery({
-    query: getUsers
+    query: getAllUsers
   })
-  console.log(users.data)
+  console.log(users)
   const handleSubmit = useCallback(
     async (event: FormEvent) => {
       event.preventDefault()
@@ -76,7 +76,6 @@ export const UserLogin = memo(function UserLogin() {
             if (result) {
               const id = result.user.uid
               await updateUser({ id })
-              console.log(updateUserResult)
               router.push('/')
             }
           }

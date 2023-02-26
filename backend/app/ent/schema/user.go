@@ -5,6 +5,7 @@ import (
 
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -14,27 +15,28 @@ type User struct {
 	ent.Schema
 }
 
-
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-        field.String("id").
-            Immutable().
-            Annotations(
-                entgql.OrderField("ID"),
-            ),
-        field.Time("create_at").
-            Default(time.Now).
-            Immutable().
-            Annotations(
-                entgql.OrderField("CREATED_AT"),
-            ),
-        field.Time("latest_login_at").
-            Default(time.Now).
-            UpdateDefault(time.Now).
-            Annotations(
-                entgql.OrderField("LATEST_LOGIN_AT"),
-            ),
+		field.String("id").
+			Immutable().
+			Annotations(
+				entgql.OrderField("ID"),
+			),
+		field.Time("create_at").
+			Default(time.Now).
+			Immutable().
+			Annotations(
+				entsql.Default("CURRENT_TIMESTAMP"),
+				entgql.OrderField("CREATED_AT"),
+			),
+		field.Time("latest_login_at").
+			Default(time.Now).
+			UpdateDefault(time.Now).
+			Annotations(
+				entsql.Default("CURRENT_TIMESTAMP"),
+				entgql.OrderField("LATEST_LOGIN_AT"),
+			),
 	}
 }
 
@@ -44,9 +46,9 @@ func (User) Edges() []ent.Edge {
 }
 
 // Mutation of the User.
-func (User) Annotations()  []schema.Annotation {
-    return  []schema.Annotation{
-        entgql.QueryField(),
-        entgql.Mutations(entgql.MutationCreate(), entgql.MutationUpdate()),
-    }
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entgql.QueryField(),
+		entgql.Mutations(entgql.MutationCreate(), entgql.MutationUpdate()),
+	}
 }

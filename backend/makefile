@@ -16,3 +16,7 @@ bs:
 	docker exec -it $(DB_CONTAINER_NAME) bash
 bsfb:
 	docker exec -it $(FIREBASE_CONTAINER_NAME) bash
+gogen:
+	cd ~/fooder/backend/app && go generate . && go generate ./...
+tidy:
+	cd ~/fooder/backend/app && go mod tidy
