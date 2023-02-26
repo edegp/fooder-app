@@ -125,7 +125,6 @@ export const Drawer = memo(function Drawer({
   const [moveDistance, setMoveDistance] = useState<number>(isVertical ? 65 : 0)
   const [stopScroll, setStopScroll] = useState<boolean>(false)
   const width = `${widthPercent}vw`
-  console.log(moveDistance)
   const handleTouchMove = useCallback(
     (event: React.TouchEvent) => {
       if (stopScroll) {
@@ -169,6 +168,7 @@ export const Drawer = memo(function Drawer({
     const startPosition = isVertical ? ref?.current?.offsetTop : ref?.current?.offsetLeft
     setTouchPosition(startPosition || 0)
     !isVertical && setStopScroll(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // animationのロジック
