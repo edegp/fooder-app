@@ -8,7 +8,6 @@ import styled from 'styled-components'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
 import { clientSize } from '@/lib/recoil/state'
 import { OverLay } from '@/ui/atom/OverLay'
-import { BsXLg } from 'react-icons/bs'
 
 type SwiperProps = React.PropsWithChildren & {
   width: string

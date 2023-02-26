@@ -52,6 +52,7 @@ export const InfoWindow = ({ children, anchor, position, options }: InfoWindowPr
     return () => {
       infoWindow.close()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   return containerElementRef.current ? createPortal(Children.only(children), containerElementRef.current) : null
 }

@@ -1,9 +1,8 @@
 import { memo, useCallback, useEffect } from 'react'
 
-import { ButtonLink } from '../atom/ButtonLink'
-
 import { useOpenState } from '@/lib/hooks/useOpenState'
 import { Button } from '@/ui/atom/Button'
+import { ButtonLink } from '@/ui/atom/ButtonLink'
 import { Modal } from '@/ui/atom/Modal'
 
 export const ErrorModal = memo(function ErrorModal({
