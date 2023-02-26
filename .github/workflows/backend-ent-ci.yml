@@ -1,9 +1,6 @@
 name: EntCI
 on:
   push:
-  # masterに変更があるたびに実行されます
-    branches:
-      - master
   # Run on PRs where something changed under the `ent/` directory.
   pull_request:
     paths:
