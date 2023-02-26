@@ -1,7 +1,6 @@
 import { FirebaseError } from 'firebase/app'
 
-import { isFirebaseError } from '../firebase'
-
+import { isFirebaseError } from '@/lib/firebase'
 import { getJpErrorMessage } from '@/lib/modules/getJpErrorMessage'
 
 export const handleError = (error: Error | unknown) => {
