@@ -1,6 +1,7 @@
 'use client'
 
 import { AppProps } from 'next/app'
+import Head from 'next/head'
 
 import { withUrqlClient } from 'next-urql'
 import { RecoilRoot } from 'recoil'
@@ -12,20 +13,28 @@ import { InitialStateProvider } from '@/ui/components/initialStateProvider'
 
 function Myapp({ Component, pageProps }: AppProps) {
   return (
-    <RecoilRoot>
-      <ErrorBoundary>
-        <RecoilURLSyncNext
-          location={{ part: 'href' }}
-          serialize={x => JSON.stringify(x)}
-          deserialize={x => ({ pathname: x })}
-          storeKey="url"
-        >
-          <InitialStateProvider>
-            <Component {...pageProps} />
-          </InitialStateProvider>
-        </RecoilURLSyncNext>
-      </ErrorBoundary>
-    </RecoilRoot>
+    <>
+      <Head>
+        <meta
+          name="viewport"
+          content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+      </Head>
+      <RecoilRoot>
+        <ErrorBoundary>
+          <RecoilURLSyncNext
+            location={{ part: 'href' }}
+            serialize={x => JSON.stringify(x)}
+            deserialize={x => ({ pathname: x })}
+            storeKey="url"
+          >
+            <InitialStateProvider>
+              <Component {...pageProps} />
+            </InitialStateProvider>
+          </RecoilURLSyncNext>
+        </ErrorBoundary>
+      </RecoilRoot>
+    </>
   )
 }
 

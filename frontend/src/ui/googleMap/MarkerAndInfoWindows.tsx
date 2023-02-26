@@ -8,7 +8,7 @@ import styled from 'styled-components'
 import { useOpenState } from '@/lib/hooks/useOpenState'
 import { imageLoader } from '@/lib/modules/imageLoader'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
-import { makersLocationState, mapState, placeDetailState } from '@/lib/recoil/state'
+import { isLoadingState, makersLocationState, mapState, placeDetailState } from '@/lib/recoil/state'
 import { Button } from '@/ui/atom/Button'
 import { Modal } from '@/ui/atom/Modal'
 import { Star } from '@/ui/components/Star'
@@ -24,6 +24,7 @@ const WindowContainer = styled.div`
   justify-items: center;
   text-align: center;
   overflow: hidden;
+  padding: 6px;
   > img,
   > div {
     margin: 0 auto;
@@ -32,6 +33,7 @@ const WindowContainer = styled.div`
     font-size: 16px;
     row-gap: 14px;
     width: 280px;
+    padding: 10px;
   }
 `
 
@@ -51,37 +53,43 @@ export const MarkerAndInfoWindows = memo(function InfoWindows() {
   const { isOpen, handleClose, handleOpen } = useOpenState()
   const map = useRecoilValue(mapState)
   const setDetail = useSetRecoilState(placeDetailState)
+  const setIsLoading = useSetRecoilState(isLoadingState)
 
   const detailCallback = useCallback(
     (result: google.maps.places.PlaceResult | null, status: google.maps.places.PlacesServiceStatus) => {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         setDetail(result)
+        setIsLoading(false)
       }
     },
-    [setDetail]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   )
   const handleClickDetail = useCallback(
     (placeId: google.maps.places.PlaceResult['place_id']) => {
-      if (placeId) {
-        const request = {
-          placeId,
-          fields: [
-            'name',
-            'rating',
-            'formatted_phone_number',
-            'opening_hours',
-            'business_status',
-            'reviews',
-            'website',
-            'photos'
-          ]
-        }
-        if (map) {
-          const service = new window.google.maps.places.PlacesService(map)
-          service.getDetails(request, detailCallback)
-        }
+      if (!placeId) {
+        throw new Error('読み込みエラー。詳細情報が得られませんでした。')
+      }
+      setIsLoading(true)
+      const request = {
+        placeId,
+        fields: [
+          'name',
+          'rating',
+          'formatted_phone_number',
+          'opening_hours',
+          'business_status',
+          'reviews',
+          'website',
+          'photos'
+        ]
+      }
+      if (map) {
+        const service = new window.google.maps.places.PlacesService(map)
+        service.getDetails(request, detailCallback)
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [detailCallback, map]
   )
 
@@ -122,10 +130,13 @@ export const MarkerAndInfoWindows = memo(function InfoWindows() {
                       className="h-[100px] object-cover"
                       alt={name || 'icon画像'}
                     />
-                    <div onClick={() => handleClickDetail(place_id)} className="text-[15px] underline hover:opacity-30">
+                    <div
+                      onClick={() => handleClickDetail(place_id)}
+                      className="cursor-pointer text-[15px] underline hover:opacity-30"
+                    >
                       詳細を見る
                     </div>
-                    <a onClick={handleOpen} className="leading-3">
+                    <a onClick={handleOpen} className="cursor-pointer leading-3">
                       GoogleMapで確認する
                     </a>
                   </WindowContainer>

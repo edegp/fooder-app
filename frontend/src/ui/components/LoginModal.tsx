@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 import { useRecoilValue } from 'recoil'
 
 import { useOpenState } from '@/lib/hooks/useOpenState'
@@ -31,7 +33,7 @@ const KeyFrame = () => (
     `}
   </style>
 )
-export const LoginModal = () => {
+export const LoginModal = memo(function LoginModal() {
   const login = useRecoilValue(loginStatus)
   const { isOpen, handleClose } = useOpenState(login)
   const style = {
@@ -45,4 +47,4 @@ export const LoginModal = () => {
       <Modal isOpen={isOpen} handleClose={handleClose} title="ログインに成功しました" style={style} size="lg" />
     </>
   )
-}
+})

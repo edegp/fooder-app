@@ -2,14 +2,25 @@
 
 import { forwardRef, memo, ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 
+import { useRecoilValue } from 'recoil'
 import styled from 'styled-components'
 
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
+import { clientSize } from '@/lib/recoil/state'
 import { OverLay } from '@/ui/atom/OverLay'
 
 type SwiperProps = React.PropsWithChildren & {
   width: string
   isVertical: boolean
+}
+
+type Props = {
+  children: ReactNode
+  handleClose: () => void
+  isOpen: boolean | null
+  width?: number
+  isVertical?: boolean
+  className?: string
 }
 
 const KeyFrame = ({ width }: { width: string }) => (
@@ -54,9 +65,9 @@ const KeyFrame = ({ width }: { width: string }) => (
 // no recommend var in reactの対策
 const Swiper = forwardRef<HTMLDivElement, SwiperProps>(function Swiper(
   { isVertical: _isVertical, width: _width, ...props },
-  _ref
+  ref
 ) {
-  return <div {...props}></div>
+  return <div ref={ref} {...props}></div>
 })
 
 const SwiperComponent = styled(Swiper)`
@@ -76,7 +87,7 @@ const SwiperComponent = styled(Swiper)`
   ${mediaQueryPc} {
     top: 0;
     right: -5px;
-    width: 40%;
+    width: ${({ isVertical, width }) => (isVertical ? '40%' : width)};
   }
 `
 
@@ -89,27 +100,22 @@ const Puller = styled.div`
   top: 8px;
   left: calc(50% - 15px);
   z-index: 150;
-  // afterでタッチ領域を広げる
-  &:after {
-    display: block;
-    content: '';
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    top: -15px;
-    left: -15px;
-    border-radius: 50%;
-  }
+`
+//タッチ領域を広げる
+const Touchable = styled.div`
+  display: block;
+  content: '';
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  top: -15px;
+  left: -15px;
+  border-radius: 50%;
+  cursor: pointer;
+  touch-action: auto;
 `
 
-type Props = {
-  children: ReactNode
-  handleClose: () => void
-  isOpen: boolean | null
-  width?: number
-  isVertical?: boolean
-  className?: string
-}
+const upperOffset = 107
 
 export const Drawer = memo(function Drawer({
   children,
@@ -121,20 +127,18 @@ export const Drawer = memo(function Drawer({
 }: Props) {
   const ref = useRef<HTMLDivElement | null>(null)
   const [touchPosition, setTouchPosition] = useState<number>(0)
-  const [moveDistance, setMoveDistance] = useState<number>(isVertical ? 65 : 0)
+  const [moveDistance, setMoveDistance] = useState<number>(-1)
   const [stopScroll, setStopScroll] = useState<boolean>(false)
+  const [clientWidth, clientHeight] = useRecoilValue(clientSize)
   const width = `${widthPercent}vw`
-
   const handleTouchMove = useCallback(
     (event: React.TouchEvent) => {
       if (stopScroll) {
         const { clientY, clientX } = event?.touches?.[0]
-        const distance = isVertical ? clientY - touchPosition : clientX - touchPosition
+        const distance = isVertical ? (clientY - upperOffset - 130) * 1.2 : clientX - touchPosition
         if (distance > 0) setMoveDistance(distance)
-        const closeBoundary = isVertical
-          ? clientY > (window.screen.height * 3) / 4
-          : clientX > (window.screen.width * 4) / 5
-        if (closeBoundary && typeof window !== 'undefined') {
+        const closeBoundary = isVertical ? clientY > (clientHeight * 3) / 4 : clientX > (clientWidth * 4) / 5
+        if (closeBoundary) {
           handleClose()
         }
       }
@@ -148,61 +152,62 @@ export const Drawer = memo(function Drawer({
       const touch = event?.changedTouches?.[0]
       if (touch && stopScroll) {
         const { clientY, clientX } = touch
-        const closeBoundary = isVertical
-          ? clientY > (window.screen.height * 1) / 2
-          : clientX > (window.screen.width * 2) / 3
-        if (closeBoundary && typeof window !== 'undefined') {
+        const closeBoundary = isVertical ? clientY > (clientHeight * 1) / 2 : clientX > (clientWidth * 2) / 3
+        if (closeBoundary) {
           handleClose()
         }
       }
-      await setTimeout(() => {
-        setStopScroll(false)
-      }, 100)
       setMoveDistance(isVertical ? 65 : 0)
+      setStopScroll(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [handleClose]
   )
-
   const handleTouchStart = useCallback(() => {
-    const startPosition = isVertical ? ref?.current?.offsetTop : ref?.current?.offsetLeft
-    setTouchPosition(startPosition || 0)
-    !isVertical && setStopScroll(true)
+    if (!isVertical) {
+      setTouchPosition(ref.current?.offsetLeft || 0)
+      setStopScroll(true)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref?.current])
+  }, [])
 
   // animationのロジック
   const animation = useCallback(() => {
-    if (isOpen && stopScroll) {
-      return { transform: `translate${isVertical ? 'Y' : 'X'}(${moveDistance}px)` }
-    }
     // 初回表示時はアニメーションを発火しない
-    if (typeof isOpen === 'boolean') {
-      // ドロワーが垂直でない場合
-      if (isVertical) {
-        if (isOpen) {
-          return { animation: '0.5s ease BottomToFadeIn' }
-        } else {
-          return {
-            animation: '0.5s ease BottomToFadeOut',
-            transform: `translateY(90vh)`
-          }
-        }
-      } else {
-        if (isOpen) {
-          return { animation: '0.5s ease LeftToFadeIn' }
-        } else {
-          return {
-            animation: '0.5s ease LeftToFadeOut',
-            transform: `translateX(${width})`
-          }
-        }
-      }
-    } else {
+    if (typeof isOpen !== 'boolean') {
       return { transform: `translate${isVertical ? 'Y(90vh)' : `X(${width})`}` }
     }
+    if (isOpen) {
+      // ポインターに追従するアニメーション
+      if (stopScroll) {
+        return {
+          transform: `translate${isVertical ? 'Y' : 'X'}(${moveDistance}px)`,
+          transitionDuration: '0.3s'
+        }
+      }
+      // fadeIn
+      if (moveDistance < 0) {
+        return { animation: isVertical ? '0.6s ease BottomToFadeIn' : '0.6s ease LeftToFadeIn' }
+      }
+      // 閉じてない場合元に戻る（reset）
+      return {
+        transform: `translate${isVertical ? 'Y' : 'X'}(0)`,
+        transitionDuration: '0.4s'
+      }
+    }
+    // fadeOut
+    return isVertical
+      ? {
+          animation: '0.5s ease BottomToFadeOut',
+          transform: `translateY(90vh)`
+        }
+      : {
+          animation: '0.5s ease LeftToFadeOut',
+          transform: `translateX(${width})`
+        }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, moveDistance, isVertical])
+  }, [isOpen, stopScroll, moveDistance])
 
   // dynamic styling
   const styles = useMemo(
@@ -232,10 +237,9 @@ export const Drawer = memo(function Drawer({
         ref={ref}
       >
         {isVertical && (
-          <Puller
-            onTouchStart={() => setStopScroll(true)}
-            onTouchEnd={() => setTimeout(() => setStopScroll(false), 100)}
-          />
+          <Puller onTouchStart={() => setStopScroll(true)}>
+            <Touchable />
+          </Puller>
         )}
         {children}
       </SwiperComponent>
