@@ -14,6 +14,7 @@ import { useMutation } from 'urql'
 import { CreateUser, UpdateUser } from '@/graphql/mutaion'
 import { signIn, signUp } from '@/lib/firebase'
 import { handleError } from '@/lib/modules/handleError'
+import { mediaQueryPc } from '@/lib/modules/mediaQuery'
 import { emailState } from '@/lib/recoil/state'
 import { Button } from '@/ui/atom/Button'
 import { Input } from '@/ui/atom/Input'
@@ -39,9 +40,17 @@ const Form = styled.form`
   flex-wrap: wrap;
   flex-direction: column;
   padding: 0 48px;
-  margin: 20vh auto;
+  margin: 20vh 0;
+  align-content: center;
   > *:not(:last-child) {
     margin-bottom: 16px;
+  }
+  ${mediaQueryPc} {
+    margin: 0 auto 16px;
+    padding-bottom: 128px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
   }
 `
 

@@ -16,6 +16,7 @@ const InputWrapper = styled.div`
   height: 48px;
   border-radius: 8px;
   width: 75vw;
+  max-width: 420px;
   display: flex;
   position: relative;
   > svg {

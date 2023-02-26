@@ -1,44 +1,40 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { memo } from 'react'
+import { HTMLAttributes } from 'react'
 
 import styled from 'styled-components'
 
 import { Colors, colors } from '@/lib/modules/colors'
 
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+type ButtonProps = {
   backgroundColor?: keyof Colors
   width?: string | number
   padding?: string
 }
 
-const ButtonComponent = styled.button<{ width: string; padding: string }>`
+const ButtonComponent = ({
+  padding: _padding,
+  width: _width,
+  backgroundColor: _backgroundColor,
+  ...props
+}: HTMLAttributes<HTMLButtonElement> & ButtonProps) => <button {...props} />
+
+export const Button = styled(ButtonComponent)`
   border-radius: 12px;
-  height: ${({ width }) => (width ? width : '2em')};
+  height: ${({ width }) => (typeof width === 'number' ? `${width}px` : width ? width : '2em')};
+  max-width: 420px;
   padding: ${({ padding }) => (padding ? padding : '0.4em 1.2em')};
+  background-color: ${({ backgroundColor }) =>
+    // @ts-ignore
+    backgroundColor ? colors[backgroundColor]?.['800'] : colors['neutral']?.['900']};
+  color: ${({ backgroundColor }) =>
+    // @ts-ignore
+    backgroundColor ? colors[backgroundColor]?.['200'] : colors['neutral']?.['200']};
   font-size: 18px;
   text-align: center;
   justify-self: center;
   line-height: 22px;
   cursor: pointer;
   &:hover {
-    opacity: 0.3;
+    opacity: 0.4;
   }
 `
-
-export const Button = memo(function Button({ backgroundColor = 'neutral', width, ...props }: ButtonProps) {
-  if (typeof width === 'number') {
-    width = `${width}px`
-  }
-  return (
-    <ButtonComponent
-      style={{
-        // @ts-ignore
-        backgroundColor: colors[backgroundColor]?.['900'],
-        // @ts-ignore
-        color: colors[backgroundColor]?.['50']
-      }}
-      width={width}
-      {...props}
-    />
-  )
-})

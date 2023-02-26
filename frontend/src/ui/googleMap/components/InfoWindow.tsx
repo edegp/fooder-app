@@ -14,7 +14,6 @@ export const InfoWindow = ({ children, anchor, position, options }: InfoWindowPr
   useEffect(() => {
     if (instance !== null) {
       instance.close()
-
       if (anchor) {
         instance.open(map, anchor)
       } else if (instance.getPosition()) {

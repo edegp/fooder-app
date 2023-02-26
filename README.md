@@ -6,6 +6,7 @@
 
 ## Frontend
 
+node-version 18.9.0
 Install package
 
 ```shell

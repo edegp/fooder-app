@@ -118,6 +118,15 @@ const currentUserInfo = atom<User | null>({
   ]
 })
 
+const isLoadingState = atom<boolean>({
+  key: 'isLoading',
+  default: true,
+  effects: [
+    ({ getPromise, setSelf }) =>
+      setSelf(!getPromise(placeDetailState) || !getPromise(geoLocation) || !getPromise(mapState))
+  ]
+})
+
 // const openSelectorFamily = selectorFamily({
 //   key: 'open',
 //   get:
@@ -138,5 +147,6 @@ export {
   urlState,
   emailState,
   loginStatus,
-  currentUserInfo
+  currentUserInfo,
+  isLoadingState
 }

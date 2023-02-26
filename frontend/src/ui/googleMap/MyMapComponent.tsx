@@ -3,15 +3,22 @@
 import { memo, useEffect, useMemo, useRef } from 'react'
 
 import { Loader } from '@googlemaps/js-api-loader'
-import { useRecoilState, useRecoilValue } from 'recoil'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
 import useSWR from 'swr'
 
-import { geoLocation, makersLocationState, mapOptionsState, mapState, placeDetailState } from '@/lib/recoil/state'
+import {
+  geoLocation,
+  isLoadingState,
+  makersLocationState,
+  mapOptionsState,
+  mapState,
+  placeDetailState
+} from '@/lib/recoil/state'
 import { LoadingRing } from '@/ui/atom/Loading'
 import { PlaceDetail } from '@/ui/googleMap/PlaceDetail'
 import { UserMapInfo } from '@/ui/googleMap/components/UserMapInfo'
 
-const mapContainerClassName = 'z-10 relative w-full h-full overflow-hidden'
+const mapContainerClassName = 'z-10 relative w-full h-full overflow-hidden touch-none'
 
 type Library = 'places' | 'drawing' | 'geometry' | 'localContext' | 'visualization'
 const loaderOptions = {
@@ -31,21 +38,16 @@ export const MyMapComponent = memo(function MyMapComponent() {
   const [map, setMap] = useRecoilState(mapState)
   const mapOptions = useRecoilValue(mapOptionsState)
   // swrでフェッチすることでキャッシュ化・suspenseに対応
-  const { data: _, isLoading: isMapLoading } = useSWR(ref.current ? [loader, ref.current, mapOptions] : null, fetcher, {
+  const { data: _ } = useSWR(ref.current ? [loader, ref.current, mapOptions] : null, fetcher, {
     focusThrottleInterval: 2000,
     keepPreviousData: true,
     loadingTimeout: 2510,
     onSuccess: data => setMap(data)
   })
-  const [makersLocation, setMakersLocation] = useRecoilState<google.maps.places.PlaceResult[] | null>(
-    makersLocationState
-  )
+  const setMakersLocation = useSetRecoilState<google.maps.places.PlaceResult[] | null>(makersLocationState)
   const detail = useRecoilValue(placeDetailState)
   const clickable = useMemo(() => !!detail, [detail])
-  const isLoading: boolean = useMemo(
-    () => isMapLoading || !center || !makersLocation,
-    [center, isMapLoading, makersLocation]
-  )
+  const isLoading = useRecoilValue(isLoadingState)
   /** 検索結果のcallback */
   const callback: (
     a: google.maps.places.PlaceResult[] | null,

@@ -47,6 +47,8 @@ services:
     build:
       context: ./firebase
       dockerfile: "./dockerfile"
+      args:
+        - GCLOUD_PROJECT=${GCLOUD_PROJECT}
     container_name: firebase
     ports:
       - 4000:4000

@@ -1,8 +1,17 @@
-import { CSSProperties, DetailedHTMLProps, HTMLAttributes, memo, PropsWithChildren, PropsWithRef } from 'react'
+import {
+  CSSProperties,
+  DetailedHTMLProps,
+  HTMLAttributes,
+  memo,
+  PropsWithChildren,
+  PropsWithRef,
+  useCallback
+} from 'react'
 
 import { useRecoilValue } from 'recoil'
 import styled from 'styled-components'
 
+import { mediaQueryPc } from '@/lib/modules/mediaQuery'
 import { clientSize } from '@/lib/recoil/state'
 import { Title, TitleBase } from '@/ui/atom/Title'
 import { CloseButton } from '@/ui/components/CloseButton'
@@ -47,7 +56,7 @@ const ModalContainer = styled(ModalComponent)`
   top: calc(45% - 100px);
   left: max(calc(50% - ${({ clientWidth }) => (clientWidth * 1) / 3}px), calc(50% - 150px));
   width: 70%;
-  max-width: 300px;
+  max-width: 360px;
   height: ${({ hasButton }) => (hasButton ? '200px' : '120px')};
   background-color: white;
   text-align: center;
@@ -58,6 +67,9 @@ const ModalContainer = styled(ModalComponent)`
   row-gap: 24px;
   padding: ${({ padding }) => padding};
   border-radius: ${({ radius }) => radius}px;
+  ${mediaQueryPc} {
+    padding: 24px;
+  }
   > ${TitleBase} {
     font-weight: 700;
     margin: 0 auto;
@@ -67,11 +79,10 @@ const ModalContainer = styled(ModalComponent)`
 export const Modal = memo(function Modal(props: PropsWithRef<PropsWithChildren<ModalProps>>) {
   const { isOpen, handleClose, radius = 15, padding = '12px', title, size, button, children, style, ...other } = props
   const [clientWidth] = useRecoilValue(clientSize)
-
-  if (!isOpen && !style) {
+  const delayIsOpen = useCallback(() => setTimeout(() => !isOpen, 200), [isOpen])
+  if (delayIsOpen()) {
     return <></>
   }
-
   return (
     <>
       <OverLay />

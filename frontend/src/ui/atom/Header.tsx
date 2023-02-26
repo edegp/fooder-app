@@ -47,6 +47,7 @@ export const Header = memo(function Header() {
       setIsLogin(false)
       router.push('/signin')
     })
+    handleClose()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
 
@@ -88,9 +89,9 @@ export const Header = memo(function Header() {
           {menuList.map((menu, i) => (
             <li key={i}>
               {menu.path ? (
-                <Link href={menu.path} scroll={false}>
-                  {menu.wording}
-                </Link>
+                <span onClick={handleClose}>
+                  <Link href={menu.path}>{menu.wording}</Link>
+                </span>
               ) : (
                 <button onClick={menu?.onClick}>{menu.wording}</button>
               )}
