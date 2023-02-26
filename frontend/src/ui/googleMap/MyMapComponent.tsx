@@ -38,16 +38,19 @@ export const MyMapComponent = memo(function MyMapComponent() {
   const [map, setMap] = useRecoilState(mapState)
   const mapOptions = useRecoilValue(mapOptionsState)
   // swrでフェッチすることでキャッシュ化・suspenseに対応
-  const { data: _ } = useSWR(ref.current ? [loader, ref.current, mapOptions] : null, fetcher, {
+  const { data: _, isLoading: isMapLoading } = useSWR(ref.current ? [loader, ref.current, mapOptions] : null, fetcher, {
     focusThrottleInterval: 2000,
     keepPreviousData: true,
     loadingTimeout: 2510,
     onSuccess: data => setMap(data)
   })
+
   const setMakersLocation = useSetRecoilState<google.maps.places.PlaceResult[] | null>(makersLocationState)
   const detail = useRecoilValue(placeDetailState)
   const clickable = useMemo(() => !!detail, [detail])
-  const isLoading = useRecoilValue(isLoadingState)
+  const [isLoading, setIsLoading] = useRecoilState(isLoadingState)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => setIsLoading(isMapLoading), [isMapLoading])
   /** 検索結果のcallback */
   const callback: (
     a: google.maps.places.PlaceResult[] | null,

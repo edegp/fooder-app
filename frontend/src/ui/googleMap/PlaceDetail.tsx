@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState, useMemo } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Options, Splide } from '@splidejs/react-splide'
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md'
@@ -35,7 +35,7 @@ export const PlaceDetail = memo(function PlaceDetail() {
 
   const slideOptions: Options = {
     type: 'fade',
-    fixedWidth: 375,
+    fixedWidth: '100%',
     fixedHeight: 250,
     focus: 'center',
     cover: true,

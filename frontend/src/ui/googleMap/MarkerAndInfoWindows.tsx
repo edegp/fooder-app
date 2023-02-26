@@ -24,6 +24,7 @@ const WindowContainer = styled.div`
   justify-items: center;
   text-align: center;
   overflow: hidden;
+  padding: 6px;
   > img,
   > div {
     margin: 0 auto;
@@ -32,6 +33,7 @@ const WindowContainer = styled.div`
     font-size: 16px;
     row-gap: 14px;
     width: 280px;
+    padding: 10px;
   }
 `
 

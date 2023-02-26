@@ -1,12 +1,4 @@
-import {
-  CSSProperties,
-  DetailedHTMLProps,
-  HTMLAttributes,
-  memo,
-  PropsWithChildren,
-  PropsWithRef,
-  useCallback
-} from 'react'
+import { CSSProperties, DetailedHTMLProps, HTMLAttributes, memo, PropsWithChildren, PropsWithRef } from 'react'
 
 import { useRecoilValue } from 'recoil'
 import styled from 'styled-components'
@@ -79,8 +71,8 @@ const ModalContainer = styled(ModalComponent)`
 export const Modal = memo(function Modal(props: PropsWithRef<PropsWithChildren<ModalProps>>) {
   const { isOpen, handleClose, radius = 15, padding = '12px', title, size, button, children, style, ...other } = props
   const [clientWidth] = useRecoilValue(clientSize)
-  const delayIsOpen = useCallback(() => setTimeout(() => !isOpen, 200), [isOpen])
-  if (delayIsOpen()) {
+
+  if (!isOpen) {
     return <></>
   }
   return (

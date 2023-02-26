@@ -84,7 +84,7 @@ export const Header = memo(function Header() {
         </Link>
         <HiOutlineMenuAlt4 onClick={handleOpen} className="mr-6 h-9 w-9 text-lg" />
       </HeadContainer>
-      <Drawer handleClose={handleClose} isOpen={nullableIsOpen} className="p-12">
+      <Drawer handleClose={handleClose} isOpen={nullableIsOpen} className="p-12 md:p-24">
         <ul className="space-y-8">
           {menuList.map((menu, i) => (
             <li key={i}>
