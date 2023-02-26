@@ -22,6 +22,7 @@ type ModalProps = {
   radius?: number
   title?: string
   button?: JSX.Element
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
 const OverLay = styled.div`
@@ -43,7 +44,7 @@ const ModalComponent = ({
 const ModalContainer = styled(ModalComponent)`
   position: absolute;
   z-index: 1000;
-  top: calc(50% - 100px);
+  top: calc(45% - 100px);
   left: max(calc(50% - ${({ clientWidth }) => (clientWidth * 1) / 3}px), calc(50% - 150px));
   width: 70%;
   max-width: 300px;
@@ -58,19 +59,18 @@ const ModalContainer = styled(ModalComponent)`
   padding: ${({ padding }) => padding};
   border-radius: ${({ radius }) => radius}px;
   > ${TitleBase} {
-    font-size: 15px;
     font-weight: 700;
     margin: 0 auto;
   }
 `
 
 export const Modal = memo(function Modal(props: PropsWithRef<PropsWithChildren<ModalProps>>) {
-  const { isOpen, handleClose, radius = 15, padding = '12px', title, button, children, style, ...other } = props
+  const { isOpen, handleClose, radius = 15, padding = '12px', title, size, button, children, style, ...other } = props
   const [clientWidth] = useRecoilValue(clientSize)
 
-  // if (!isOpen && !style) {
-  //   return <></>
-  // }
+  if (!isOpen && !style) {
+    return <></>
+  }
 
   return (
     <>
@@ -84,7 +84,11 @@ export const Modal = memo(function Modal(props: PropsWithRef<PropsWithChildren<M
         {...other}
       >
         <CloseButton handleClose={handleClose} />
-        {title && <Title level={2}>{title}</Title>}
+        {title && (
+          <Title level={2} size={size}>
+            {title}
+          </Title>
+        )}
         {children}
         {button}
       </ModalContainer>

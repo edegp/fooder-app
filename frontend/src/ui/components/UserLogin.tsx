@@ -6,15 +6,15 @@ import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { usePathname, useRouter } from 'next/navigation'
 
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from 'react-icons/md'
 import { useRecoilState } from 'recoil'
 import styled from 'styled-components'
-import { useMutation } from 'urql'
+import { useMutation, useQuery } from 'urql'
 
 import { CreateUser, UpdateUser } from '@/graphql/mutaion'
-import { auth } from '@/lib/firebase/firebase'
-import { useError } from '@/lib/hooks/useError'
+import { getUsers } from '@/graphql/query'
+import { signIn, signUp } from '@/lib/firebase'
+import { handleError } from '@/lib/modules/handleError'
 import { emailState } from '@/lib/recoil/state'
 import { Button } from '@/ui/atom/Button'
 import { Input } from '@/ui/atom/Input'
@@ -49,12 +49,14 @@ const Form = styled.form`
 export const UserLogin = memo(function UserLogin() {
   const router = useRouter()
   const pathname = usePathname()
-  const { error, handleError } = useError()
   const [email, setEmail] = useRecoilState(emailState)
   const [isShowPassword, setIsShowPassword] = useState(true)
-  const [_, createUser] = useMutation(CreateUser)
+  const [createUserResult, createUser] = useMutation(CreateUser)
   const [updateUserResult, updateUser] = useMutation(UpdateUser)
-
+  const [users, reexecuteQuery] = useQuery({
+    query: getUsers
+  })
+  console.log(users.data)
   const handleSubmit = useCallback(
     async (event: FormEvent) => {
       event.preventDefault()
@@ -63,22 +65,23 @@ export const UserLogin = memo(function UserLogin() {
       if (email && password) {
         try {
           if (pathname === '/signup') {
-            const result = await createUserWithEmailAndPassword(auth, email.value, password.value)
+            const result = await signUp(email.value, password.value)
             if (result) {
               const idToken = await result.user.getIdToken()
               await createUser({ idToken })
               router.push('/')
             }
           } else {
-            const result = await signInWithEmailAndPassword(auth, email.value, password.value)
+            const result = await signIn(email.value, password.value)
             if (result) {
               const id = result.user.uid
               await updateUser({ id })
+              console.log(updateUserResult)
               router.push('/')
             }
           }
-        } catch (err) {
-          handleError(error)
+        } catch (err: unknown) {
+          handleError(err)
         }
       }
     },

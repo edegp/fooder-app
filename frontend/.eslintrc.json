@@ -16,8 +16,9 @@
     "no-relative-import-paths/no-relative-import-paths": [
       "error",
       {
-        "rootDir": "./frontend/src",
-        "prefix": "@"
+        "rootDir": "./src",
+        "prefix": "@",
+        "allowSameFolder": false
       }
     ],
     "unused-imports/no-unused-imports": "error",
