@@ -4,7 +4,7 @@ import { User } from 'firebase/auth'
 import { atom, selector } from 'recoil'
 import { urlSyncEffect } from 'recoil-sync'
 
-import { auth } from '@/lib/firebase/firebase'
+import { auth } from '@/lib/firebase'
 import { localStorageEffect } from '@/lib/recoil/localstrageEffect'
 
 // // predicate

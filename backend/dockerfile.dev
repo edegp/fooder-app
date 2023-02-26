@@ -2,7 +2,10 @@
 # 参考 https://qiita.com/sky0621/items/58fa2bcfc0935f6186cb
 FROM golang:1.20.1-alpine3.17 as build-step
 
-ENV GOOGLE_APPLICATION_CREDENTIALS="/app/firebase_admin/refreshToken.json"
+ENV GOOGLE_APPLICATION_CREDENTIALS="/app/firebase_admin/application_default_credentials.json"
+ENV FIREBASE_AUTH_EMULATOR_HOST="172.19.0.3:9099"
+ENV GCLOUD_PROJECT="demo-fooder-376908"
+
 # for go mod download
 RUN apk add --update --no-cache ca-certificates git bash
 RUN mkdir /app
@@ -17,7 +20,7 @@ COPY app .
 CMD ["air","-c",".air.toml"]
 # -----------------------------------------------------------------------------
 # build
-# RUN cd server && CGO_ENABLED=0 go build -o /go/bin/app
+
 
 # -----------------------------------------------------------------------------
 # step 2: exec

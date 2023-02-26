@@ -10,7 +10,7 @@ import { HiOutlineMenuAlt4 } from 'react-icons/hi'
 import { useRecoilState } from 'recoil'
 import styled from 'styled-components'
 
-import { auth } from '@/lib/firebase/firebase'
+import { auth } from '@/lib/firebase'
 import { useOpenState } from '@/lib/hooks/useOpenState'
 import { loginStatus } from '@/lib/recoil/state'
 import { Drawer } from '@/ui/atom/Drawer'

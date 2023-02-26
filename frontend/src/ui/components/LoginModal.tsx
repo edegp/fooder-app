@@ -42,7 +42,7 @@ export const LoginModal = () => {
     <>
       <KeyFrame />
       {isOpen && <OverLay />}
-      <Modal isOpen={isOpen} handleClose={handleClose} title="ログインに成功しました" style={style} />
+      <Modal isOpen={isOpen} handleClose={handleClose} title="ログインに成功しました" style={style} size="lg" />
     </>
   )
 }

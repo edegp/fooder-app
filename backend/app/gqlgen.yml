@@ -18,8 +18,8 @@ exec:
 # Where should the resolver implementations go?
 resolver:
   layout: follow-schema
-  dir: graph
-  package: graph
+  dir: resolver
+  package: resolver
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json
@@ -53,12 +53,6 @@ models:
   ID:
     model:
       - github.com/99designs/gqlgen/graphql.ID
-  Int:
-    model:
-      - github.com/99designs/gqlgen/graphql.Int
-  Time:
-    model:
-      - github.com/99designs/gqlgen/graphql.Time
   Node:
     model:
       # ent.Noderは、Nodeテンプレートが生成する新しいインターフェースである

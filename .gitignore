@@ -24,7 +24,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-
+*.log
 # local env files
 .env*
 !.env*.example
@@ -43,4 +43,6 @@ styles/dist.css
 **/tmp/
 
 backend/app/firebase/*.json
+application_default_credentials.json
+ui-debug.log
 *refreshToken.json

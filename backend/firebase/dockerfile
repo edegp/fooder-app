@@ -1,4 +1,8 @@
 FROM node:16-slim
 
+ENV GCLOUD_PROJECT="demo-fooder-376908"
+
 RUN npm add -g firebase-tools@latest
-EXPOSE 9099
+WORKDIR /opt/workspace
+COPY ./firebase.json ./
+CMD firebase emulators:start --only=auth --import=./firebase/data --export-on-exit=./firebase/data --project ${GCLOUD_PROJECT}

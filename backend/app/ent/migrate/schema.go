@@ -11,8 +11,8 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
-		{Name: "create_at", Type: field.TypeTime},
-		{Name: "latest_login_at", Type: field.TypeTime},
+		{Name: "create_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "latest_login_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

@@ -39,6 +39,9 @@ const ButtonContainer = styled.div`
   display: flex;
   column-gap: 12px;
 `
+
+const getGoogleMapUrl = (lat?: number, lng?: number, place_id?: string) =>
+  `https://www.google.com/maps/search/?api=1&query=${lat}%2C-${lng}&query_place_id=${place_id}`
 /* レコメンドした場所をwindowで表示**/
 export const MarkerAndInfoWindows = memo(function InfoWindows() {
   const makersLocation = useRecoilValue(makersLocationState)
@@ -90,58 +93,55 @@ export const MarkerAndInfoWindows = memo(function InfoWindows() {
           const { name, geometry, rating, icon, place_id, photos } = place
           const lat = geometry?.location?.lat()
           const lng = geometry?.location?.lng()
-          const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${lat}%2C-${lng}&query_place_id=${place_id}`
-          if (name)
-            return (
-              <Fragment key={i}>
-                <Marker
-                  position={geometry?.location || { lat: 0, lng: 0 }}
-                  icon={{
-                    url: icon || '',
-                    labelOrigin: new google.maps.Point(geometry?.location?.lat() || 0, geometry?.location?.lng() || 0),
-                    scaledSize: new google.maps.Size(26, 26, 'px', 'px')
-                  }}
-                  onClick={() => {
-                    setOpenList(prev => Object.fromEntries(Object.keys(prev).map(key => [key, false])))
-                    setOpenList(prev => ({ ...prev, [name]: !prev[name] }))
-                  }}
-                />
-                {openList[name] && (
-                  <InfoWindow position={geometry?.location}>
-                    <WindowContainer>
-                      <p>{name}</p>
-                      <Star rating={rating} className="flex space-x-2" isDisplayRatingNum size={18} />
-                      <Image
-                        loader={imageLoader}
-                        src={photos?.[0]?.getUrl() || ''}
-                        width={112}
-                        height={64}
-                        className="h-[100px] object-cover"
-                        alt={name || 'icon画像'}
-                      />
-                      <div
-                        onClick={() => handleClickDetail(place_id)}
-                        className="text-[15px] underline hover:opacity-30"
-                      >
-                        詳細を見る
-                      </div>
-                      <a onClick={handleOpen} className="leading-3">
-                        GoogleMapで確認する
-                      </a>
-                    </WindowContainer>
-                  </InfoWindow>
-                )}
-                <Modal isOpen={isOpen} handleClose={handleClose}>
-                  <p>Google Mapに移動しますか？</p>
-                  <ButtonContainer>
-                    <a href={googleMapUrl} target="blank" rel="noreferrer">
-                      <Button backgroundColor="blue">移動する</Button>
+          const googleMapUrl = getGoogleMapUrl(lat, lng, place_id)
+          if (!name) return
+          return (
+            <Fragment key={i}>
+              <Marker
+                position={geometry?.location || { lat: 0, lng: 0 }}
+                icon={{
+                  url: icon || '',
+                  labelOrigin: new google.maps.Point(geometry?.location?.lat() || 0, geometry?.location?.lng() || 0),
+                  scaledSize: new google.maps.Size(26, 26, 'px', 'px')
+                }}
+                onClick={() => {
+                  setOpenList(prev => Object.fromEntries(Object.keys(prev).map(key => [key, false])))
+                  setOpenList(prev => ({ ...prev, [name]: !prev[name] }))
+                }}
+              />
+              {openList[name] && (
+                <InfoWindow position={geometry?.location}>
+                  <WindowContainer>
+                    <p>{name}</p>
+                    <Star rating={rating} className="flex space-x-2" isDisplayRatingNum size={18} />
+                    <Image
+                      loader={imageLoader}
+                      src={photos?.[0]?.getUrl() || ''}
+                      width={112}
+                      height={64}
+                      className="h-[100px] object-cover"
+                      alt={name || 'icon画像'}
+                    />
+                    <div onClick={() => handleClickDetail(place_id)} className="text-[15px] underline hover:opacity-30">
+                      詳細を見る
+                    </div>
+                    <a onClick={handleOpen} className="leading-3">
+                      GoogleMapで確認する
                     </a>
-                    <Button backgroundColor="stone">戻る</Button>
-                  </ButtonContainer>
-                </Modal>
-              </Fragment>
-            )
+                  </WindowContainer>
+                </InfoWindow>
+              )}
+              <Modal isOpen={isOpen} handleClose={handleClose}>
+                <p>Google Mapに移動しますか？</p>
+                <ButtonContainer>
+                  <a href={googleMapUrl} target="blank" rel="noreferrer">
+                    <Button backgroundColor="blue">移動する</Button>
+                  </a>
+                  <Button backgroundColor="stone">戻る</Button>
+                </ButtonContainer>
+              </Modal>
+            </Fragment>
+          )
         })}
     </>
   )

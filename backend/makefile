@@ -1,6 +1,7 @@
 MYSQL_USER=docker
 MYSQL_PASSWORD=password
-CONTAINER_NAME=mysql_host
+DB_CONTAINER_NAME=mysql_host
+FIREBASE_CONTAINER_NAME=firebase
 up:
 	docker-compose up
 bd:
@@ -10,6 +11,12 @@ bdsw:
 dp:
 	docker-compose up
 db:
-	docker exec -it $(CONTAINER_NAME) mysql -u $(MYSQL_USER) -p$(MYSQL_PASSWORD)
+	docker exec -it $(DB_CONTAINER_NAME) mysql -u $(MYSQL_USER) -p$(MYSQL_PASSWORD)
 bs:
-	docker exec -it $(CONTAINER_NAME) bash
+	docker exec -it $(DB_CONTAINER_NAME) bash
+bsfb:
+	docker exec -it $(FIREBASE_CONTAINER_NAME) bash
+gogen:
+	cd ~/fooder/backend/app && go generate . && go generate ./...
+tidy:
+	cd ~/fooder/backend/app && go mod tidy

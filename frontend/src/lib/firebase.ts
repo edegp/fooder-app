@@ -1,6 +1,6 @@
 // import { getAnalytics, isSupported } from 'firebase/analytics'
 import { FirebaseError, initializeApp } from 'firebase/app'
-import { connectAuthEmulator, getAuth } from 'firebase/auth'
+import { connectAuthEmulator, createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 
 // predicate
 export const isFirebaseError = (e: Error): e is FirebaseError => {
@@ -17,12 +17,20 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '',
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || ''
 }
+const url = process.env.FIREBASE_AUTH_EMULATOR_URL || 'http://localhost:9099'
 
-export const app = initializeApp(firebaseConfig)
+initializeApp(firebaseConfig)
+
 // Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth()
-
-// emulator setting
-if (process.env.NODE_ENV !== 'production' && !!process.env.FIREBASE_AUTH_EMULATOR_URL) {
-  connectAuthEmulator(auth, process.env.FIREBASE_AUTH_EMULATOR_URL)
+export const getMyAuth = () => {
+  const auth = getAuth()
+  if (process.env.NODE_ENV !== 'production') {
+    connectAuthEmulator(auth, url)
+  }
+  return auth
 }
+
+export const auth = getMyAuth()
+
+export const signUp = async (email: string, password: string) => createUserWithEmailAndPassword(auth, email, password)
+export const signIn = async (email: string, password: string) => signInWithEmailAndPassword(auth, email, password)

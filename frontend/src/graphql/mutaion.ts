@@ -9,6 +9,7 @@ export const CreateUser = gql`
     }
   }
 `
+
 export const UpdateUser = gql`
   mutation UpdateUser($id: String!) {
     updateUser(id: $id) {
