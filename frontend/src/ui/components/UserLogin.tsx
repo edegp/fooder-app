@@ -9,10 +9,9 @@ import { usePathname, useRouter } from 'next/navigation'
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from 'react-icons/md'
 import { useRecoilState } from 'recoil'
 import styled from 'styled-components'
-import { useMutation, useQuery } from 'urql'
+import { useMutation } from 'urql'
 
 import { CreateUser, UpdateUser } from '@/graphql/mutaion'
-import { getAllUsers } from '@/graphql/query'
 import { signIn, signUp } from '@/lib/firebase'
 import { handleError } from '@/lib/modules/handleError'
 import { emailState } from '@/lib/recoil/state'
@@ -51,12 +50,8 @@ export const UserLogin = memo(function UserLogin() {
   const pathname = usePathname()
   const [email, setEmail] = useRecoilState(emailState)
   const [isShowPassword, setIsShowPassword] = useState(true)
-  const [createUserResult, createUser] = useMutation(CreateUser)
-  const [updateUserResult, updateUser] = useMutation(UpdateUser)
-  const [users, reexecuteQuery] = useQuery({
-    query: getAllUsers
-  })
-  console.log(users)
+  const [_createUserResult, createUser] = useMutation(CreateUser)
+  const [_updateUserResult, updateUser] = useMutation(UpdateUser)
   const handleSubmit = useCallback(
     async (event: FormEvent) => {
       event.preventDefault()

@@ -6,9 +6,9 @@ import { withUrqlClient } from 'next-urql'
 import { RecoilRoot } from 'recoil'
 
 import { RecoilURLSyncNext } from '@/lib/recoil/RecilURLSyncNext'
-import { InitialState } from '@/pages/_initialState'
 import '@/styles/globals.css'
 import { ErrorBoundary } from '@/ui/atom/ErrorBoundary'
+import { InitialStateProvider } from '@/ui/components/initialStateProvider'
 
 function Myapp({ Component, pageProps }: AppProps) {
   return (
@@ -20,9 +20,9 @@ function Myapp({ Component, pageProps }: AppProps) {
           deserialize={x => ({ pathname: x })}
           storeKey="url"
         >
-          <InitialState>
+          <InitialStateProvider>
             <Component {...pageProps} />
-          </InitialState>
+          </InitialStateProvider>
         </RecoilURLSyncNext>
       </ErrorBoundary>
     </RecoilRoot>
