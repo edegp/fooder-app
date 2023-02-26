@@ -15,13 +15,3 @@ RUN go mod download && go mod verify && go mod tidy
 COPY app .
 # hotreload
 CMD ["air","-c",".air.toml"]
-# -----------------------------------------------------------------------------
-# build
-# RUN cd server && CGO_ENABLED=0 go build -o /go/bin/app
-
-# -----------------------------------------------------------------------------
-# step 2: exec
-# FROM scratch
-# COPY --from=build-step /go/bin/app /go/bin/app
-# EXPOSE 8080
-# ENTRYPOINT ["/go/bin/app"]

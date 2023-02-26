@@ -1,12 +1,17 @@
 version: "3.9"
 services:
   web:
-    build: .
+    container_name: go_app
+    build:
+      context: .
+      dockerfile: "dockerfile.dev"
     ports:
       - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
+      firebase:
+        condition: service_started
     volumes:
       - ./app:/app
   db:
@@ -19,8 +24,7 @@ services:
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
-      retries: 5
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+      retries: 3
     ports:
       - 3307:3306
     expose:
@@ -32,24 +36,31 @@ services:
       MYSQL_PASSWORD: password
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       TZ: Asia/Tokyo
+    tty: true
     volumes:
       # volumeの作成
       - data-volume:/var/lib/mysql
       # bind mountでconfig 反映
       - ./sql:/var/lib/mysql/conf.d
   # firebase emulator
-  # https://zenn.dev/ucwork/articles/f006150468b109のコピー
   firebase:
     build:
       context: ./firebase
+      dockerfile: "./dockerfile"
     container_name: firebase
     ports:
       - 4000:4000
       - 9099:9099
+    # ip固定
+    networks:
+      backend_default:
+        ipv4_address: 172.19.0.3
     volumes:
-      - ./firebase:/opt/workspace
-    working_dir: /opt/workspace
-    command: "firebase emulators:start --only=auth --import=./firebase/data --export-on-exit=./firebase/data --project fooder"
-    tty: true
+      - user-data:/opt/workspace/firebase/data
 volumes:
   data-volume:
+  user-data:
+networks:
+  backend_default:
+    name: backend_default
+    driver: bridge
