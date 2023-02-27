@@ -37,12 +37,9 @@ func main() {
 	client, err := connectUnixSocket(entOptions...)
 	if err != nil {
 		client, err = ent.Open("mysql", url, entOptions...)
-		if err == nil {
+		if err != nil {
 			log.Fatalf("Faital to connect mysql. %s", err)
 		}
-	}
-	if err != nil {
-		log.Fatalf("Error: mysql client: %v\n", err)
 	}
 	defer client.Close()
 	// Run the migration here
@@ -66,7 +63,7 @@ func main() {
 	srv.Use(entgql.Transactioner{TxOpener: client})
 	// cors setting
 	handler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins:   []string{"http://localhost:3000", "https://fooder-app.vercel.app"},
 		AllowCredentials: true,
 		// Debug:            true,
 	}).Handler(mux)
