@@ -135,7 +135,7 @@ export const Drawer = memo(function Drawer({
     (event: React.TouchEvent) => {
       if (stopScroll) {
         const { clientY, clientX } = event?.touches?.[0]
-        const distance = isVertical ? (clientY - upperOffset - 130) * 1.2 : clientX - touchPosition
+        const distance = isVertical ? (clientY - upperOffset - 130) * 1.3 : clientX - touchPosition
         if (distance > 0) setMoveDistance(distance)
         const closeBoundary = isVertical ? clientY > (clientHeight * 3) / 4 : clientX > (clientWidth * 4) / 5
         if (closeBoundary) {
@@ -182,7 +182,7 @@ export const Drawer = memo(function Drawer({
       if (stopScroll) {
         return {
           transform: `translate${isVertical ? 'Y' : 'X'}(${moveDistance}px)`,
-          transitionDuration: '0.3s'
+          transitionDuration: '0.2s'
         }
       }
       // fadeIn
