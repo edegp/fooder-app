@@ -47,7 +47,7 @@ jobs:
 
       - name: Create docker image url
         id: image-url
-        run: echo "::set-output name=value::gcr.io/${{ secrets.DEV_GCP_PROJECT_ID }}/${{ matrix.service }}-service:${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}"
+        run: echo "::set-output name=value::gcr.io/${{ secrets.GCP_PROJECT}}/${{ matrix.service }}-service:${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}"
 
       - name: Deploy
         if: github.event_name == 'push'
