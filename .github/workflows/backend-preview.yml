@@ -2,11 +2,11 @@ name: Deploy
 on:
   push:
     paths:
-    - 'backend/app/*'
+    - 'backend/app/**'
   pull_request_target:
     types: [assigned, opened, synchronize, reopened]
     paths:
-      - 'backend/app/*'
+      - 'backend/app/**'
 jobs:
   deploy:
     runs-on: ubuntu-latest
