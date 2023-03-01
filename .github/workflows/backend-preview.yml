@@ -85,3 +85,4 @@ jobs:
             <${{ steps.preview-url.outputs.value }}>
             <sub>(:fire: updated at ${{ steps.datetime.outputs.value }})</sub>
           edit-mode: replace
+          permissions: write-all
