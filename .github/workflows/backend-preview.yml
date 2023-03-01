@@ -55,6 +55,7 @@ jobs:
             --image ${{ steps.image-url.outputs.value }}
             --tag pr-${{ github.event.pull_request.number }}
             --no-traffic
+            --quiet
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2
