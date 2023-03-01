@@ -7,8 +7,9 @@
     "samples"
   ],
   "scripts": {
-    "turbo-dev": "open http://localhost:3000 && next dev --turbo",
     "dev": "open http://localhost:3000 && next dev",
+    "dev:turbo": "open http://localhost:3000 && next dev --turbo",
+    "dev:remote": " open http://localhost:3000 &&  env-cmd -f ./.env.production next dev",
     "build": "next build && next export",
     "start": "next start",
     "lint": "next lint",
@@ -80,6 +81,7 @@
     "@typescript-eslint/parser": "5.50.0",
     "autoprefixer": "^10.4.7",
     "babel-plugin-styled-components": "2.0.7",
+    "env-cmd": "10.1.0",
     "eslint": "8.19.0",
     "eslint-config-next": "latest",
     "eslint-config-prettier": "8.6.0",

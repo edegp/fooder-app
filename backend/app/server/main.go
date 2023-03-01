@@ -24,6 +24,18 @@ import (
 	"github.com/rs/cors"
 )
 
+func connectSQL() (client *ent.Client, err error) {
+	env := os.Getenv("ENV")
+	var entOptions []ent.Option
+	entOptions = append(entOptions, ent.Debug())
+	if env == "" {
+		// open mysql server
+		return cloudsql.ConnectUnixSocket(entOptions...)
+	}
+	url := "admin:password@tcp(mysql_host)/fooder?parseTime=true"
+	return ent.Open("mysql", url, entOptions...)
+}
+
 const defaultPort = "8080"
 
 func main() {
@@ -31,16 +43,9 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
-	var entOptions []ent.Option
-	entOptions = append(entOptions, ent.Debug())
-	url := "admin:password@tcp(mysql_host)/fooder?parseTime=true"
-	// open mysql server
-	client, err := cloudsql.ConnectUnixSocket(entOptions...)
+	client, err := connectSQL()
 	if err != nil {
-		client, err = ent.Open("mysql", url, entOptions...)
-		if err != nil {
-			log.Fatalf("Faital to connect mysql. %s", err)
-		}
+		log.Fatalf("Faital to connect mysql. %s", err)
 	}
 	defer client.Close()
 	// Run the migration here
@@ -62,9 +67,17 @@ func main() {
 	srv := handler.NewDefaultServer((resolver.NewSchema(client)))
 	// use Transactioner
 	srv.Use(entgql.Transactioner{TxOpener: client})
+	env := os.Getenv("ENV")
+	var corsOriginsOption []string
+	if env == "" {
+		corsOriginsOption = append(corsOriginsOption, "https://fooder-app.vercel.app")
+	} else {
+		corsOriginsOption = append(corsOriginsOption, "http://localhost:3000")
+	}
 	// cors setting
 	handler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "https://fooder-app.vercel.app"},
+		AllowedHeaders:   []string{"X-Requested-With", "Authorization", "Origin"},
+		AllowedOrigins:   corsOriginsOption,
 		AllowCredentials: true,
 		// Debug:            true,
 	}).Handler(mux)
