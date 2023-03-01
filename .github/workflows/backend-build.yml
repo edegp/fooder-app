@@ -3,18 +3,25 @@ on:
   pull_request:
     branches:
       - 'main'
+env:
+  GCP_PROJECT: ${{secrets.GCP_PROJECT}}
+  GCP_PROJECT_NUM: ${{secrets.GCP_PROJECT_NUM}}
+  SERVICE_NAME: ${{secrets.SERVICE_NAME}}
+  REGION : ${{secrets.REGION }}
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
 
     permissions:
       contents: read
       id-token: 'write'
 
     steps:
+
       - uses: 'google-github-actions/setup-gcloud@v0'
         with:
-          project_id: ${{ {secrets.GCP_PROJECT }}
+          project_id: ${{ env.GCP_PROJECT }}
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -24,8 +31,8 @@ jobs:
         uses: 'google-github-actions/auth@v0.3.1'
         with:
           create_credentials_file: true
-          workload_identity_provider: projects/${{ {secrets.GCP_PROJECT_NUM }}/locations/global/workloadIdentityPools/github-actions/providers/gha-provider
-          service_account: ci-user@${{ {secrets.GCP_PROJECT }}.iam.gserviceaccount.com
+          workload_identity_provider: projects/${{ env.GCP_PROJECT_NUM }}/locations/global/workloadIdentityPools/github-actions/providers/gha-provider
+          service_account: ci-user@${{ env.GCP_PROJECT }}.iam.gserviceaccount.com
 
       - id: 'gcloud'
         name: Authenticate
@@ -35,16 +42,16 @@ jobs:
 
       - name: Docker Build
         run: |-
-          docker build -t ${{ {secrets.SERVICE_NAME }} .
-          docker tag ${{ {secrets.SERVICE_NAME }} gcr.io/${{ {secrets.GCP_PROJECT }}/${{{secrets.SERVICE_NAME}}:latest
-          docker push gcr.io/${{ {secrets.GCP_PROJECT }}/${{{secrets.SERVICE_NAME}}:latest
+          docker build -t ${{ env.SERVICE_NAME }} .
+          docker tag ${{ env.SERVICE_NAME }} gcr.io/${{ env.GCP_PROJECT }}/${{env.SERVICE_NAME}}:latest
+          docker push gcr.io/${{ env.GCP_PROJECT }}/${{env.SERVICE_NAME}}:latest
 
       - name: Deploy
         if: github.event_name == 'push'
         run: |-
-          gcloud run deploy ${{ {secrets.SERVICE_NAME }} --image gcr.io/${{ {secrets.GCP_PROJECT }}/${{ {secrets.SERVICE_NAME }}:latest \
-            --project ${{ {secrets.GCP_PROJECT }} \
+          gcloud run deploy ${{ env.SERVICE_NAME }} --image gcr.io/${{ env.GCP_PROJECT }}/${{ env.SERVICE_NAME }}:latest \
+            --project ${{ env.GCP_PROJECT }} \
             --platform managed \
-            --region ${{ {secrets.REGION }} \
-            --service-account ${{ {secrets.SERVICE_NAME }}@${{ {secrets.GCP_PROJECT }}.iam.gserviceaccount.com \
+            --region ${{ env.REGION }} \
+            --service-account ${{ env.SERVICE_NAME }}@${{ env.GCP_PROJECT }}.iam.gserviceaccount.com \
             --allow-unauthenticated
