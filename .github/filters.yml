@@ -11,4 +11,5 @@ frontend_ci: &frontend_ci
 
 frontend:
   - *frontend_ci
-  - 'frontend/**'
+  - 'frontend/**/*.ts'
+  - 'frontend/**/*.tsx'
