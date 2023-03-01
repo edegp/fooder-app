@@ -1,4 +1,4 @@
-name: Deploy
+name: build
 on:
   pull_request:
     branches:
@@ -9,7 +9,7 @@ env:
   SERVICE_NAME: ${{secrets.SERVICE_NAME}}
   REGION : ${{secrets.REGION }}
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
 
@@ -45,13 +45,3 @@ jobs:
           docker build -t ${{ env.SERVICE_NAME }} -f ./backend/Dockerfile.prod  .
           docker tag ${{ env.SERVICE_NAME }} gcr.io/${{ env.GCP_PROJECT }}/${{env.SERVICE_NAME}}:latest
           docker push gcr.io/${{ env.GCP_PROJECT }}/${{env.SERVICE_NAME}}:latest
-
-      - name: Deploy
-        if: github.event_name == 'push'
-        run: |-
-          gcloud run deploy ${{ env.SERVICE_NAME }} --image gcr.io/${{ env.GCP_PROJECT }}/${{ env.SERVICE_NAME }}:latest \
-            --project ${{ env.GCP_PROJECT }} \
-            --platform managed \
-            --region ${{ env.REGION }} \
-            --service-account ${{ env.SERVICE_NAME }}@${{ env.GCP_PROJECT }}.iam.gserviceaccount.com \
-            --allow-unauthenticated
