@@ -14,7 +14,7 @@ jobs:
       id-token: 'write'
 
     steps:
-      - uses: 'google-github-actions/setup-gcloud@v0'
+      - uses: 'google-github-actions/setup-gcloud@v1'
         with:
           project_id: ${{ secrets.GCP_PROJECT }}
       - name: Checkout
@@ -45,10 +45,14 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Create docker image url
+        id: image-url
+        run: echo "::set-output name=value::gcr.io/${{ secrets.DEV_GCP_PROJECT_ID }}/${{ matrix.service }}-service:${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}"
+
       - name: Deploy
         if: github.event_name == 'push'
         run: |-
-          gcloud run deploy ${{ matrix.service }}
+          gcloud beta run deploy ${{ matrix.service }}
             --platform managed
             --region ${{ secrets.GCP_REGION }}
             --image ${{ steps.image-url.outputs.value }}
