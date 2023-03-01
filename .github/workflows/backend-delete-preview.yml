@@ -1,10 +1,11 @@
 # copy from https://zenn.dev/matken/articles/preview-deploy-on-cloud-run
-
 name: Cloud Run (Delete Preview)
 
 on:
   pull_request:
     types: [ closed ]
+    paths:
+      - 'backend/app/'
 
 jobs:
   deploy:
