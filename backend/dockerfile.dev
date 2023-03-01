@@ -2,8 +2,8 @@
 # 参考 https://qiita.com/sky0621/items/58fa2bcfc0935f6186cb
 FROM golang:1.20.1-alpine3.17 as build-step
 
-ENV GOOGLE_APPLICATION_CREDENTIALS="/app/firebase_admin/application_default_credentials.json"
-ENV FIREBASE_AUTH_EMULATOR_HOST="172.19.0.3:9099"
+ENV GOOGLE_APPLICATION_CREDENTIALS="/service_account/key.json"
+ENV FIREBASE_AUTH_EMULATOR_HOST="172.21.0.3:9099"
 ARG GCLOUD_PROJECT
 ENV GCLOUD_PROJECT=${GCLOUD_PROJECT}
 

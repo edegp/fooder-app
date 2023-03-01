@@ -12,8 +12,6 @@ services:
         condition: service_healthy
       firebase:
         condition: service_started
-    volumes:
-      - ./app:/app
   db:
     # mac対応
     platform: linux/x86_64
@@ -30,9 +28,9 @@ services:
     expose:
       - 3307
     environment:
-      MYSQL_ROOT_PASSWORD: go_fooder_dev
+      MYSQL_ROOT_PASSWORD: ps
       MYSQL_DATABASE: fooder
-      MYSQL_USER: docker
+      MYSQL_USER: admin
       MYSQL_PASSWORD: password
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       TZ: Asia/Tokyo
@@ -56,7 +54,7 @@ services:
     # ip固定
     networks:
       backend_default:
-        ipv4_address: 172.19.0.3
+        ipv4_address: 172.21.0.3
     volumes:
       - user-data:/opt/workspace/firebase/data
 volumes:
@@ -66,3 +64,6 @@ networks:
   backend_default:
     name: backend_default
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16

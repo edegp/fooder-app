@@ -9,8 +9,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - ./app:/app
   db:
     # mac対応
     platform: linux/x86_64
