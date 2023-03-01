@@ -43,7 +43,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./dockerfile.prod
+          file: ./backend/dockerfile.prod
           push: true
           tags: "gcr.io/${{ secrets.GCP_PROJECT }}/${{secrets.SERVICE_NAME}}:latest"
           cache-from: type=gha
