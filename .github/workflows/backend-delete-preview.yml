@@ -10,11 +10,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        service: [ product-x ]
-
     steps:
       - uses: actions/checkout@v2.3.4
       - id: "auth"
