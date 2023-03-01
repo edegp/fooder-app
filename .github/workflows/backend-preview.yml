@@ -39,12 +39,15 @@ jobs:
           password: '${{ steps.auth.outputs.access_token }}'
       - run: echo '${{ steps.auth.outputs.access_token }}' | docker login -u oauth2accesstoken --password-stdin https://gcr.io
 
-      - name: Docker Build
-        run: |-
-          cd backend
-          docker build -t ${{ secrets.SERVICE_NAME }} -f ./dockerfile.prod  .
-          docker tag ${{ secrets.SERVICE_NAME }} gcr.io/${{ secrets.GCP_PROJECT }}/${{secrets.SERVICE_NAME}}:latest
-          docker push gcr.io/${{ secrets.GCP_PROJECT }}/${{secrets.SERVICE_NAME}}:latest
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./dockerfile.prod
+          push: true
+          tags: "gcr.io/${{ secrets.GCP_PROJECT }}/${{secrets.SERVICE_NAME}}:latest"
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Deploy
         if: github.event_name == 'push'
