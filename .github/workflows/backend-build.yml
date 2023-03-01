@@ -1,15 +1,10 @@
-name: build
+name: Deploy
 on:
   pull_request:
     branches:
       - 'main'
-env:
-  GCP_PROJECT: ${{secrets.GCP_PROJECT}}
-  GCP_PROJECT_NUM: ${{secrets.GCP_PROJECT_NUM}}
-  SERVICE_NAME: ${{secrets.SERVICE_NAME}}
-  REGION : ${{secrets.REGION }}
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
 
@@ -21,7 +16,7 @@ jobs:
 
       - uses: 'google-github-actions/setup-gcloud@v0'
         with:
-          project_id: ${{ env.GCP_PROJECT }}
+          project_id: ${{ secrets.GCP_PROJECT }}
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -31,8 +26,8 @@ jobs:
         uses: 'google-github-actions/auth@v0.3.1'
         with:
           create_credentials_file: true
-          workload_identity_provider: projects/${{ env.GCP_PROJECT_NUM }}/locations/global/workloadIdentityPools/github-actions/providers/gha-provider
-          service_account: ci-user@${{ env.GCP_PROJECT }}.iam.gserviceaccount.com
+          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUM }}/locations/global/workloadIdentityPools/github-actions/providers/gha-provider
+          service_account: ci-user@${{ secrets.GCP_PROJECT }}.iam.gserviceaccount.com
 
       - id: 'gcloud'
         name: Authenticate
@@ -42,6 +37,45 @@ jobs:
 
       - name: Docker Build
         run: |-
-          docker build -t ${{ env.SERVICE_NAME }} -f ./backend/dockerfile.prod  .
-          docker tag ${{ env.SERVICE_NAME }} gcr.io/${{ env.GCP_PROJECT }}/${{env.SERVICE_NAME}}:latest
-          docker push gcr.io/${{ env.GCP_PROJECT }}/${{env.SERVICE_NAME}}:latest
+          docker build -t ${{ secrets.SERVICE_NAME }} -f /backend/Dockerfile.prod  .
+          docker tag ${{ secrets.SERVICE_NAME }} gcr.io/${{ secrets.GCP_PROJECT }}/${{secrets.SERVICE_NAME}}:latest
+          docker push gcr.io/${{ secrets.GCP_PROJECT }}/${{secrets.SERVICE_NAME}}:latest
+
+      - name: Deploy
+        if: github.event_name == 'push'
+        run: |-
+          gcloud beta run deploy ${{ matrix.service }}
+            --platform managed
+            --region ${{ secrets.GCP_REGION }}
+            --image ${{ steps.image-url.outputs.value }}
+            --tag pr-${{ github.event.pull_request.number }}
+            --no-traffic
+
+      - name: Find Comment
+        uses: peter-evans/find-comment@v1
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: github-actions[bot]
+          body-includes: "Preview"
+
+      - name: Create Preview URL
+        id: preview-url
+        run: echo "::set-output name=value::https://pr-${{ github.event.pull_request.number }}---product-x-drwvbiotlz-an.a.run.app"
+
+      - name: Get datetime for now
+        id: datetime
+        run: echo "::set-output name=value::$(date)"
+        env:
+          TZ: Asia/Tokyo
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Visit the :eyes: **Preview** :eyes: for this PR (updated for commit ${{ github.event.pull_request.head.sha }}):
+            <${{ steps.preview-url.outputs.value }}>
+            <sub>(:fire: updated at ${{ steps.datetime.outputs.value }})</sub>
+          edit-mode: replace
