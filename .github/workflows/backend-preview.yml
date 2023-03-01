@@ -15,18 +15,18 @@ jobs:
       - uses: 'google-github-actions/setup-gcloud@v1'
         with:
           project_id: ${{ secrets.GCP_PROJECT }}
-      - run: echo github.event
+      
       - name: Checkout
         uses: actions/checkout@v3
       - id: 'auth'
-
+      
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v1'
         with:
           token_format: 'access_token'
           workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUM }}/locations/global/workloadIdentityPools/my-pool/providers/my-provider
           service_account: ci-user@${{ secrets.GCP_PROJECT }}.iam.gserviceaccount.com
-
+      - run: echo ${{ github.event }}
       - name: Create docker image url
         run: echo "image-url=gcr.io/${{ secrets.GCP_PROJECT}}/${{ secrets.SERVICE_NAME }}:${{ github.event.pull_request_target.number || github.event.pull_request.number }}-${{ github.event.pull_request_target.head.sha || github.event.pull_request.head.sha }}"
 
