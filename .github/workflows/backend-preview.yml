@@ -1,6 +1,7 @@
 name: Deploy
 on:
   pull_request_target:
+    types: ['edited','opened','reopened','synchronize','assigned']
     paths:
       - 'backend/app/**'
 jobs:
