@@ -15,9 +15,11 @@ jobs:
       - uses: 'google-github-actions/setup-gcloud@v1'
         with:
           project_id: ${{ secrets.GCP_PROJECT }}
+
       - name: Checkout
         uses: actions/checkout@v3
       - id: 'auth'
+
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v1'
         with:
@@ -29,12 +31,14 @@ jobs:
         id: image-url
         run: echo "::set-output name=value::gcr.io/${{ secrets.GCP_PROJECT}}/${{secrets.SERVICE_NAME}}:${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}"
 
-      - uses: 'docker/login-action@v1'
+      - name: Login docker
+        uses: 'docker/login-action@v1'
         with:
           registry: 'gcr.io' # or REGION-docker.pkg.dev
           username: 'oauth2accesstoken'
           password: '${{ steps.auth.outputs.access_token }}'
       - run: echo '${{ steps.auth.outputs.access_token }}' | docker login -u oauth2accesstoken --password-stdin https://gcr.io
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Build and push
@@ -85,4 +89,3 @@ jobs:
             <${{ steps.preview-url.outputs.value }}>
             <sub>(:fire: updated at ${{ steps.datetime.outputs.value }})</sub>
           edit-mode: replace
-          permissions: write-all
