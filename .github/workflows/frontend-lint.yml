@@ -1,29 +1,13 @@
 name: Lint
 
-on: push
+on:
+  push:
+    paths:
+      - 'frontend/**/*.ts'
+      - 'frontend/**/*.tsx'
 
 jobs:
-  # JOB to run change detection
-  changes:
-    runs-on: ubuntu-latest
-    # Required permissions
-    permissions:
-      pull-requests: read
-    # Set job outputs to values from filter step
-    outputs:
-      backend: ${{ steps.filter.outputs.backend }}
-      frontend: ${{ steps.filter.outputs.frontend }}
-    steps:
-      - uses: actions/checkout@v3.0.0
-      # For pull requests it's not necessary to checkout the code
-      - uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          token: ${{ github.token }}
-          filters: .github/filters.yml
   lint:
-    needs: changes
-    if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:

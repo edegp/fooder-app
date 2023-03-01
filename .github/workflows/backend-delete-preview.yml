@@ -1,0 +1,65 @@
+# copy from https://zenn.dev/matken/articles/preview-deploy-on-cloud-run
+name: Cloud Run (Delete Preview)
+
+on:
+  pull_request:
+    types: [ closed ]
+    paths:
+      - 'backend/app/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: [ product-x ]
+
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - id: "auth"
+        uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUM }}/locations/global/workloadIdentityPools/github-actions/providers/gha-provider
+          service_account: ci-user@${{ secrets.GCP_PROJECT }}.iam.gserviceaccount.com
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Install alpha component
+        run: gcloud components install --quiet alpha
+
+      - name: Deploy revision with tag
+        run: >
+          gcloud alpha run services update-traffic ${{ matrix.service }}
+          --region ${{ secrets.GCP_REGION }}
+          --remove-tags pr-${{ github.event.pull_request.number }}
+      - name: Find Comment
+        uses: peter-evans/find-comment@v1
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: github-actions[bot]
+          body-includes: "Preview"
+
+      - name: Create Preview URL
+        id: preview-url
+        run: echo "::set-output name=value::https://pr-${{ github.event.pull_request.number }}---product-x-drwvbiotlz-an.a.run.app"
+
+      - name: Get datetime for now
+        id: datetime
+        run: echo "::set-output name=value::$(date)"
+        env:
+          TZ: Asia/Tokyo
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Visit the :eyes: **Preview** :eyes: for this PR (updated for commit ${{ github.event.pull_request.head.sha }}):
+            ~<${{ steps.preview-url.outputs.value }}>~
+            <sub>(:warning: deleted at ${{ steps.datetime.outputs.value }})</sub>
+          edit-mode: replace
+

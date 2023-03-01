@@ -3,39 +3,8 @@ services:
   web:
     build:
       context: .
-      dockerfile: "dockerfile.production"
+      dockerfile: "Dockerfile.prod"
     ports:
       - "8080:8080"
-    depends_on:
-      db:
-        condition: service_healthy
-  db:
-    # mac対応
-    platform: linux/x86_64
-    image: mysql:latest
-    container_name: mysql_host
-    restart: always
-    # 起動チェック
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 5
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    ports:
-      - 3307:3306
-    expose:
-      - 3307
-    environment:
-      MYSQL_ROOT_PASSWORD: go_fooder_dev
-      MYSQL_DATABASE: fooder
-      MYSQL_USER: docker
-      MYSQL_PASSWORD: password
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      TZ: Asia/Tokyo
-    volumes:
-      # volumeの作成
-      - data-volume:/var/lib/mysql
-      # bind mountでconfig 反映
-      - ./sql:/var/lib/mysql/conf.d
 volumes:
   data-volume:

@@ -1,9 +1,11 @@
 name: EntCI
 on:
   push:
+    paths:
+    - 'backend/app/ent/**'
   pull_request:
     paths:
-      - 'backend/app/ent/*'
+      - 'backend/app/ent/**'
 jobs:
   ent:
     runs-on: ubuntu-latest
