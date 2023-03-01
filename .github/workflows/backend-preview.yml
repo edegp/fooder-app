@@ -3,8 +3,7 @@ on:
   push:
     paths:
     - 'backend/app/**'
-  pull_request_target:
-    types: [assigned, opened, synchronize, reopened]
+  pull_request:
     paths:
       - 'backend/app/**'
 jobs:
