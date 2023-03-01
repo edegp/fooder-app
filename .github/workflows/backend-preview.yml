@@ -1,8 +1,6 @@
 name: Deploy
 on:
   push:
-    paths:
-    - 'backend/app/**'
   pull_request:
     paths:
       - 'backend/app/**'
