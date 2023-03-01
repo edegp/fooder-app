@@ -45,4 +45,6 @@ styles/dist.css
 backend/app/firebase/*.json
 application_default_credentials.json
 ui-debug.log
-*refreshToken.json
+/backend/**/*.json
+
+dockerfile.dev.remote

@@ -1,0 +1,61 @@
+version: "3.9"
+services:
+  web:
+    container_name: go_app
+    build:
+      context: .
+      dockerfile: "dockerfile.dev.remote"
+    ports:
+      - "8080:8080"
+    depends_on:
+      sql_proxy:
+        condition: service_started
+      firebase:
+        condition: service_started
+    networks:
+      - proxy
+      - remote_default
+  # firebase emulator
+  firebase:
+    build:
+      context: ./firebase
+      dockerfile: "./dockerfile"
+      args:
+        - GCLOUD_PROJECT=${GCLOUD_PROJECT}
+    container_name: firebase
+    ports:
+      - 4000:4000
+      - 9099:9099
+    # ip固定
+    networks:
+      remote_default:
+        ipv4_address: 192.22.0.3
+    tty: true
+    volumes:
+      - user-data:/opt/workspace/firebase
+  sql_proxy:
+    container_name: sql_proxy
+    image: gcr.io/cloudsql-docker/gce-proxy:1.33.4
+    volumes:
+      - ./cloudsql:/cloudsql
+      - ./service_account:/service_account
+    restart: always
+    env_file:
+      - ./.env
+    command: /cloud_sql_proxy -dir=/cloudsql -instances=fooder-379012:us-central1:fooder
+    networks:
+      - proxy
+
+volumes:
+  data-volume:
+  user-data:
+networks:
+  remote_default:
+    name: remote_default
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.22.0.0/16
+  proxy:
+    name: proxy
+    driver: bridge

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/app/cloudsql"
 	"backend/app/ent"
 	"backend/app/ent/migrate"
 	"backend/app/resolver"
@@ -32,9 +33,9 @@ func main() {
 	}
 	var entOptions []ent.Option
 	entOptions = append(entOptions, ent.Debug())
-	url := "docker:password@tcp(mysql_host)/fooder?parseTime=true"
+	url := "admin:password@tcp(mysql_host)/fooder?parseTime=true"
 	// open mysql server
-	client, err := connectUnixSocket(entOptions...)
+	client, err := cloudsql.ConnectUnixSocket(entOptions...)
 	if err != nil {
 		client, err = ent.Open("mysql", url, entOptions...)
 		if err != nil {
@@ -45,7 +46,7 @@ func main() {
 	// Run the migration here
 	if err := client.Debug().Schema.Create(
 		context.Background(),
-		// Hook into Atlas Diff process.
+		// // Hook into Atlas Diff process.
 		schema.WithDiffHook(DiffHook),
 		// Hook into Atlas Apply process.
 		schema.WithApplyHook(ApplyHook),
