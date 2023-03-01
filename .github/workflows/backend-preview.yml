@@ -38,7 +38,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: /backend
+          context: "{{defaultContext}}:backend"
           file: ./dockerfile.prod
           push: true
           tags: "gcr.io/${{ secrets.GCP_PROJECT }}/${{secrets.SERVICE_NAME}}:latest"
