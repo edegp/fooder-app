@@ -37,7 +37,7 @@ jobs:
 
       - name: Docker Build
         run: |-
-          docker build -t ${{ secrets.SERVICE_NAME }} -f /backend/Dockerfile.prod  .
+          docker build -t ${{ secrets.SERVICE_NAME }} -f ./backend/dockerfile.prod  .
           docker tag ${{ secrets.SERVICE_NAME }} gcr.io/${{ secrets.GCP_PROJECT }}/${{secrets.SERVICE_NAME}}:latest
           docker push gcr.io/${{ secrets.GCP_PROJECT }}/${{secrets.SERVICE_NAME}}:latest
 
