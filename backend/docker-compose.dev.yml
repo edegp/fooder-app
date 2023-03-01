@@ -4,7 +4,7 @@ services:
     container_name: go_app
     build:
       context: .
-      dockerfile: "dockerfile.dev"
+      dockerfile: "Dockerfile.dev"
     ports:
       - "8080:8080"
     depends_on:
@@ -20,7 +20,7 @@ services:
     restart: always
     # 起動チェック
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping"]
       timeout: 20s
       retries: 3
     ports:
@@ -39,7 +39,7 @@ services:
       # volumeの作成
       - data-volume:/var/lib/mysql
       # bind mountでconfig 反映
-      - ./sql:/var/lib/mysql/conf.d
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
   # firebase emulator
   firebase:
     build:

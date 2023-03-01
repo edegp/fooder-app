@@ -4,22 +4,55 @@ services:
     container_name: go_app
     build:
       context: .
-      dockerfile: "dockerfile.dev.remote"
+      dockerfile: "Dockerfile.dev.remote"
     ports:
       - "8080:8080"
     depends_on:
       sql_proxy:
-        condition: service_started
+        condition: service_healthy
       firebase:
         condition: service_started
+      db:
+        condition: service_healthy
+    volumes:
+      - ./cloudsql:/cloudsql
     networks:
       - proxy
       - remote_default
+  db:
+    # mac対応
+    platform: linux/x86_64
+    image: mysql:latest
+    container_name: mysql_host
+    restart: always
+    environment:
+      MYSQL_DATABASE: fooder
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+      TZ: Asia/Tokyo
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping"]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      sql_proxy:
+        condition: service_healthy
+    tty: true
+    volumes:
+      # volumeの作成
+      - data-volume:/var/lib/mysql
+      - ./cloudsql:/cloudsql
+      # bind mountでconfig 反映
+      - ./cloudsql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - proxy
   # firebase emulator
   firebase:
     build:
       context: ./firebase
-      dockerfile: "./dockerfile"
+      dockerfile: ./Dockerfile
       args:
         - GCLOUD_PROJECT=${GCLOUD_PROJECT}
     container_name: firebase
@@ -35,14 +68,22 @@ services:
       - user-data:/opt/workspace/firebase
   sql_proxy:
     container_name: sql_proxy
-    image: gcr.io/cloudsql-docker/gce-proxy:1.33.4
+    build:
+      context: .
+      dockerfile: ./cloudsql/Dockerfile
+    restart: always
+    command: /cloud_sql_proxy -dir=/cloudsql -instances=fooder-379012:us-central1:fooder -use_http_health_check
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:8090"]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+      start_period: 5s
+    env_file:
+      - ./.env
     volumes:
       - ./cloudsql:/cloudsql
       - ./service_account:/service_account
-    restart: always
-    env_file:
-      - ./.env
-    command: /cloud_sql_proxy -dir=/cloudsql -instances=fooder-379012:us-central1:fooder
     networks:
       - proxy
 
