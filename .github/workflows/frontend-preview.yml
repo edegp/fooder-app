@@ -1,6 +1,9 @@
 on:
   push:
   pull_request:
+    paths:
+       - '/frontend/**/**.ts'
+       - /frontend/**/**.tsx
   workflow_call:
       preview-url:
         required: true
