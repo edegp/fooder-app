@@ -6,29 +6,27 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    outputs:
+      preview-url: ${{ steps.preview-url.outputs.value }}
     permissions: write-all
     steps:
       - uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ secrets.GCP_PROJECT }}
-
       - name: Checkout
         uses: actions/checkout@v3
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name}}
           ref: ${{ github.event.pull_request.head.ref}}
-
       - id: 'auth'
         uses: google-github-actions/auth@v1
         with:
           token_format: 'access_token'
           workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUM }}/locations/global/workloadIdentityPools/my-pool/providers/my-provider
           service_account: ci-user@${{ secrets.GCP_PROJECT }}.iam.gserviceaccount.com
-
       - id: image-url
         name: Create docker image url
         run: echo "value=gcr.io/${{ secrets.GCP_PROJECT }}/${{ secrets.SERVICE_NAME }}:${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}"  >> $GITHUB_OUTPUT
-
       - name: Login docker
         uses: docker/login-action@v2
         with:
@@ -59,32 +57,16 @@ jobs:
             --image ${{ steps.image-url.outputs.value }}
             --tag pr-${{ github.event.pull_request.number }}
             --no-traffic
-
-      - name: Find Comment
-        uses: peter-evans/find-comment@v2
-        id: fc
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: github-actions[bot]
-          body-includes: "Preview"
-
       - id: preview-url
         name: Create Preview URL
         run: echo "value=https://pr-${{ github.event.pull_request.number }}---product-x-drwvbiotlz-an.a.run.app"  >> $GITHUB_OUTPUT
-
-      - id: datetime
-        name: Get datetime for now
-        run: echo "value=$(date)" >> $GITHUB_OUTPUT
-        env:
-          TZ: Asia/Tokyo
-
-      - name: Create or update comment
-        uses: peter-evans/create-or-update-comment@v2
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            Visit the :eyes: **Preview** :eyes: for this PR (updated for commit ${{ github.event.pull_request.head.sha }}):
-            <${{ steps.preview-url.outputs.value }}>
-            <sub>(:fire: updated at ${{ steps.datetime.outputs.value }})</sub>
-          edit-mode: replace
+  call-frontend-preview:
+    uses: edegp/fooder-app/.github/workflows/frontend-preview.yml@main
+    needs: deploy
+    with:
+      preview-url: ${{ needs.deploy.outputs.preview-url }}
+  call-comment:
+    uses: edegp/fooder-app/.github/workflows/comment.yml@main
+    needs: call-nextjs-preview
+    with:
+      preview-url: ${{ needs.call-nextjs-preview.outputs.preview-url }}
