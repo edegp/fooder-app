@@ -27,7 +27,7 @@ func connectSQL() (client *ent.Client, err error) {
 	env := os.Getenv("ENV")
 	var entOptions []ent.Option
 	entOptions = append(entOptions, ent.Debug())
-	log.Printf("env %T", env)
+	log.Printf("env %s", env)
 	if env == "development" {
 		// open mysql server
 		url := "admin:password@tcp(mysql_host)/fooder?parseTime=true"
@@ -69,6 +69,7 @@ func main() {
 	srv.Use(entgql.Transactioner{TxOpener: client})
 	env := os.Getenv("ENV")
 	var corsOriginsOption []string
+	log.Printf("env %s", env)
 	if env == "" {
 		corsOriginsOption = append(corsOriginsOption, "https://fooder-app.vercel.app")
 	} else {
