@@ -18,8 +18,9 @@ services:
         condition: service_healthy
     volumes:
       - ./cloudsql:/cloudsql
+      - ./app:/app
     env_file:
-      - ./.env
+      - ./.env.remote
     networks:
       - proxy
       - remote_default
