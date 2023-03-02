@@ -28,7 +28,7 @@ jobs:
 
       - id: image-url
         name: Create docker image url
-        run: echo "image-url=gcr.io/${{ secrets.GCP_PROJECT }}/${{ secrets.SERVICE_NAME }}:${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}"  >> $GITHUB_OUTPUT
+        run: echo "value=gcr.io/${{ secrets.GCP_PROJECT }}/${{ secrets.SERVICE_NAME }}:${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}"  >> $GITHUB_OUTPUT
 
       - name: Login docker
         uses: docker/login-action@v2
