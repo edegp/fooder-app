@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: "Dockerfile.dev"
+      args:
+        - ENV="dev-remote"
     ports:
       - "8080:8080"
     depends_on:
@@ -16,6 +18,8 @@ services:
         condition: service_healthy
     volumes:
       - ./cloudsql:/cloudsql
+    env_file:
+      - ./.env
     networks:
       - proxy
       - remote_default

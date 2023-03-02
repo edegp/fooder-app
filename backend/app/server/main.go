@@ -60,7 +60,7 @@ func main() {
 	); !errors.Is(err, nil) {
 		log.Printf("Error: failed creating schema resources %v\n", err)
 	}
-
+	env := os.Getenv("ENV")
 	// open graphql server
 	mux := http.NewServeMux()
 	srv := handler.NewDefaultServer((resolver.NewSchema(client)))
@@ -70,8 +70,9 @@ func main() {
 	handler := cors.New(cors.Options{
 		AllowedHeaders:   []string{"X-Requested-With", "Authorization", "Origin"},
 		AllowedOrigins:   []string{"http://localhost:3000", "https://fooder-app.vercel.app"},
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowCredentials: true,
-		// Debug:            true,
+		Debug:            env == "development",
 	}).Handler(mux)
 	// add CORS responsive header
 	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))

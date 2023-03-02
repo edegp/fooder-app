@@ -1,0 +1,37 @@
+on:
+  push:
+  pull_request:
+  workflow_call:
+      preview-url:
+        required: true
+        type: string
+jobs:
+  call-nextjs-preview:
+      runs-on: ubuntu-latest
+      outputs:
+        preview-url: ${{ steps.preview-url.outputs.value }}
+
+      steps:
+      - uses: actions/checkout@v3
+      - uses: chrnorm/deployment-action@v2
+        name: Create GitHub deployment
+        id: deployment
+        with:
+          token: '${{ github.token }}'
+          environment-url: http://my-app-url.com
+          environment: preview
+      - name: Deploy preview
+        run: |
+          npm install --global vercel@latest
+          cd frontend
+          vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          vercel env add
+          vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --env NEXT_PUBLIC_GRAPHQL_API_URL=${{ github.event.outputs.preview-url || secrets.APP_API }}
+      - id: preview-url
+        run: echo "value=${{ steps.deployment.outputs.deployment_url }}" >> $GITHUB_OUTPUT
+  call-comment:
+    uses: edegp/fooder-app/.github/workflows/comment.yml@main
+    needs: call-nextjs-preview
+    with:
+      preview-url: ${{ needs.call-nextjs-preview.outputs.preview-url }}
