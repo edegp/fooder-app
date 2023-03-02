@@ -1,6 +1,6 @@
 # step 1: build go app
 # 参考 https://qiita.com/sky0621/items/58fa2bcfc0935f6186cb
-FROM golang:1.20.1-alpine3.17 as build-step
+FROM golang:1.20.1-alpine3.17
 
 ENV GOOGLE_APPLICATION_CREDENTIALS="/service_account/key.json"
 ENV FIREBASE_AUTH_EMULATOR_HOST="172.21.0.3:9099"

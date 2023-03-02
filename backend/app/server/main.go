@@ -68,20 +68,25 @@ func main() {
 	srv.Use(entgql.Transactioner{TxOpener: client})
 	isEnv := env == "development"
 	corsOptions := cors.Options{
-		AllowedHeaders:   []string{"X-Requested-With", "Authorization", "Origin", "Content-Type", "Accept"},
 		AllowedOrigins:   []string{"http://localhost:3000", "https://fooder-app.vercel.app", "https://fooder*.vercel.app"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowCredentials: true,
 		Debug:            isEnv,
 	}
+	var url string
+	if env == "" {
+		url = os.Getenv("ENDPOINT")
+	} else {
+		url = "http://localhost"
+	}
 	// cors setting
 	handler := cors.New(corsOptions).Handler(mux)
-	log.Print(handler)
+	log.Print(corsOptions)
 	// add CORS responsive header
 	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	mux.Handle("/query", srv)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Printf("connect to %s:%s/ for GraphQL playground", url, port)
 	log.Fatal(http.ListenAndServe(":"+port, handler))
 }
 
