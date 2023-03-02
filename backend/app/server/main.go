@@ -28,12 +28,12 @@ func connectSQL() (client *ent.Client, err error) {
 	var entOptions []ent.Option
 	entOptions = append(entOptions, ent.Debug())
 	log.Printf("env %T", env)
-	if env == "" {
+	if env == "development" {
 		// open mysql server
-		return ConnectUnixSocket(entOptions...)
+		url := "admin:password@tcp(mysql_host)/fooder?parseTime=true"
+		return ent.Open("mysql", url, entOptions...)
 	}
-	url := "admin:password@tcp(mysql_host)/fooder?parseTime=true"
-	return ent.Open("mysql", url, entOptions...)
+	return ConnectUnixSocket(entOptions...)
 }
 
 const defaultPort = "8080"
