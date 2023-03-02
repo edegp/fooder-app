@@ -66,14 +66,17 @@ func main() {
 	srv := handler.NewDefaultServer((resolver.NewSchema(client)))
 	// use Transactioner
 	srv.Use(entgql.Transactioner{TxOpener: client})
-	// cors setting
-	handler := cors.New(cors.Options{
+	isEnv := env == "development"
+	corsOptions := cors.Options{
 		AllowedHeaders:   []string{"X-Requested-With", "Authorization", "Origin", "Content-Type", "Accept"},
 		AllowedOrigins:   []string{"http://localhost:3000", "https://fooder-app.vercel.app", "https://fooder*.vercel.app"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowCredentials: true,
-		Debug:            env == "development",
-	}).Handler(mux)
+		Debug:            isEnv,
+	}
+	// cors setting
+	handler := cors.New(corsOptions).Handler(mux)
+	log.Print(handler)
 	// add CORS responsive header
 	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	mux.Handle("/query", srv)
