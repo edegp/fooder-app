@@ -26,15 +26,18 @@ export const ErrorModal = memo(function ErrorModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetError])
   const Buttons = () =>
-    error ===
-    'メールアドレスが未登録です。メールアドレスをもう一度確認してください。未登録の方は，新規登録からメールアドレスを登録してください。' ? (
-      <div className="space-x-4">
-        <ButtonLink href="/signup">新規登録</ButtonLink>
+    error === 'メールが未登録です。メールをもう一度確認するか新規登録からメールを登録してください。' ? (
+      <div className="flex space-x-3">
+        <ButtonLink href="/signup" onClick={handleClick}>
+          新規登録
+        </ButtonLink>
         <Button onClick={handleClick}>ログイン</Button>
       </div>
     ) : (
       <Button onClick={handleClick}>OK</Button>
     )
 
-  return <Modal handleClose={handleClick} isOpen={isOpen} title={error || ''} button={<Buttons />} {...props} />
+  return (
+    <Modal handleClose={handleClick} isOpen={isOpen} title={error || ''} button={<Buttons />} size="sm" {...props} />
+  )
 })

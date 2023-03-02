@@ -4,7 +4,7 @@ services:
     container_name: go_app
     build:
       context: .
-      dockerfile: "Dockerfile.dev.remote"
+      dockerfile: "Dockerfile.dev"
     ports:
       - "8080:8080"
     depends_on:

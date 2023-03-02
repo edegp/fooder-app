@@ -4,7 +4,7 @@ export const getJpErrorMessage = (message: string) => {
   } else if (message === 'auth/email-already-in-use') {
     return 'すでに登録済みです。ログイン画面からログインしてください'
   } else if (message === 'auth/user-not-found') {
-    return 'メールアドレスが未登録です。メールアドレスをもう一度確認してください。未登録の方は，新規登録からメールアドレスを登録してください。'
+    return 'メールが未登録です。メールをもう一度確認するか新規登録からメールを登録してください。'
   }
   return '認証エラーです。お手数ですが，サポートまでお問い合わせください。'
 }
