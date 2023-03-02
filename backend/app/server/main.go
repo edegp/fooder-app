@@ -27,7 +27,6 @@ func connectSQL() (client *ent.Client, err error) {
 	env := os.Getenv("ENV")
 	var entOptions []ent.Option
 	entOptions = append(entOptions, ent.Debug())
-	log.Printf("env %s", env)
 	if env == "development" {
 		// open mysql server
 		url := "admin:password@tcp(mysql_host)/fooder?parseTime=true"
@@ -67,19 +66,10 @@ func main() {
 	srv := handler.NewDefaultServer((resolver.NewSchema(client)))
 	// use Transactioner
 	srv.Use(entgql.Transactioner{TxOpener: client})
-	env := os.Getenv("ENV")
-	var corsOriginsOption []string
-	log.Printf("env %s", env)
-	if env == "" {
-		log.Printf("append vercel url")
-		corsOriginsOption = append(corsOriginsOption, "https://fooder-app.vercel.app")
-	} else {
-		corsOriginsOption = append(corsOriginsOption, "http://localhost:3000")
-	}
 	// cors setting
 	handler := cors.New(cors.Options{
 		AllowedHeaders:   []string{"X-Requested-With", "Authorization", "Origin"},
-		AllowedOrigins:   corsOriginsOption,
+		AllowedOrigins:   []string{"http://localhost:3000", "https://fooder-app.vercel.app"},
 		AllowCredentials: true,
 		// Debug:            true,
 	}).Handler(mux)
