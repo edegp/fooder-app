@@ -6,8 +6,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: 'write'
+    permissions: write-all
     steps:
       - uses: google-github-actions/setup-gcloud@v1
         with:
@@ -69,13 +68,13 @@ jobs:
           comment-author: github-actions[bot]
           body-includes: "Preview"
 
-      - name: Create Preview URL
-        id: preview-url
-        run: echo "::set-output name=value::https://pr-${{ github.event.pull_request.number }}---product-x-drwvbiotlz-an.a.run.app"
+      - id: preview-url
+        name: Create Preview URL
+        run: echo "value=https://pr-${{ github.event.pull_request.number }}---product-x-drwvbiotlz-an.a.run.app"  >> $GITHUB_OUTPUT
 
-      - name: Get datetime for now
-        id: datetime
-        run: echo "::set-output name=value::$(date)"
+      - id: datetime
+        name: Get datetime for now
+        run: echo "value=$(date)" >> $GITHUB_OUTPUT
         env:
           TZ: Asia/Tokyo
 

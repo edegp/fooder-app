@@ -71,6 +71,7 @@ func main() {
 	var corsOriginsOption []string
 	log.Printf("env %s", env)
 	if env == "" {
+		log.Printf("append vercel url")
 		corsOriginsOption = append(corsOriginsOption, "https://fooder-app.vercel.app")
 	} else {
 		corsOriginsOption = append(corsOriginsOption, "http://localhost:3000")
