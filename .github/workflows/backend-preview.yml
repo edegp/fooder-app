@@ -6,7 +6,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      id-token: write
+      contents: write
     outputs:
       preview-url: ${{ steps.preview-url.outputs.value }}
     steps:
