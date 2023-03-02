@@ -25,7 +25,6 @@ jobs:
           token_format: 'access_token'
           workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUM }}/locations/global/workloadIdentityPools/my-pool/providers/my-provider
           service_account: ci-user@${{ secrets.GCP_PROJECT }}.iam.gserviceaccount.com
-      - run: echo '${{ github.event.pull_request }}'
 
       - id: image-url
         name: Create docker image url
@@ -41,7 +40,7 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-
+      - run: echo '${{ steps.image-url.outputs.value }}'
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
