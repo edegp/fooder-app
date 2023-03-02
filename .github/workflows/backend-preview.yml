@@ -1,8 +1,9 @@
 name: Deploy
 on:
+  push:
   pull_request_target:
     paths:
-      - 'backend/app/**'
+      - 'backend/app/**/*.go'
 jobs:
   deploy:
     runs-on: ubuntu-latest
