@@ -27,7 +27,7 @@ func connectSQL() (client *ent.Client, err error) {
 	env := os.Getenv("ENV")
 	var entOptions []ent.Option
 	entOptions = append(entOptions, ent.Debug())
-	log.Print(env)
+	log.Printf("env %T", env)
 	if env == "" {
 		// open mysql server
 		return ConnectUnixSocket(entOptions...)
