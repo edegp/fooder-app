@@ -68,8 +68,8 @@ func main() {
 	srv.Use(entgql.Transactioner{TxOpener: client})
 	// cors setting
 	handler := cors.New(cors.Options{
-		AllowedHeaders:   []string{"X-Requested-With", "Authorization", "Origin"},
-		AllowedOrigins:   []string{"http://localhost:3000", "https://fooder-app.vercel.app"},
+		AllowedHeaders:   []string{"X-Requested-With", "Authorization", "Origin", "Content-Type", "Accept"},
+		AllowedOrigins:   []string{"http://localhost:3000", "https://fooder-app.vercel.app", "https://fooder*.vercel.app"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowCredentials: true,
 		Debug:            env == "development",
