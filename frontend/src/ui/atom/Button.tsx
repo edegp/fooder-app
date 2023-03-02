@@ -22,7 +22,7 @@ export const Button = styled(ButtonComponent)`
   border-radius: 12px;
   height: ${({ width }) => (typeof width === 'number' ? `${width}px` : width ? width : '2em')};
   max-width: 420px;
-  padding: ${({ padding }) => (padding ? padding : '0.4em 1.2em')};
+  padding: ${({ padding }) => (padding ? padding : '0.4em 1em')};
   background-color: ${({ backgroundColor }) =>
     // @ts-ignore
     backgroundColor ? colors[backgroundColor]?.['800'] : colors['neutral']?.['900']};

@@ -16,7 +16,7 @@ export const TitleBase = styled.h1`
 export const Title = ({ children, level, size = 'md' }: Props) => {
   return (
     // eslint-disable-next-line tailwindcss/no-custom-classname
-    <TitleBase className={`text-${size}`} as={`h${level}`}>
+    <TitleBase className={`text-${size} self-center`} as={`h${level}`}>
       {children}
     </TitleBase>
   )

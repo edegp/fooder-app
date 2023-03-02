@@ -9,6 +9,7 @@ import { Button } from '@/ui/atom/Button'
 const ButtonLinkComponent = styled(Button.withComponent('span'))`
   > a {
     display: inline-block;
+    text-decoration: none;
   }
 `
 

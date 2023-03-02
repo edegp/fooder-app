@@ -69,7 +69,18 @@ const ModalContainer = styled(ModalComponent)`
 `
 
 export const Modal = memo(function Modal(props: PropsWithRef<PropsWithChildren<ModalProps>>) {
-  const { isOpen, handleClose, radius = 15, padding = '12px', title, size, button, children, style, ...other } = props
+  const {
+    isOpen,
+    handleClose,
+    radius = 15,
+    padding = '16px 12px',
+    title,
+    size,
+    button,
+    children,
+    style,
+    ...other
+  } = props
   const [clientWidth] = useRecoilValue(clientSize)
 
   if (!isOpen) {
@@ -88,7 +99,7 @@ export const Modal = memo(function Modal(props: PropsWithRef<PropsWithChildren<M
       >
         <CloseButton handleClose={handleClose} />
         {title && (
-          <Title level={2} size={size}>
+          <Title level={3} size={size}>
             {title}
           </Title>
         )}
