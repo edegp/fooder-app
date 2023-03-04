@@ -13,6 +13,9 @@ RUN cd server && CGO_ENABLED=0 go build -o /go/bin/app
 
 # step 2: exec
 FROM scratch
+# 証明書
+# https://qiita.com/ny7760/items/6f209f61d69e00a82676
+COPY --from=build-step /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build-step /go/bin/app /go/bin/app
 EXPOSE 8080
 ENTRYPOINT ["/go/bin/app"]
