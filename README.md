@@ -72,9 +72,9 @@ If you use service account or gcloud, Set up json file under [GOOGLE_APPLICATION
 **if you dont use firebase emulator remove [here](https://github.com/edegp/fooder-app/blob/1f8c1aeeca3b0f14a4568e47b983e639f284c027/frontend/src/lib/firebase.ts#L27)**
 
 ```diff
- - # if (process.env.NODE_ENV !== 'production') {
- - #  connectAuthEmulator(auth, url)
- - # }
+ - if (process.env.NODE_ENV !== 'production') {
+ -  connectAuthEmulator(auth, url)
+ - }
 ```
 
 If you don't have Docker, [Install Docker Desktop](https://www.docker.com/products/docker-desktop/)
