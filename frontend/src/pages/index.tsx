@@ -1,18 +1,12 @@
-import Head from 'next/head'
-
-import { Header } from '@/ui/atom/Header'
+import { Layout } from '@/ui/atom/Layout'
 import { LoginModal } from '@/ui/components/LoginModal'
 import { MyMapComponent } from '@/ui/googleMap/MyMapComponent'
 
 export default function Page() {
   return (
-    <>
-      <Head>
-        <title>Fooder</title>
-      </Head>
-      <Header />
+    <Layout title="Fooder">
       <MyMapComponent />
       <LoginModal />
-    </>
+    </Layout>
   )
 }

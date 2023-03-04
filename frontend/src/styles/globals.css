@@ -16,6 +16,7 @@
     height: 100vh;
     overflow: hidden;
     @apply text-body;
+    color: black;
   }
 
   @screen lg {
