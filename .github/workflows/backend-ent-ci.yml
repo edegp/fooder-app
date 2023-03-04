@@ -1,6 +1,5 @@
 name: EntCI
 on:
-  push:
   pull_request:
     paths:
       - 'backend/app/ent/**'
