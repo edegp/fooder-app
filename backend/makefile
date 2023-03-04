@@ -8,7 +8,7 @@ bd:
 bdsw:
 	docker-compose build --progress=plain --no-cache
 dp:
-	docker-compose up
+	docker-compose up -d
 db:
 	docker exec -it $(DB_CONTAINER_NAME) mysql -u $(MYSQL_USER) -p$(MYSQL_PASSWORD)
 clsql:
@@ -18,6 +18,6 @@ bs:
 bsfb:
 	docker exec -it $(FIREBASE_CONTAINER_NAME) bash
 gogen:
-	cd ~/fooder/backend/app && go generate ./..
+	cd ~/fooder/backend/app && go generate ./... && go generate ./...
 tidy:
 	cd ~/fooder/backend/app && go mod tidy

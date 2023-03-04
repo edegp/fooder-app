@@ -1,4 +1,4 @@
-type Mutation {
-  createUser(idToken: String): User
-  updateUser(id: String): User
+extend type Mutation {
+  createUser(idToken: String!, age: String): User
+  updateUser(id: String!): User
 }

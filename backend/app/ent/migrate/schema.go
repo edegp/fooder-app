@@ -8,9 +8,34 @@ import (
 )
 
 var (
+	// RecordsColumns holds the columns for the "records" table.
+	RecordsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "place_id", Type: field.TypeString},
+		{Name: "visit_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "payment_amount", Type: field.TypeInt, Nullable: true},
+		{Name: "leave_at", Type: field.TypeInt, Nullable: true},
+		{Name: "evaluation", Type: field.TypeInt, Default: 3},
+		{Name: "user_id", Type: field.TypeString},
+	}
+	// RecordsTable holds the schema information for the "records" table.
+	RecordsTable = &schema.Table{
+		Name:       "records",
+		Columns:    RecordsColumns,
+		PrimaryKey: []*schema.Column{RecordsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "records_users_record",
+				Columns:    []*schema.Column{RecordsColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
+		{Name: "age", Type: field.TypeInt, Nullable: true},
 		{Name: "create_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "latest_login_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 	}
@@ -22,9 +47,11 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		RecordsTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	RecordsTable.ForeignKeys[0].RefTable = UsersTable
 }

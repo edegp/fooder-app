@@ -11,17 +11,29 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
 	// FieldCreateAt holds the string denoting the create_at field in the database.
 	FieldCreateAt = "create_at"
 	// FieldLatestLoginAt holds the string denoting the latest_login_at field in the database.
 	FieldLatestLoginAt = "latest_login_at"
+	// EdgeRecord holds the string denoting the record edge name in mutations.
+	EdgeRecord = "record"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// RecordTable is the table that holds the record relation/edge.
+	RecordTable = "records"
+	// RecordInverseTable is the table name for the Record entity.
+	// It exists in this package in order to avoid circular dependency with the "record" package.
+	RecordInverseTable = "records"
+	// RecordColumn is the table column denoting the record relation/edge.
+	RecordColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
+	FieldAge,
 	FieldCreateAt,
 	FieldLatestLoginAt,
 }
@@ -37,6 +49,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
+	AgeValidator func(int) error
 	// DefaultCreateAt holds the default value on creation for the "create_at" field.
 	DefaultCreateAt func() time.Time
 	// DefaultLatestLoginAt holds the default value on creation for the "latest_login_at" field.

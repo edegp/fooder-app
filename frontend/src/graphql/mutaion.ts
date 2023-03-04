@@ -19,3 +19,26 @@ export const UpdateUser = gql`
     }
   }
 `
+export const CreateRecord = gql`
+  mutation CreateUser($userId: String!, $placeId: String!) {
+    createUser(userId: $userId, placeId: $placeId) {
+      id
+      userId
+      placeId
+      visitAt
+    }
+  }
+`
+
+export const UpdateRecord = gql`
+  mutation UpdateUser($id: String!, $paymentAmount: Int, $evaluation: Int) {
+    updateUser(id: $id) {
+      id
+      userId
+      placeId
+      leaveAt
+      paymentAmount
+      evaluation
+    }
+  }
+`

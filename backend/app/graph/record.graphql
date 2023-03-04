@@ -1,0 +1,16 @@
+type Mutation {
+  createRecord(userId: String!, placeId: String!): Record
+  updateRecord(
+    id: String!
+    userId: String
+    placeId: String
+    paymentAmount: Int
+    evaluation: Int
+  ): Record
+}
+
+extend type Query {
+  getUserRecords(userId: String!): [Record]
+  getPlaceRecords(placeId: String!): [Record]
+  getUserParticularPlaceRecords(userId: String!, placeId: String!): [Record]
+}

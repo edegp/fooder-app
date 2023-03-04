@@ -6,19 +6,117 @@ import (
 	"time"
 )
 
+// CreateRecordInput represents a mutation input for creating records.
+type CreateRecordInput struct {
+	PlaceID       string
+	VisitAt       *time.Time
+	PaymentAmount *int
+	LeaveAt       *int
+	Evaluation    *int
+	UserID        string
+}
+
+// Mutate applies the CreateRecordInput on the RecordMutation builder.
+func (i *CreateRecordInput) Mutate(m *RecordMutation) {
+	m.SetPlaceID(i.PlaceID)
+	if v := i.VisitAt; v != nil {
+		m.SetVisitAt(*v)
+	}
+	if v := i.PaymentAmount; v != nil {
+		m.SetPaymentAmount(*v)
+	}
+	if v := i.LeaveAt; v != nil {
+		m.SetLeaveAt(*v)
+	}
+	if v := i.Evaluation; v != nil {
+		m.SetEvaluation(*v)
+	}
+	m.SetUserID(i.UserID)
+}
+
+// SetInput applies the change-set in the CreateRecordInput on the RecordCreate builder.
+func (c *RecordCreate) SetInput(i CreateRecordInput) *RecordCreate {
+	i.Mutate(c.Mutation())
+	return c
+}
+
+// UpdateRecordInput represents a mutation input for updating records.
+type UpdateRecordInput struct {
+	PlaceID            *string
+	VisitAt            *time.Time
+	ClearPaymentAmount bool
+	PaymentAmount      *int
+	ClearLeaveAt       bool
+	LeaveAt            *int
+	Evaluation         *int
+	ClearUser          bool
+	UserID             *string
+}
+
+// Mutate applies the UpdateRecordInput on the RecordMutation builder.
+func (i *UpdateRecordInput) Mutate(m *RecordMutation) {
+	if v := i.PlaceID; v != nil {
+		m.SetPlaceID(*v)
+	}
+	if v := i.VisitAt; v != nil {
+		m.SetVisitAt(*v)
+	}
+	if i.ClearPaymentAmount {
+		m.ClearPaymentAmount()
+	}
+	if v := i.PaymentAmount; v != nil {
+		m.SetPaymentAmount(*v)
+	}
+	if i.ClearLeaveAt {
+		m.ClearLeaveAt()
+	}
+	if v := i.LeaveAt; v != nil {
+		m.SetLeaveAt(*v)
+	}
+	if v := i.Evaluation; v != nil {
+		m.SetEvaluation(*v)
+	}
+	if i.ClearUser {
+		m.ClearUser()
+	}
+	if v := i.UserID; v != nil {
+		m.SetUserID(*v)
+	}
+}
+
+// SetInput applies the change-set in the UpdateRecordInput on the RecordUpdate builder.
+func (c *RecordUpdate) SetInput(i UpdateRecordInput) *RecordUpdate {
+	i.Mutate(c.Mutation())
+	return c
+}
+
+// SetInput applies the change-set in the UpdateRecordInput on the RecordUpdateOne builder.
+func (c *RecordUpdateOne) SetInput(i UpdateRecordInput) *RecordUpdateOne {
+	i.Mutate(c.Mutation())
+	return c
+}
+
 // CreateUserInput represents a mutation input for creating users.
 type CreateUserInput struct {
+	Age           *int
 	CreateAt      *time.Time
 	LatestLoginAt *time.Time
+	RecordIDs     []string
 }
 
 // Mutate applies the CreateUserInput on the UserMutation builder.
 func (i *CreateUserInput) Mutate(m *UserMutation) {
+	if v := i.Age; v != nil {
+		m.SetAge(*v)
+	}
 	if v := i.CreateAt; v != nil {
 		m.SetCreateAt(*v)
 	}
 	if v := i.LatestLoginAt; v != nil {
 		m.SetLatestLoginAt(*v)
+	}
+	if v := i.RecordIDs; len(v) > 0 {
+		m.AddRecordIDs(v...)
 	}
 }
 
@@ -30,13 +128,33 @@ func (c *UserCreate) SetInput(i CreateUserInput) *UserCreate {
 
 // UpdateUserInput represents a mutation input for updating users.
 type UpdateUserInput struct {
-	LatestLoginAt *time.Time
+	ClearAge        bool
+	Age             *int
+	LatestLoginAt   *time.Time
+	ClearRecord     bool
+	AddRecordIDs    []string
+	RemoveRecordIDs []string
 }
 
 // Mutate applies the UpdateUserInput on the UserMutation builder.
 func (i *UpdateUserInput) Mutate(m *UserMutation) {
+	if i.ClearAge {
+		m.ClearAge()
+	}
+	if v := i.Age; v != nil {
+		m.SetAge(*v)
+	}
 	if v := i.LatestLoginAt; v != nil {
 		m.SetLatestLoginAt(*v)
+	}
+	if i.ClearRecord {
+		m.ClearRecord()
+	}
+	if v := i.AddRecordIDs; len(v) > 0 {
+		m.AddRecordIDs(v...)
+	}
+	if v := i.RemoveRecordIDs; len(v) > 0 {
+		m.RemoveRecordIDs(v...)
 	}
 }
 

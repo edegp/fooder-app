@@ -10,10 +10,8 @@ services:
     env_file:
       - .env
     depends_on:
-      db:
-        condition: service_healthy
-      firebase:
-        condition: service_started
+      - db
+      - firebase
     volumes:
       - ./app:/app
   db:
@@ -22,22 +20,14 @@ services:
     image: mysql:latest
     container_name: mysql_host
     restart: always
-    # 起動チェック
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping"]
-      interval: 5s
-      timeout: 30s
-      retries: 5
-      start_period: 8s
     ports:
       - 3307:3306
     expose:
       - 3307
     environment:
-      MYSQL_ROOT_PASSWORD: ps
-      MYSQL_DATABASE: fooder
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: $MYSQL_DATABASE
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       TZ: Asia/Tokyo
     tty: true
@@ -50,7 +40,7 @@ services:
   firebase:
     build:
       context: ./firebase
-      dockerfile: "./dockerfile"
+      dockerfile: "./Dockerfile"
       args:
         - GCLOUD_PROJECT=${GCLOUD_PROJECT}
     container_name: firebase

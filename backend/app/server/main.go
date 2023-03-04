@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/app/ent"
+	"backend/app/ent/migrate"
 	"backend/app/resolver"
 	"context"
 	"errors"
@@ -27,7 +28,7 @@ func connectSQL(env string) (client *ent.Client, err error) {
 	entOptions = append(entOptions, ent.Debug())
 	if env == "development" {
 		// open mysql server
-		url := "docker:password@tcp(mysql_host)/fooder?parseTime=true"
+		url := fmt.Sprintf("%s:%s@tcp(mysql_host)/%s?parseTime=true", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_DATABASE"))
 		return ent.Open("mysql", url, entOptions...)
 	}
 	return ConnectUnixSocket(entOptions...)
@@ -43,12 +44,14 @@ func main() {
 	}
 	client, err := connectSQL(env)
 	if err != nil {
-		log.Fatalf("Faital to connect mysql. %s", err)
+		log.Fatalf("Fatal to connect mysql. %s", err)
 	}
 	defer client.Close()
 	// Run the migration here
 	if err := client.Debug().Schema.Create(
 		context.Background(),
+		// allow uid
+		migrate.WithGlobalUniqueID(true),
 		// // Hook into Atlas Diff process.
 		schema.WithDiffHook(DiffHook),
 		// Hook into Atlas Apply process.

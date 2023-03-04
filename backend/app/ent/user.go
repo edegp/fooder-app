@@ -16,10 +16,37 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
+	// Age holds the value of the "age" field.
+	Age int `json:"age,omitempty"`
 	// CreateAt holds the value of the "create_at" field.
 	CreateAt time.Time `json:"create_at,omitempty"`
 	// LatestLoginAt holds the value of the "latest_login_at" field.
 	LatestLoginAt time.Time `json:"latest_login_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges UserEdges `json:"edges"`
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Record holds the value of the record edge.
+	Record []*Record `json:"record,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]map[string]int
+
+	namedRecord map[string][]*Record
+}
+
+// RecordOrErr returns the Record value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RecordOrErr() ([]*Record, error) {
+	if e.loadedTypes[0] {
+		return e.Record, nil
+	}
+	return nil, &NotLoadedError{edge: "record"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -27,6 +54,8 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case user.FieldAge:
+			values[i] = new(sql.NullInt64)
 		case user.FieldID:
 			values[i] = new(sql.NullString)
 		case user.FieldCreateAt, user.FieldLatestLoginAt:
@@ -52,6 +81,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.ID = value.String
 			}
+		case user.FieldAge:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field age", values[i])
+			} else if value.Valid {
+				u.Age = int(value.Int64)
+			}
 		case user.FieldCreateAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field create_at", values[i])
@@ -67,6 +102,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 		}
 	}
 	return nil
+}
+
+// QueryRecord queries the "record" edge of the User entity.
+func (u *User) QueryRecord() *RecordQuery {
+	return NewUserClient(u.config).QueryRecord(u)
 }
 
 // Update returns a builder for updating this User.
@@ -92,6 +132,9 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString("age=")
+	builder.WriteString(fmt.Sprintf("%v", u.Age))
+	builder.WriteString(", ")
 	builder.WriteString("create_at=")
 	builder.WriteString(u.CreateAt.Format(time.ANSIC))
 	builder.WriteString(", ")
@@ -99,6 +142,30 @@ func (u *User) String() string {
 	builder.WriteString(u.LatestLoginAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedRecord returns the Record named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedRecord(name string) ([]*Record, error) {
+	if u.Edges.namedRecord == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedRecord[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedRecord(name string, edges ...*Record) {
+	if u.Edges.namedRecord == nil {
+		u.Edges.namedRecord = make(map[string][]*Record)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedRecord[name] = []*Record{}
+	} else {
+		u.Edges.namedRecord[name] = append(u.Edges.namedRecord[name], edges...)
+	}
 }
 
 // Users is a parsable slice of User.
