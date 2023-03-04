@@ -3,12 +3,12 @@
 FROM golang:1.20.1-alpine3.17
 
 ENV GOOGLE_APPLICATION_CREDENTIALS="/service_account/key.json"
-ENV FIREBASE_AUTH_EMULATOR_HOST="172.21.0.3:9099"
+ENV FIREBASE_AUTH_EMULATOR_HOST="192.22.0.3:9099"
 ARG GCLOUD_PROJECT
 ENV GCLOUD_PROJECT=${GCLOUD_PROJECT}
 
 # for go mod download
-RUN apk add --update --no-cache ca-certificates git bash
+RUN apk add --update --no-cache ca-certificates git bash curl
 RUN mkdir /app
 WORKDIR /app
 COPY app/go.mod app/go.sum ./

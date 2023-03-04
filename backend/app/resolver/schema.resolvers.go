@@ -24,9 +24,8 @@ func (r *queryResolver) Nodes(ctx context.Context, ids []string) ([]ent.Noder, e
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*ent.User, error) {
-	// client := ent.FromContext(ctx)
-	// log.Print("getUsers")
-	return r.client.Debug().User.Query().All(ctx)
+	client := ent.FromContext(ctx)
+	return client.Debug().User.Query().All(ctx)
 }
 
 // Query returns graph.QueryResolver implementation.

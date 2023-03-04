@@ -2,7 +2,6 @@ package main
 
 import (
 	"backend/app/ent"
-	"backend/app/ent/migrate"
 	"backend/app/resolver"
 	"context"
 	"errors"
@@ -23,13 +22,12 @@ import (
 	"github.com/rs/cors"
 )
 
-func connectSQL() (client *ent.Client, err error) {
-	env := os.Getenv("ENV")
+func connectSQL(env string) (client *ent.Client, err error) {
 	var entOptions []ent.Option
 	entOptions = append(entOptions, ent.Debug())
 	if env == "development" {
 		// open mysql server
-		url := "admin:password@tcp(mysql_host)/fooder?parseTime=true"
+		url := "docker:password@tcp(mysql_host)/fooder?parseTime=true"
 		return ent.Open("mysql", url, entOptions...)
 	}
 	return ConnectUnixSocket(entOptions...)
@@ -39,10 +37,11 @@ const defaultPort = "8080"
 
 func main() {
 	port := os.Getenv("PORT")
+	env := os.Getenv("ENV")
 	if port == "" {
 		port = defaultPort
 	}
-	client, err := connectSQL()
+	client, err := connectSQL(env)
 	if err != nil {
 		log.Fatalf("Faital to connect mysql. %s", err)
 	}
@@ -54,37 +53,37 @@ func main() {
 		schema.WithDiffHook(DiffHook),
 		// Hook into Atlas Apply process.
 		schema.WithApplyHook(ApplyHook),
-		// reset database
-		migrate.WithDropIndex(true),
-		migrate.WithDropColumn(true),
+		// // reset database
+		// migrate.WithDropIndex(true),
+		// migrate.WithDropColumn(true),
 	); !errors.Is(err, nil) {
 		log.Printf("Error: failed creating schema resources %v\n", err)
 	}
-	env := os.Getenv("ENV")
 	// open graphql server
 	mux := http.NewServeMux()
-	srv := handler.NewDefaultServer((resolver.NewSchema(client)))
+	srv := handler.NewDefaultServer(resolver.NewSchema(client))
 	// use Transactioner
 	srv.Use(entgql.Transactioner{TxOpener: client})
-	isEnv := env == "development"
+
+	isEnv := env == "development" || env == "dev-remote"
 	corsOptions := cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "https://fooder-app.vercel.app", "https://fooder*.vercel.app"},
+		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:8080", "https://fooder-app.vercel.app", "https://fooder*.vercel.app"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowCredentials: true,
 		Debug:            isEnv,
 	}
+	// cors setting
+	handler := cors.New(corsOptions).Handler(mux)
+	// add CORS responsive header
+	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	mux.Handle("/query", srv)
+
 	var url string
 	if env == "" {
 		url = os.Getenv("ENDPOINT")
 	} else {
 		url = "http://localhost"
 	}
-	// cors setting
-	handler := cors.New(corsOptions).Handler(mux)
-	log.Print(corsOptions)
-	// add CORS responsive header
-	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	mux.Handle("/query", srv)
 
 	log.Printf("connect to %s:%s/ for GraphQL playground", url, port)
 	log.Fatal(http.ListenAndServe(":"+port, handler))

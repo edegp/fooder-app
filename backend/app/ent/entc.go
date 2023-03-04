@@ -4,10 +4,10 @@
 package main
 
 import (
+	"backend/app/formatter"
 	"log"
 	"os"
 	"strings"
-	"backend/app/formatter"
 
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent/entc"
@@ -38,10 +38,10 @@ func main() {
 		// entgql.WithWhereInputs(true),
 		// entgql.WithNodeDescriptor(true),
 	)
-    if err != nil {
-        log.Fatalf("creating entgql extension: %v", err)
-    }
-    if err := entc.Generate("../ent/schema", &gen.Config{}, entc.Extensions(ex)); err != nil {
-        log.Fatalf("running ent codegen: %v", err)
-    }
+	if err != nil {
+		log.Fatalf("creating entgql extension: %v", err)
+	}
+	if err := entc.Generate("../ent/schema", &gen.Config{}, entc.Extensions(ex)); err != nil {
+		log.Fatalf("running ent codegen: %v", err)
+	}
 }

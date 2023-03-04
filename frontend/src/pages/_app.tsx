@@ -38,7 +38,7 @@ function Myapp({ Component, pageProps }: AppProps) {
   )
 }
 
-const graphql_api_url = process.env.NEXT_PUBLIC_GRAPHQL_API_URL || 'http://localhost:8080'
+const graphql_api_url = process.env.NEXT_PUBLIC_GRAPHQL_API_URL || 'http://localhost:8080/query'
 
 // urqlの設定
 export default withUrqlClient(() => ({ url: graphql_api_url }), {

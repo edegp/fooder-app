@@ -16,19 +16,20 @@ import (
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, idToken *string) (*ent.User, error) {
 	firebaseClient, err := firebase.InitFirebaseClient()
-	log.Print(*firebaseClient)
+	log.Print(firebaseClient, err)
 	if err != nil {
 		log.Printf("failed firebase client init %T", err)
 		return nil, err
 	}
 	token, err := firebaseClient.VerifyIDToken(ctx, *idToken)
-	log.Print(token)
+	log.Print(token, err)
 	if err != nil {
 		log.Printf("failed firebase verify IDToken %s", err)
 		return nil, err
 	}
 	client := ent.FromContext(ctx)
 	userID := token.UID
+	log.Printf("userid %s", userID)
 	return client.Debug().User.Create().SetID(userID).Save(ctx)
 }
 

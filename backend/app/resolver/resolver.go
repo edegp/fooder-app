@@ -14,4 +14,3 @@ func NewSchema(client *ent.Client) graphql.ExecutableSchema {
 		Resolvers: &Resolver{client},
 	})
 }
-

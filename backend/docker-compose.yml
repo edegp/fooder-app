@@ -1,10 +1,75 @@
 version: "3.9"
 services:
   web:
+    container_name: go_app
     build:
       context: .
-      dockerfile: "Dockerfile"
+      dockerfile: "Dockerfile.dev"
     ports:
       - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      firebase:
+        condition: service_started
+    volumes:
+      - ./app:/app
+  db:
+    # mac対応
+    platform: linux/x86_64
+    image: mysql:latest
+    container_name: mysql_host
+    restart: always
+    # 起動チェック
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping"]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+      start_period: 8s
+    ports:
+      - 3307:3306
+    expose:
+      - 3307
+    environment:
+      MYSQL_ROOT_PASSWORD: ps
+      MYSQL_DATABASE: fooder
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      TZ: Asia/Tokyo
+    tty: true
+    volumes:
+      # volumeの作成
+      - data-volume:/var/lib/mysql
+      # bind mountでconfig 反映
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+  # firebase emulator
+  firebase:
+    build:
+      context: ./firebase
+      dockerfile: "./dockerfile"
+      args:
+        - GCLOUD_PROJECT=${GCLOUD_PROJECT}
+    container_name: firebase
+    ports:
+      - 4000:4000
+      - 9099:9099
+    # ip固定
+    networks:
+      backend_default:
+        ipv4_address: 172.21.0.3
+    volumes:
+      - user-data:/opt/workspace/firebase/data
 volumes:
   data-volume:
+  user-data:
+networks:
+  backend_default:
+    name: backend_default
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
