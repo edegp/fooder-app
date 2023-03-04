@@ -1,21 +1,21 @@
 #! /bin/sh
-firebase emulators:start --only=auth --import=./firebase --export-on-exit=./firebase --project ${GCLOUD_PROJECT}
+firebase emulators:start --only=auth --import=./firebase --export-on-exit=./firebase --project "${GCLOUD_PROJECT}"
 set -x
 
 pid=0
 
 # SIGUSR1-handler
 my_handler() {
-  echo "my_handler"
+	echo "my_handler"
 }
 
 # SIGTERM-handler
 term_handler() {
-  if [ $pid -ne 0 ]; then
-    kill -SIGTERM "$pid"
-    wait "$pid"
-  fi
-  exit 143; # 128 + 15 -- SIGTERM
+	if [ $pid -ne 0 ]; then
+		kill -SIGTERM "$pid"
+		wait "$pid"
+	fi
+	exit 143 # 128 + 15 -- SIGTERM
 }
 
 # setup handlers
@@ -28,7 +28,7 @@ node firebase &
 pid="$!"
 
 # wait forever
-while true
-do
-  tail -f /dev/null & wait ${!}
+while true; do
+	tail -f /dev/null &
+	wait ${!}
 done

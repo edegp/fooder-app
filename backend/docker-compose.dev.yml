@@ -1,50 +1,28 @@
 version: "3.9"
 services:
   web:
-    container_name: go_app
+    container_name: go_app_remote
     build:
       context: .
       dockerfile: "Dockerfile.dev"
     ports:
       - "8080:8080"
     depends_on:
-      db:
-        condition: service_healthy
-      firebase:
-        condition: service_started
-  db:
-    # mac対応
-    platform: linux/x86_64
-    image: mysql:latest
-    container_name: mysql_host
-    restart: always
-    # 起動チェック
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping"]
-      timeout: 20s
-      retries: 3
-    ports:
-      - 3307:3306
-    expose:
-      - 3307
-    environment:
-      MYSQL_ROOT_PASSWORD: ps
-      MYSQL_DATABASE: fooder
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: password
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      TZ: Asia/Tokyo
-    tty: true
+      - "sql_proxy"
+      - "firebase"
+    command: /app/wait-for-cloudsql.sh air -c .air.toml
     volumes:
-      # volumeの作成
-      - data-volume:/var/lib/mysql
-      # bind mountでconfig 反映
-      - ./mysql/my.cnf:/etc/mysql/my.cnf
+      - ./cloudsql:/cloudsql
+      - ./app:/app
+    env_file:
+      - ./.env.remote
+    networks:
+      - remote_default
   # firebase emulator
   firebase:
     build:
       context: ./firebase
-      dockerfile: "./dockerfile"
+      dockerfile: ./Dockerfile
       args:
         - GCLOUD_PROJECT=${GCLOUD_PROJECT}
     container_name: firebase
@@ -53,17 +31,31 @@ services:
       - 9099:9099
     # ip固定
     networks:
-      backend_default:
-        ipv4_address: 172.21.0.3
+      remote_default:
+        ipv4_address: 192.22.0.3
+    tty: true
     volumes:
-      - user-data:/opt/workspace/firebase/data
+      - user-data:/opt/workspace/firebase
+  sql_proxy:
+    container_name: sql_proxy
+    build:
+      context: .
+      dockerfile: ./cloudsql/Dockerfile
+    restart: always
+    volumes:
+      - ./cloudsql:/cloudsql
+      - ./service_account:/service_account
+    networks:
+      remote_default:
+        ipv4_address: 192.22.0.5
+
 volumes:
-  data-volume:
+  data-volume-remote:
   user-data:
 networks:
-  backend_default:
-    name: backend_default
+  remote_default:
+    name: remote_default
     driver: bridge
     ipam:
       config:
-        - subnet: 172.21.0.0/16
+        - subnet: 192.22.0.0/16
