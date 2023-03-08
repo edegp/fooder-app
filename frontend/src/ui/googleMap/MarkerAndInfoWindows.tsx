@@ -44,7 +44,8 @@ const ButtonContainer = styled.div`
 
 const getGoogleMapUrl = (lat?: number, lng?: number, place_id?: string) =>
   `https://www.google.com/maps/search/?api=1&query=${lat}%2C-${lng}&query_place_id=${place_id}`
-/* レコメンドした場所をwindowで表示**/
+
+/** レコメンドした場所をwindowで表示 */
 export const MarkerAndInfoWindows = memo(function InfoWindows() {
   const makersLocation = useRecoilValue(makersLocationState)
   const placeNames = makersLocation?.map((place: google.maps.places.PlaceResult) => [place.name, false]) || [[]]

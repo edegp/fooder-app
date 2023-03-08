@@ -3,7 +3,7 @@
 import { memo, useEffect, useMemo, useRef } from 'react'
 
 import { Loader } from '@googlemaps/js-api-loader'
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import useSWR from 'swr'
 
 import {
@@ -45,12 +45,14 @@ export const MyMapComponent = memo(function MyMapComponent() {
     onSuccess: data => setMap(data)
   })
 
-  const setMakersLocation = useSetRecoilState<google.maps.places.PlaceResult[] | null>(makersLocationState)
+  const [makersLocation, setMakersLocation] = useRecoilState<google.maps.places.PlaceResult[] | null>(
+    makersLocationState
+  )
   const detail = useRecoilValue(placeDetailState)
   const clickable = useMemo(() => !!detail, [detail])
   const [isLoading, setIsLoading] = useRecoilState(isLoadingState)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => setIsLoading(isMapLoading), [isMapLoading])
+  useEffect(() => setIsLoading(isMapLoading || !makersLocation), [isMapLoading, makersLocation])
   /** 検索結果のcallback */
   const callback: (
     a: google.maps.places.PlaceResult[] | null,

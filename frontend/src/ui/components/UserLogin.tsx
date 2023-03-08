@@ -17,7 +17,6 @@ import { handleError } from '@/lib/modules/handleError'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
 import { emailState } from '@/lib/recoil/state'
 import { Button } from '@/ui/atom/Button'
-import { ButtonLink } from '@/ui/atom/ButtonLink'
 import { Input } from '@/ui/atom/Input'
 
 type userForm = EventTarget & {
@@ -34,7 +33,7 @@ const Form = styled.form`
   flex-wrap: wrap;
   flex-direction: column;
   padding: 0 48px;
-  margin: 20vh 0 16px;
+  margin-bottom: 16px;
   align-content: center;
   > *:not(:last-child) {
     margin-bottom: 16px;
@@ -50,6 +49,7 @@ const Form = styled.form`
 
 const HereList = styled.ul`
   text-align: center;
+  letter-spacing: 0.04em;
   > *:not(:last-child) {
     padding-bottom: 4px;
   }
@@ -113,6 +113,7 @@ export const UserLogin = memo(function UserLogin() {
     }
     try {
       await sendPasswordResetEmail(auth, email, actionCodeSettings)
+      router.push('/forgetpass')
     } catch (err) {
       router.push('/signin')
       handleError(err)
@@ -121,7 +122,7 @@ export const UserLogin = memo(function UserLogin() {
   }, [email, router])
 
   return (
-    <>
+    <div className="flex h-[calc(100%-100px)] w-full flex-col items-center justify-center">
       <Form onSubmit={handleSubmit}>
         <Input name="email" id="email" type="email" defaultValue={email} placeholder="メールアドレス" required />
         <Input
@@ -142,7 +143,7 @@ export const UserLogin = memo(function UserLogin() {
           required
         />
         <Button padding="7px 6px" type="submit">
-          {pathname === '/signup' ? '登録' : 'ログイン'}
+          {pathname === '/signup' ? '新規登録' : 'ログイン'}
         </Button>
       </Form>
       {pathname === '/signin' ? (
@@ -152,9 +153,7 @@ export const UserLogin = memo(function UserLogin() {
           </li>
           <li>
             パスワードをお忘れの方は
-            <ButtonLink href={'forgetpass'} onClick={handleFogetPassClick}>
-              こちら
-            </ButtonLink>
+            <span onClick={handleFogetPassClick}>こちら</span>
             から
           </li>
         </HereList>
@@ -163,6 +162,6 @@ export const UserLogin = memo(function UserLogin() {
           登録済み方は<Link href="/signin">こちら</Link>
         </SignInHere>
       )}
-    </>
+    </div>
   )
 })
