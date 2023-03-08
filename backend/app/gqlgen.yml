@@ -43,6 +43,7 @@ resolver:
 autobind:
   - "backend/app/ent"
   - "backend/app/ent/user"
+  - "backend/app/ent/record"
 
 # This section declares type mapping between the GraphQL and go type systems
 #
@@ -53,6 +54,14 @@ models:
   ID:
     model:
       - github.com/99designs/gqlgen/graphql.ID
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Uint64:
+    model:
+      - github.com/99designs/gqlgen/graphql.Uint64
   Node:
     model:
       # ent.Noderは、Nodeテンプレートが生成する新しいインターフェースである

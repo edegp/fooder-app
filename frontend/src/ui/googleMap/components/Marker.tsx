@@ -43,24 +43,25 @@ export const Marker = memo(function Marker({ position, options, clickable, icon,
     }
   }, [onClick])
 
-  useEffect(function markerInit() {
-    const markerOptions = {
-      ...options,
-      map,
-      position: position
-    }
-    const marker = new window.google.maps.Marker(markerOptions)
-    marker.setMap(map)
-    if (position) marker.setPosition(position)
-    if (icon) marker.setIcon(icon)
-    if (clickable) marker.setClickable(clickable)
-    if (onClick) setClickListener(google.maps.event.addListener(marker, 'click', onClick))
-    setInstance(marker)
-
-    // return () => {
-    //   if (marker) marker.setMap(null)
-    // }
-  }, [])
-
+  useEffect(
+    function markerInit() {
+      const markerOptions = {
+        ...options,
+        map,
+        position: position
+      }
+      const marker = new window.google.maps.Marker(markerOptions)
+      marker.setMap(map)
+      if (position) marker.setPosition(position)
+      if (icon) marker.setIcon(icon)
+      if (clickable) marker.setClickable(clickable)
+      if (onClick) setClickListener(google.maps.event.addListener(marker, 'click', onClick))
+      setInstance(marker)
+      return () => {
+        if (marker) marker.setMap(null)
+      }
+    },
+    [map]
+  )
   return null
 })

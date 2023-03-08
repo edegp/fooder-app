@@ -24,10 +24,27 @@ type Menu = {
 const HeadContainer = styled.header`
   height: 64px;
   background-color: white;
+  position: relative;
   display: flex;
   justify-content: space-between;
   justify-items: center;
   align-items: center;
+`
+
+const HeaderShadow = styled.div`
+  content: '';
+  position: absolute;
+  width: 100%;
+  bottom: -1.56rem;
+  left: 0px;
+  background-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.6) 0px, rgba(0, 0, 0, 0.2) 40%, transparent 120%);
+  background-position: 0% -0.94rem;
+  background-repeat: no-repeat;
+  height: 1.36rem;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 20;
+  visibility: visible;
 `
 
 const Title = styled.h1`
@@ -83,6 +100,7 @@ export const Header = memo(function Header() {
           <Title className="no-underline">Fooder</Title>
         </Link>
         <HiOutlineMenuAlt4 onClick={handleOpen} className="mr-6 h-9 w-9 text-lg" />
+        {pathname !== '/' && <HeaderShadow />}
       </HeadContainer>
       <Drawer handleClose={handleClose} isOpen={nullableIsOpen} className="p-12 md:p-24">
         <ul className="space-y-8">

@@ -2,28 +2,22 @@
 
 import { FormEvent, memo, useCallback, useState } from 'react'
 
-import dynamic from 'next/dynamic'
-import Head from 'next/head'
+import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
+import { sendPasswordResetEmail } from 'firebase/auth'
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from 'react-icons/md'
 import { useRecoilState } from 'recoil'
 import styled from 'styled-components'
 import { useMutation } from 'urql'
 
 import { CreateUser, UpdateUser } from '@/graphql/mutaion'
-import { signIn, signUp } from '@/lib/firebase'
+import { auth, signIn, signUp } from '@/lib/firebase'
 import { handleError } from '@/lib/modules/handleError'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
 import { emailState } from '@/lib/recoil/state'
 import { Button } from '@/ui/atom/Button'
 import { Input } from '@/ui/atom/Input'
-import { LoadingRing } from '@/ui/atom/Loading'
-
-const Header = dynamic(
-  import('@/ui/atom/Header').then(module => module.Header),
-  { ssr: false, loading: () => <LoadingRing /> }
-)
 
 type userForm = EventTarget & {
   email: HTMLInputElement
@@ -33,14 +27,13 @@ type userForm = EventTarget & {
 const Form = styled.form`
   position: relative;
   width: 100%;
-  height: 100vh;
   z-index: 0;
   overflow: hidden;
   display: inline-flex;
   flex-wrap: wrap;
   flex-direction: column;
   padding: 0 48px;
-  margin: 20vh 0;
+  margin-bottom: 16px;
   align-content: center;
   > *:not(:last-child) {
     margin-bottom: 16px;
@@ -53,6 +46,26 @@ const Form = styled.form`
     align-content: center;
   }
 `
+
+const HereList = styled.ul`
+  text-align: center;
+  letter-spacing: 0.04em;
+  > *:not(:last-child) {
+    padding-bottom: 4px;
+  }
+  a {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+`
+
+const host = process.env.NEXT_PUBLIC_HOST || 'http://localhost:3000'
+
+const actionCodeSettings = {
+  url: `${host}/singin`
+}
+
+const SignInHere = HereList.withComponent('p')
 
 export const UserLogin = memo(function UserLogin() {
   const router = useRouter()
@@ -93,13 +106,23 @@ export const UserLogin = memo(function UserLogin() {
   )
 
   const handleShowPassWord = useCallback(() => setIsShowPassword(prev => !prev), [setIsShowPassword])
+  const handleFogetPassClick = useCallback(async () => {
+    if (!email) {
+      router.push('/signin')
+      throw new Error('メールの取得に失敗しました')
+    }
+    try {
+      await sendPasswordResetEmail(auth, email, actionCodeSettings)
+      router.push('/forgetpass')
+    } catch (err) {
+      router.push('/signin')
+      handleError(err)
+      return <></>
+    }
+  }, [email, router])
 
   return (
-    <>
-      <Head>
-        <title>Fooder Login</title>
-      </Head>
-      <Header />
+    <div className="flex h-[calc(100%-100px)] w-full flex-col items-center justify-center">
       <Form onSubmit={handleSubmit}>
         <Input name="email" id="email" type="email" defaultValue={email} placeholder="メールアドレス" required />
         <Input
@@ -120,9 +143,27 @@ export const UserLogin = memo(function UserLogin() {
           required
         />
         <Button padding="7px 6px" type="submit">
-          {pathname === '/signup' ? '登録' : 'ログイン'}
+          {pathname === '/signup' ? '新規登録' : 'ログイン'}
         </Button>
       </Form>
-    </>
+      {pathname === '/signin' ? (
+        <HereList>
+          <li>
+            登録がお済みでない方は<Link href="/signup">こちら</Link>
+          </li>
+          <li>
+            パスワードをお忘れの方は
+            <span className="underline" onClick={handleFogetPassClick}>
+              こちら
+            </span>
+            から
+          </li>
+        </HereList>
+      ) : (
+        <SignInHere>
+          登録済み方は<Link href="/signin">こちら</Link>
+        </SignInHere>
+      )}
+    </div>
   )
 })

@@ -7,15 +7,6 @@ import { urlSyncEffect } from 'recoil-sync'
 import { auth } from '@/lib/firebase'
 import { localStorageEffect } from '@/lib/recoil/localstrageEffect'
 
-// // predicate
-// const isRecoilState = (
-//   recoilState: RecoilState<unknown> | boolean | null = false
-// ): recoilState is RecoilState<unknown> => {
-//   const maybeType: RecoilState<unknown> | null =
-//     recoilState !== null && typeof recoilState !== 'boolean' && 'key' in recoilState ? recoilState : null
-//   return !!maybeType
-// }
-
 const clientSize = atom({
   key: 'clientSize',
   default: [0, 0]
@@ -126,16 +117,6 @@ const isLoadingState = atom<boolean>({
       setSelf(!getPromise(placeDetailState) || !getPromise(geoLocation) || !getPromise(mapState))
   ]
 })
-
-// const openSelectorFamily = selectorFamily({
-//   key: 'open',
-//   get:
-//     (state: RecoilState<unknown>) =>
-//     ({ get }: { get: GetRecoilValue }) =>
-//       !!get(state),
-//   set: ({ set }: { set: any }, newValue: boolean) => set(newValue)
-// })
-
 export {
   clientSize,
   isPcBrowser,

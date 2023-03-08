@@ -4,6 +4,8 @@
 
 あなたにあったおすすめのお店を AI で瞬時に検索！
 
+**[DEMO](https://fooder-app.vercel.app/)**
+
 ## Frontend
 
 node-version 18.9.0

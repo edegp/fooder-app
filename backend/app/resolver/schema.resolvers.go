@@ -8,6 +8,7 @@ import (
 	"backend/app/ent"
 	"backend/app/graph"
 	"context"
+	"fmt"
 )
 
 // Node is the resolver for the node field.
@@ -20,6 +21,12 @@ func (r *queryResolver) Node(ctx context.Context, id string) (ent.Noder, error) 
 func (r *queryResolver) Nodes(ctx context.Context, ids []string) ([]ent.Noder, error) {
 	client := ent.FromContext(ctx)
 	return client.Noders(ctx, ids)
+}
+
+// Records is the resolver for the records field.
+func (r *queryResolver) Records(ctx context.Context) ([]*ent.Record, error) {
+	client := ent.FromContext(ctx)
+	return client.Debug().Record.Query().All(ctx)
 }
 
 // Users is the resolver for the users field.
@@ -39,8 +46,28 @@ type queryResolver struct{ *Resolver }
 //   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //     it when you're done.
 //   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *userResolver) ID(ctx context.Context, obj *ent.User) (string, error) {
-	return obj.ID, nil
+func (r *recordResolver) StayTime(ctx context.Context, obj *ent.Record) (*int32, error) {
+	panic(fmt.Errorf("not implemented: StayTime - stayTime"))
+}
+func (r *userResolver) Age(ctx context.Context, obj *ent.User) (*int32, error) {
+	panic(fmt.Errorf("not implemented: Age - age"))
+}
+func (r *createRecordInputResolver) StayTime(ctx context.Context, obj *ent.CreateRecordInput, data *int32) error {
+	panic(fmt.Errorf("not implemented: StayTime - stayTime"))
+}
+func (r *createUserInputResolver) Age(ctx context.Context, obj *ent.CreateUserInput, data *int32) error {
+	panic(fmt.Errorf("not implemented: Age - age"))
+}
+func (r *updateRecordInputResolver) StayTime(ctx context.Context, obj *ent.UpdateRecordInput, data *int32) error {
+	panic(fmt.Errorf("not implemented: StayTime - stayTime"))
+}
+func (r *updateUserInputResolver) Age(ctx context.Context, obj *ent.UpdateUserInput, data *int32) error {
+	panic(fmt.Errorf("not implemented: Age - age"))
 }
 
+type recordResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
+type createRecordInputResolver struct{ *Resolver }
+type createUserInputResolver struct{ *Resolver }
+type updateRecordInputResolver struct{ *Resolver }
+type updateUserInputResolver struct{ *Resolver }

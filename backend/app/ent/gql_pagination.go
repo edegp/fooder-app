@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"backend/app/ent/record"
 	"backend/app/ent/user"
 	"context"
 	"encoding/base64"
@@ -241,6 +242,308 @@ func paginateLimit(first, last *int) int {
 	return limit
 }
 
+// RecordEdge is the edge representation of Record.
+type RecordEdge struct {
+	Node   *Record `json:"node"`
+	Cursor Cursor  `json:"cursor"`
+}
+
+// RecordConnection is the connection containing edges to Record.
+type RecordConnection struct {
+	Edges      []*RecordEdge `json:"edges"`
+	PageInfo   PageInfo      `json:"pageInfo"`
+	TotalCount int           `json:"totalCount"`
+}
+
+func (c *RecordConnection) build(nodes []*Record, pager *recordPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *Record
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *Record {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *Record {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*RecordEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &RecordEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// RecordPaginateOption enables pagination customization.
+type RecordPaginateOption func(*recordPager) error
+
+// WithRecordOrder configures pagination ordering.
+func WithRecordOrder(order *RecordOrder) RecordPaginateOption {
+	if order == nil {
+		order = DefaultRecordOrder
+	}
+	o := *order
+	return func(pager *recordPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultRecordOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithRecordFilter configures pagination filter.
+func WithRecordFilter(filter func(*RecordQuery) (*RecordQuery, error)) RecordPaginateOption {
+	return func(pager *recordPager) error {
+		if filter == nil {
+			return errors.New("RecordQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type recordPager struct {
+	order  *RecordOrder
+	filter func(*RecordQuery) (*RecordQuery, error)
+}
+
+func newRecordPager(opts []RecordPaginateOption) (*recordPager, error) {
+	pager := &recordPager{}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultRecordOrder
+	}
+	return pager, nil
+}
+
+func (p *recordPager) applyFilter(query *RecordQuery) (*RecordQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *recordPager) toCursor(r *Record) Cursor {
+	return p.order.Field.toCursor(r)
+}
+
+func (p *recordPager) applyCursors(query *RecordQuery, after, before *Cursor) *RecordQuery {
+	for _, predicate := range cursorsToPredicates(
+		p.order.Direction, after, before,
+		p.order.Field.field, DefaultRecordOrder.Field.field,
+	) {
+		query = query.Where(predicate)
+	}
+	return query
+}
+
+func (p *recordPager) applyOrder(query *RecordQuery, reverse bool) *RecordQuery {
+	direction := p.order.Direction
+	if reverse {
+		direction = direction.reverse()
+	}
+	query = query.Order(direction.orderFunc(p.order.Field.field))
+	if p.order.Field != DefaultRecordOrder.Field {
+		query = query.Order(direction.orderFunc(DefaultRecordOrder.Field.field))
+	}
+	return query
+}
+
+func (p *recordPager) orderExpr(reverse bool) sql.Querier {
+	direction := p.order.Direction
+	if reverse {
+		direction = direction.reverse()
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.field).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultRecordOrder.Field {
+			b.Comma().Ident(DefaultRecordOrder.Field.field).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to Record.
+func (r *RecordQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...RecordPaginateOption,
+) (*RecordConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newRecordPager(opts)
+	if err != nil {
+		return nil, err
+	}
+	if r, err = pager.applyFilter(r); err != nil {
+		return nil, err
+	}
+	conn := &RecordConnection{Edges: []*RecordEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = r.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+
+	r = pager.applyCursors(r, after, before)
+	r = pager.applyOrder(r, last != nil)
+	if limit := paginateLimit(first, last); limit != 0 {
+		r.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := r.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+
+	nodes, err := r.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+var (
+	// RecordOrderFieldVisitAt orders Record by visit_at.
+	RecordOrderFieldVisitAt = &RecordOrderField{
+		field: record.FieldVisitAt,
+		toCursor: func(r *Record) Cursor {
+			return Cursor{
+				ID:    r.ID,
+				Value: r.VisitAt,
+			}
+		},
+	}
+	// RecordOrderFieldPaymentAmount orders Record by payment_amount.
+	RecordOrderFieldPaymentAmount = &RecordOrderField{
+		field: record.FieldPaymentAmount,
+		toCursor: func(r *Record) Cursor {
+			return Cursor{
+				ID:    r.ID,
+				Value: r.PaymentAmount,
+			}
+		},
+	}
+	// RecordOrderFieldEvaluation orders Record by evaluation.
+	RecordOrderFieldEvaluation = &RecordOrderField{
+		field: record.FieldEvaluation,
+		toCursor: func(r *Record) Cursor {
+			return Cursor{
+				ID:    r.ID,
+				Value: r.Evaluation,
+			}
+		},
+	}
+)
+
+// String implement fmt.Stringer interface.
+func (f RecordOrderField) String() string {
+	var str string
+	switch f.field {
+	case record.FieldVisitAt:
+		str = "VISIT_AT"
+	case record.FieldPaymentAmount:
+		str = "PAYMENT_AMOUNT"
+	case record.FieldEvaluation:
+		str = "EVALUATION"
+	}
+	return str
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (f RecordOrderField) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(f.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (f *RecordOrderField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("RecordOrderField %T must be a string", v)
+	}
+	switch str {
+	case "VISIT_AT":
+		*f = *RecordOrderFieldVisitAt
+	case "PAYMENT_AMOUNT":
+		*f = *RecordOrderFieldPaymentAmount
+	case "EVALUATION":
+		*f = *RecordOrderFieldEvaluation
+	default:
+		return fmt.Errorf("%s is not a valid RecordOrderField", str)
+	}
+	return nil
+}
+
+// RecordOrderField defines the ordering field of Record.
+type RecordOrderField struct {
+	field    string
+	toCursor func(*Record) Cursor
+}
+
+// RecordOrder defines the ordering of Record.
+type RecordOrder struct {
+	Direction OrderDirection    `json:"direction"`
+	Field     *RecordOrderField `json:"field"`
+}
+
+// DefaultRecordOrder is the default ordering of Record.
+var DefaultRecordOrder = &RecordOrder{
+	Direction: OrderDirectionAsc,
+	Field: &RecordOrderField{
+		field: record.FieldID,
+		toCursor: func(r *Record) Cursor {
+			return Cursor{ID: r.ID}
+		},
+	},
+}
+
+// ToEdge converts Record into RecordEdge.
+func (r *Record) ToEdge(order *RecordOrder) *RecordEdge {
+	if order == nil {
+		order = DefaultRecordOrder
+	}
+	return &RecordEdge{
+		Node:   r,
+		Cursor: order.Field.toCursor(r),
+	}
+}
+
 // UserEdge is the edge representation of User.
 type UserEdge struct {
 	Node   *User  `json:"node"`
@@ -439,6 +742,16 @@ func (u *UserQuery) Paginate(
 }
 
 var (
+	// UserOrderFieldAge orders User by age.
+	UserOrderFieldAge = &UserOrderField{
+		field: user.FieldAge,
+		toCursor: func(u *User) Cursor {
+			return Cursor{
+				ID:    u.ID,
+				Value: u.Age,
+			}
+		},
+	}
 	// UserOrderFieldCreateAt orders User by create_at.
 	UserOrderFieldCreateAt = &UserOrderField{
 		field: user.FieldCreateAt,
@@ -465,6 +778,8 @@ var (
 func (f UserOrderField) String() string {
 	var str string
 	switch f.field {
+	case user.FieldAge:
+		str = "AGE"
 	case user.FieldCreateAt:
 		str = "CREATED_AT"
 	case user.FieldLatestLoginAt:
@@ -485,6 +800,8 @@ func (f *UserOrderField) UnmarshalGQL(v interface{}) error {
 		return fmt.Errorf("UserOrderField %T must be a string", v)
 	}
 	switch str {
+	case "AGE":
+		*f = *UserOrderFieldAge
 	case "CREATED_AT":
 		*f = *UserOrderFieldCreateAt
 	case "LATEST_LOGIN_AT":

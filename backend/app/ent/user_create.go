@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"backend/app/ent/record"
 	"backend/app/ent/user"
 	"context"
 	"errors"
@@ -18,6 +19,20 @@ type UserCreate struct {
 	config
 	mutation *UserMutation
 	hooks    []Hook
+}
+
+// SetAge sets the "age" field.
+func (uc *UserCreate) SetAge(i int) *UserCreate {
+	uc.mutation.SetAge(i)
+	return uc
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (uc *UserCreate) SetNillableAge(i *int) *UserCreate {
+	if i != nil {
+		uc.SetAge(*i)
+	}
+	return uc
 }
 
 // SetCreateAt sets the "create_at" field.
@@ -52,6 +67,21 @@ func (uc *UserCreate) SetNillableLatestLoginAt(t *time.Time) *UserCreate {
 func (uc *UserCreate) SetID(s string) *UserCreate {
 	uc.mutation.SetID(s)
 	return uc
+}
+
+// AddRecordIDs adds the "record" edge to the Record entity by IDs.
+func (uc *UserCreate) AddRecordIDs(ids ...string) *UserCreate {
+	uc.mutation.AddRecordIDs(ids...)
+	return uc
+}
+
+// AddRecord adds the "record" edges to the Record entity.
+func (uc *UserCreate) AddRecord(r ...*Record) *UserCreate {
+	ids := make([]string, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uc.AddRecordIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -101,6 +131,11 @@ func (uc *UserCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
+	if v, ok := uc.mutation.Age(); ok {
+		if err := user.AgeValidator(v); err != nil {
+			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "User.age": %w`, err)}
+		}
+	}
 	if _, ok := uc.mutation.CreateAt(); !ok {
 		return &ValidationError{Name: "create_at", err: errors.New(`ent: missing required field "User.create_at"`)}
 	}
@@ -142,6 +177,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
+	if value, ok := uc.mutation.Age(); ok {
+		_spec.SetField(user.FieldAge, field.TypeInt, value)
+		_node.Age = value
+	}
 	if value, ok := uc.mutation.CreateAt(); ok {
 		_spec.SetField(user.FieldCreateAt, field.TypeTime, value)
 		_node.CreateAt = value
@@ -149,6 +188,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.LatestLoginAt(); ok {
 		_spec.SetField(user.FieldLatestLoginAt, field.TypeTime, value)
 		_node.LatestLoginAt = value
+	}
+	if nodes := uc.mutation.RecordIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RecordTable,
+			Columns: []string{user.RecordColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: record.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
