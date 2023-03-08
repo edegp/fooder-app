@@ -2,7 +2,7 @@ import { useSearchParams } from 'next/navigation'
 
 import { Layout } from '@/ui/atom/Layout'
 
-export default async function Forgetpass() {
+export default function Forgetpass() {
   const searchParams = useSearchParams()
   const email = searchParams.get('email')
 
