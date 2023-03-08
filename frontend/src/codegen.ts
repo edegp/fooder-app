@@ -10,7 +10,7 @@ const config: CodegenConfig = {
   },
   hooks: { afterOneFileWrite: ['prettier --write', 'eslint --fix'] },
   generates: {
-    './src/graphql/': {
+    'src/graphql/': {
       preset: 'client',
       config: {
         withHooks: true
