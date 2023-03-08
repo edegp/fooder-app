@@ -5,17 +5,19 @@ import { FormEvent, memo, useCallback, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
+import { sendPasswordResetEmail } from 'firebase/auth'
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from 'react-icons/md'
 import { useRecoilState } from 'recoil'
 import styled from 'styled-components'
 import { useMutation } from 'urql'
 
 import { CreateUser, UpdateUser } from '@/graphql/mutaion'
-import { signIn, signUp } from '@/lib/firebase'
+import { auth, signIn, signUp } from '@/lib/firebase'
 import { handleError } from '@/lib/modules/handleError'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
 import { emailState } from '@/lib/recoil/state'
 import { Button } from '@/ui/atom/Button'
+import { ButtonLink } from '@/ui/atom/ButtonLink'
 import { Input } from '@/ui/atom/Input'
 
 type userForm = EventTarget & {
@@ -56,6 +58,12 @@ const HereList = styled.ul`
     cursor: pointer;
   }
 `
+
+const host = process.env.NEXT_PUBLIC_HOST || 'http://localhost:3000'
+
+const actionCodeSettings = {
+  url: `${host}/singin`
+}
 
 const SignInHere = HereList.withComponent('p')
 
@@ -98,6 +106,20 @@ export const UserLogin = memo(function UserLogin() {
   )
 
   const handleShowPassWord = useCallback(() => setIsShowPassword(prev => !prev), [setIsShowPassword])
+  const handleFogetPassClick = useCallback(async () => {
+    if (!email) {
+      router.push('/signin')
+      throw new Error('メールの取得に失敗しました')
+    }
+    try {
+      await sendPasswordResetEmail(auth, email, actionCodeSettings)
+    } catch (err) {
+      router.push('/signin')
+      handleError(err)
+      return <></>
+    }
+  }, [email, router])
+
   return (
     <>
       <Form onSubmit={handleSubmit}>
@@ -130,9 +152,9 @@ export const UserLogin = memo(function UserLogin() {
           </li>
           <li>
             パスワードをお忘れの方は
-            <Link href={{ pathname: 'forgetpass', query: { email } }} as="forgetpass">
+            <ButtonLink href={'forgetpass'} onClick={handleFogetPassClick}>
               こちら
-            </Link>
+            </ButtonLink>
             から
           </li>
         </HereList>
