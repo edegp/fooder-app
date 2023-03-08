@@ -153,7 +153,9 @@ export const UserLogin = memo(function UserLogin() {
           </li>
           <li>
             パスワードをお忘れの方は
-            <span onClick={handleFogetPassClick}>こちら</span>
+            <span className="underline" onClick={handleFogetPassClick}>
+              こちら
+            </span>
             から
           </li>
         </HereList>
