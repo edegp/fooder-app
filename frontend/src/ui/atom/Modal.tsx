@@ -56,7 +56,7 @@ const ModalContainer = styled(ModalComponent)`
   flex-direction: column;
   justify-content: ${({ hasButton }) => (hasButton ? 'end' : 'center')};
   align-items: center;
-  row-gap: 24px;
+  row-gap: 8px;
   padding: ${({ padding }) => padding};
   border-radius: ${({ radius }) => radius}px;
   ${mediaQueryPc} {
@@ -66,6 +66,13 @@ const ModalContainer = styled(ModalComponent)`
     font-weight: 700;
     margin: 0 auto;
   }
+`
+
+const TitleContainer = styled.div`
+  height: 100%;
+  display: flex;
+  align-self: flex-end;
+  align-items: center;
 `
 
 export const Modal = memo(function Modal(props: PropsWithRef<PropsWithChildren<ModalProps>>) {
@@ -99,9 +106,11 @@ export const Modal = memo(function Modal(props: PropsWithRef<PropsWithChildren<M
       >
         <CloseButton handleClose={handleClose} />
         {title && (
-          <Title level={3} size={size}>
-            {title}
-          </Title>
+          <TitleContainer>
+            <Title level={3} size={size}>
+              {title}
+            </Title>
+          </TitleContainer>
         )}
         {children}
         {button}
