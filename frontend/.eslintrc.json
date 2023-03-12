@@ -1,45 +1,42 @@
 {
   "env": {
-    "es2020": true,
+    "es6": true,
     "node": true
   },
   "extends": [
-    "next",
-    "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended",
     "plugin:tailwindcss/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "next",
     "prettier"
   ],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "unused-imports", "no-relative-import-paths", "import", "tailwindcss", "prettier"],
+  "plugins": ["@typescript-eslint", "no-relative-import-paths", "unused-imports", "import", "tailwindcss"],
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "typescript": {}
+    }
+  },
+  "parserOptions": {
+    "project": "./tsconfig.json",
+    "tsconfigRootDir": "./"
+  },
   "rules": {
+    "unused-imports/no-unused-imports": "error",
     "no-relative-import-paths/no-relative-import-paths": [
       "error",
-      {
-        "rootDir": "./src",
-        "prefix": "@",
-        "allowSameFolder": false
-      }
-    ],
-    "unused-imports/no-unused-imports": "error",
-    "prettier/prettier": [
-      "error",
-      {
-        "trailingComma": "none",
-        "tabWidth": 2,
-        "semi": false,
-        "singleQuote": true,
-        "jsxBracketSameLine": false,
-        "printWidth": 120,
-        "arrowParens": "avoid"
-      }
+      { "allowSameFolder": false, "rootDir": "src", "prefix": "@" }
     ],
     "no-console": ["warn", { "allow": ["info", "error"] }],
     // importの並び順設定
     "import/order": [
       "error",
       {
-        "groups": ["builtin", "external", "internal", ["parent", "sibling"], "object", "type", "index"],
+        "groups": ["builtin", "external", "internal", "object", "type", "index"],
         "pathGroups": [
           {
             "pattern": "react",
@@ -57,14 +54,19 @@
             "position": "before"
           },
           {
-            "pattern": "graphql/**",
+            "pattern": "@/graphql/**",
             "group": "internal",
             "position": "before"
           },
           {
-            "pattern": "ui-components/**",
-            "group": "index",
+            "pattern": "@/lib/**",
+            "group": "internal",
             "position": "after"
+          },
+          {
+            "pattern": "@/ui/**",
+            "group": "index",
+            "position": "before"
           },
           {
             "pattern": "**\\.css",
