@@ -4,7 +4,7 @@ import { InfoWindowProps } from '@react-google-maps/api'
 import { createPortal } from 'react-dom'
 import { useRecoilValue } from 'recoil'
 
-import { mapState } from '@/lib/recoil/state'
+import { mapState } from '@/lib/recoil/mapState'
 
 export const InfoWindow = ({ children, anchor, position, options }: InfoWindowProps) => {
   const map = useRecoilValue(mapState)

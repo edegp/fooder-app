@@ -5,7 +5,7 @@ import { memo, useEffect, useState } from 'react'
 import { MarkerProps } from '@react-google-maps/api'
 import { useRecoilValue } from 'recoil'
 
-import { mapState } from '@/lib/recoil/state'
+import { mapState } from '@/lib/recoil/mapState'
 
 export const Marker = memo(function Marker({ position, options, clickable, icon, onClick }: MarkerProps) {
   const map = useRecoilValue(mapState)

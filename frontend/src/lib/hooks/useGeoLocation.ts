@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { useRecoilState } from 'recoil'
 
-import { geoLocation } from '@/lib/recoil/state'
+import { geoLocation } from '@/lib/recoil/mapState'
 
 export const useGeoLocation = () => {
   const [id, setId] = useState(0)

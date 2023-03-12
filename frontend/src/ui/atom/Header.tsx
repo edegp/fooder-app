@@ -7,13 +7,16 @@ import { usePathname, useRouter } from 'next/navigation'
 
 import { signOut } from 'firebase/auth'
 import { HiOutlineMenuAlt4 } from 'react-icons/hi'
-import { useRecoilState } from 'recoil'
+import { useRecoilValue } from 'recoil'
 import styled from 'styled-components'
 
 import { auth } from '@/lib/firebase'
 import { useOpenState } from '@/lib/hooks/useOpenState'
-import { loginStatus } from '@/lib/recoil/state'
+import { userStatus } from '@/lib/recoil/state'
+
 import { Drawer } from '@/ui/atom/Drawer'
+
+import { SearchBox } from '@/ui/components/SearchBox'
 
 type Menu = {
   wording: string
@@ -22,13 +25,21 @@ type Menu = {
 }
 
 const HeadContainer = styled.header`
-  height: 64px;
+  width: 98%;
+  height: 60px;
+  margin: 0 auto;
   background-color: white;
-  position: relative;
+  position: absolute;
+  top: 1.5vh;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 15;
   display: flex;
   justify-content: space-between;
   justify-items: center;
   align-items: center;
+  border-radius: 28px;
 `
 
 const HeaderShadow = styled.div`
@@ -50,39 +61,35 @@ const HeaderShadow = styled.div`
 const Title = styled.h1`
   font-size: 18px;
   font-weight: bold;
-  margin: 0 10px;
+  margin: 0 15px 0 10px;
 `
 
 export const Header = memo(function Header() {
   const { nullableIsOpen, setIsOpen, handleClose, handleOpen } = useOpenState(null)
-  const [isLogin, setIsLogin] = useRecoilState(loginStatus)
   const router = useRouter()
   const pathname = usePathname()
+  const isLogin = useRecoilValue(userStatus)
 
   const handleSignOut = useCallback(() => {
     signOut(auth).then(() => {
-      setIsLogin(false)
       router.push('/signin')
     })
     handleClose()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
 
-  const loginList = useMemo(
-    () =>
-      isLogin
+  const menuList: Menu[] = useMemo(
+    () => [
+      ...(isLogin
         ? [{ wording: 'ログアウト', onClick: handleSignOut }]
         : [
             { wording: 'ログイン', path: '/signin' },
             { wording: '新規登録', path: '/signup' }
-          ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+          ]),
+      { wording: 'FAQ', path: '/faq' },
+      { wording: 'Support', path: '/help' }
+    ],
     [isLogin, handleSignOut]
-  )
-
-  const menuList: Menu[] = useMemo(
-    () => [...loginList, { wording: 'FAQ', path: '/faq' }, { wording: 'Support', path: '/help' }],
-    [loginList]
   )
 
   //　画面遷移後にヘッダーのDrawerを閉める
@@ -99,7 +106,8 @@ export const Header = memo(function Header() {
         <Link href="/">
           <Title className="no-underline">Fooder</Title>
         </Link>
-        <HiOutlineMenuAlt4 onClick={handleOpen} className="mr-6 h-9 w-9 text-lg" />
+        {pathname === '/' && <SearchBox />}
+        <HiOutlineMenuAlt4 onClick={handleOpen} className="m-7 h-9 w-9 text-lg" />
         {pathname !== '/' && <HeaderShadow />}
       </HeadContainer>
       <Drawer handleClose={handleClose} isOpen={nullableIsOpen} className="p-12 md:p-24">

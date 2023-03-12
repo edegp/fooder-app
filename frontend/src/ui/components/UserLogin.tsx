@@ -12,16 +12,18 @@ import styled from 'styled-components'
 import { useMutation } from 'urql'
 
 import { CreateUser, UpdateUser } from '@/graphql/mutaion'
+
 import { auth, signIn, signUp } from '@/lib/firebase'
 import { handleError } from '@/lib/modules/handleError'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
 import { emailState } from '@/lib/recoil/state'
+
 import { Button } from '@/ui/atom/Button'
 import { Input } from '@/ui/atom/Input'
 
 type userForm = EventTarget & {
-  email: HTMLInputElement
-  password: HTMLInputElement
+  email?: HTMLInputElement
+  password?: HTMLInputElement
 }
 
 const Form = styled.form`
@@ -75,10 +77,10 @@ export const UserLogin = memo(function UserLogin() {
   const [_createUserResult, createUser] = useMutation(CreateUser)
   const [_updateUserResult, updateUser] = useMutation(UpdateUser)
   const handleSubmit = useCallback(
-    async (event: FormEvent) => {
+    async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault()
-      const { email, password }: { email: HTMLInputElement; password: HTMLInputElement } = event.target as userForm
-      setEmail(email.value)
+      const { email, password }: userForm = event.target
+      if (email?.value) setEmail(email?.value)
       if (email && password) {
         try {
           if (pathname === '/signup') {

@@ -17,7 +17,7 @@
     "baseUrl": "src",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "typeRoots": ["node_modules/@types", "@types/google-map-react"],
+    "typeRoots": ["types"],
     "paths": {
       "@/*": ["./*"],
       "~/*": ["../public/*"]

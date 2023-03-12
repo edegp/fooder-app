@@ -6,12 +6,17 @@ import Head from 'next/head'
 import { withUrqlClient } from 'next-urql'
 import { RecoilRoot } from 'recoil'
 
+import { usePageView } from '@/lib/hooks/usePageView'
 import { RecoilURLSyncNext } from '@/lib/recoil/RecilURLSyncNext'
+
 import '@/styles/globals.css'
 import { ErrorBoundary } from '@/ui/atom/ErrorBoundary'
+
 import { InitialStateProvider } from '@/ui/components/initialStateProvider'
 
 function Myapp({ Component, pageProps }: AppProps) {
+  usePageView()
+
   return (
     <>
       <Head>

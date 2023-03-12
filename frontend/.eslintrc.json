@@ -6,31 +6,23 @@
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "plugin:tailwindcss/recommended",
+    // includes react react-hooks next recommended
+    // https://github.com/vercel/next.js/blob/canary/packages/eslint-config-next/index.js
+    "next",
     "plugin:import/recommended",
     "plugin:import/typescript",
-    "next",
     "prettier"
   ],
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "no-relative-import-paths", "unused-imports", "import", "tailwindcss"],
-  "settings": {
-    "import/parsers": {
-      "@typescript-eslint/parser": [".ts", ".tsx"]
-    },
-    "import/resolver": {
-      "typescript": {}
-    }
-  },
-  "parserOptions": {
-    "project": "./tsconfig.json",
-    "tsconfigRootDir": "./"
-  },
+  "plugins": ["@typescript-eslint", "no-relative-import-paths", "unused-imports", "tailwindcss"],
   "rules": {
+    // 使っていないimportを自動lint
     "unused-imports/no-unused-imports": "error",
+    // relative pathsの禁止、自動lint
     "no-relative-import-paths/no-relative-import-paths": [
       "error",
       { "allowSameFolder": false, "rootDir": "src", "prefix": "@" }
     ],
+    // consoleの禁止
     "no-console": ["warn", { "allow": ["info", "error"] }],
     // importの並び順設定
     "import/order": [
@@ -64,7 +56,17 @@
             "position": "after"
           },
           {
-            "pattern": "@/ui/**",
+            "pattern": "@/ui/atom/**",
+            "group": "index",
+            "position": "before"
+          },
+          {
+            "pattern": "@/ui/components/googleMap",
+            "group": "index",
+            "position": "before"
+          },
+          {
+            "pattern": "@/ui/components/**",
             "group": "index",
             "position": "before"
           },
@@ -76,7 +78,7 @@
         ],
         "pathGroupsExcludedImportTypes": ["react", "next/**"],
         "newlines-between": "always",
-        "alphabetize": { "order": "asc", "caseInsensitive": false }
+        "alphabetize": { "order": "asc", "caseInsensitive": true }
       }
     ],
     // no-var warningをunderscoreで回避する設定

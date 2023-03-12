@@ -5,7 +5,9 @@ import styled from 'styled-components'
 
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
 import { clientSize } from '@/lib/recoil/state'
+
 import { Title, TitleBase } from '@/ui/atom/Title'
+
 import { CloseButton } from '@/ui/components/CloseButton'
 
 type CustomProps = {
@@ -71,7 +73,6 @@ const ModalContainer = styled(ModalComponent)`
 const TitleContainer = styled.div`
   height: 100%;
   display: flex;
-  align-self: flex-end;
   align-items: center;
 `
 

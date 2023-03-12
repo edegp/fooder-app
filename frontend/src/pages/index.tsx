@@ -1,6 +1,7 @@
 import { Layout } from '@/ui/atom/Layout'
+
+import { MyMapComponent } from '@/ui/components/googleMap/MyMapComponent'
 import { LoginModal } from '@/ui/components/LoginModal'
-import { MyMapComponent } from '@/ui/googleMap/MyMapComponent'
 
 export default function Page() {
   return (

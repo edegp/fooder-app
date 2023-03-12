@@ -1,4 +1,6 @@
-import { ReactNode, useState, memo, useCallback } from 'react'
+import { memo, ReactNode } from 'react'
+
+import { useOpenState } from '@/lib/hooks/useOpenState'
 
 type Props = {
   children: ReactNode | string
@@ -7,20 +9,18 @@ type Props = {
 }
 
 export const Text = memo(function Text({ children, className, isEllipsis }: Props) {
-  const [open, setOpen] = useState<boolean>(false)
-  const handleClick = useCallback(() => setOpen(true), [setOpen])
+  const { isOpen, handleOpen } = useOpenState()
 
-  if (!open && isEllipsis && typeof children === 'string') {
-    if (children.length > 60) {
-      return (
-        <div className={className}>
-          {children.slice(0, 50)}
-          <span className="cursor-pointer underline hover:opacity-30" onClick={handleClick}>
-            …続きを読む
-          </span>
-        </div>
-      )
-    }
+  if (!isOpen && isEllipsis && typeof children === 'string' && children.length > 60) {
+    return (
+      <div className={className}>
+        {children.slice(0, 50)}
+        <span className="cursor-pointer underline hover:opacity-30" onClick={handleOpen}>
+          …続きを読む
+        </span>
+      </div>
+    )
   }
+
   return <div className={className}>{children}</div>
 })

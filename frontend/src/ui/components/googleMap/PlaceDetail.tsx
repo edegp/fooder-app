@@ -6,12 +6,34 @@ import { useRecoilState } from 'recoil'
 import styled from 'styled-components'
 
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
-import { placeDetailState } from '@/lib/recoil/state'
+import { placeDetailState } from '@/lib/recoil/mapState'
+
 import { Drawer } from '@/ui/atom/Drawer'
+
 import { CloseButton } from '@/ui/components/CloseButton'
+import { OpeningTimeTab } from '@/ui/components/OpningTimeTab'
 import { Reviews } from '@/ui/components/Reviews'
-import { OpeningTimeTab } from '@/ui/googleMap/components/OpningTimeTab'
-import { SlideImages } from '@/ui/googleMap/components/SlideImages'
+import { SlideImages } from '@/ui/components/SlideImages'
+
+const slideOptions: Options = {
+  type: 'fade',
+  fixedWidth: '100%',
+  fixedHeight: 250,
+  focus: 'center',
+  cover: true,
+  rewind: true
+}
+const thumbsOptions: Options = {
+  type: 'slide',
+  rewind: true,
+  gap: '1rem',
+  pagination: false,
+  fixedWidth: 110,
+  fixedHeight: 70,
+  cover: true,
+  focus: 'center',
+  isNavigation: true
+}
 
 const Container = styled.div`
   padding: 0 32px;
@@ -23,7 +45,6 @@ const Container = styled.div`
     row-gap: 32px;
   }
 `
-
 /* レコメンドした場所をタップした場合に表示する詳細画面**/
 export const PlaceDetail = memo(function PlaceDetail() {
   const [openingOpen, setOpeningOpen] = useState(false)
@@ -32,26 +53,6 @@ export const PlaceDetail = memo(function PlaceDetail() {
   const [detail, setDetail] = useRecoilState(placeDetailState)
   // first renderingで表示しない
   const isOpen = useMemo(() => (detail === null ? null : !!detail), [detail])
-
-  const slideOptions: Options = {
-    type: 'fade',
-    fixedWidth: '100%',
-    fixedHeight: 250,
-    focus: 'center',
-    cover: true,
-    rewind: true
-  }
-  const thumbsOptions: Options = {
-    type: 'slide',
-    rewind: true,
-    gap: '1rem',
-    pagination: false,
-    fixedWidth: 110,
-    fixedHeight: 70,
-    cover: true,
-    focus: 'center',
-    isNavigation: true
-  }
 
   // thumbとスライドを同期
   useEffect(() => {

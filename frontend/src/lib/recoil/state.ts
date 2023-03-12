@@ -20,73 +20,6 @@ const isPcBrowser = selector({
   }
 })
 
-const geoLocation = atom<google.maps.LatLngLiteral | null>({
-  key: 'geoLocation',
-  default: null
-})
-
-const mapOptionsState = selector({
-  key: 'mapOptionsState',
-  get: ({ get }) => ({
-    zoom: 15,
-    center: get(geoLocation)
-  }),
-  dangerouslyAllowMutability: true
-})
-
-const mapState = atom<google.maps.Map | null>({
-  key: 'mapState',
-  default: null,
-  dangerouslyAllowMutability: true
-})
-
-const placeDetailState = atom<google.maps.places.PlaceResult | null>({
-  key: 'placeDetailState',
-  default: null,
-  dangerouslyAllowMutability: true
-})
-
-const makersLocationState = atom<google.maps.places.PlaceResult[] | null>({
-  key: 'makersLocationState',
-  default: null,
-  dangerouslyAllowMutability: true
-})
-
-const urlState = atom<string>({
-  key: 'urlState',
-  effects: [
-    ({ getPromise, setSelf }) => {
-      getPromise(currentUserInfo).then(user => {
-        getPromise(loginStatus).then(login => {
-          if (user) {
-            setSelf(login ? '/' : 'signin')
-          } else {
-            setSelf('signup')
-          }
-        })
-      })
-    },
-    urlSyncEffect({ storeKey: 'url', refine: string() })
-  ]
-})
-
-const loginStatus = atom<boolean>({
-  key: 'loginStatus',
-  default: false,
-  effects: [
-    ({ setSelf }) => {
-      const unsubscribe = onAuthStateChanged(auth, user => {
-        if (user) {
-          setSelf(true)
-        } else {
-          setSelf(false)
-        }
-      })
-      return () => unsubscribe()
-    }
-  ]
-})
-
 const emailState = atom<string>({
   key: 'emailState',
   default: '',
@@ -109,25 +42,32 @@ const currentUserInfo = atom<User | null>({
   ]
 })
 
-const isLoadingState = atom<boolean>({
-  key: 'isLoading',
-  default: true,
+const urlState = atom<string>({
+  key: 'urlState',
   effects: [
-    ({ getPromise, setSelf }) =>
-      setSelf(!getPromise(placeDetailState) || !getPromise(geoLocation) || !getPromise(mapState))
+    urlSyncEffect({
+      storeKey: 'url',
+      refine: string(),
+      read: ({ read }) => (read('currentUserInfo') ? '/' : '/signin')
+    })
   ]
 })
-export {
-  clientSize,
-  isPcBrowser,
-  mapState,
-  placeDetailState,
-  makersLocationState,
-  geoLocation,
-  mapOptionsState,
-  urlState,
-  emailState,
-  loginStatus,
-  currentUserInfo,
-  isLoadingState
-}
+
+const userStatus = atom<boolean | null>({
+  key: 'userStatus',
+  default: null,
+  effects: [
+    ({ setSelf }) => {
+      const unsubscribe = onAuthStateChanged(auth, async user => {
+        if (user) {
+          setSelf(true)
+        } else {
+          setSelf(false)
+        }
+      })
+      return () => unsubscribe()
+    }
+  ]
+})
+
+export { clientSize, isPcBrowser, urlState, emailState, userStatus, currentUserInfo }

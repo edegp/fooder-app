@@ -1,17 +1,31 @@
-import { RingLoader } from 'react-spinners'
+import { MagnifyingGlass, Triangle } from 'react-loader-spinner'
+import { useRecoilValue } from 'recoil'
 
-export const LoadingRing = () => (
-  <RingLoader
-    color="#222"
-    cssOverride={{
-      margin: 'auto',
-      textAlign: 'center',
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-      zIndex: 100
-    }}
-  />
-)
+import { colors } from '@/lib/modules/colors'
+import { searchQueryState } from '@/lib/recoil/mapState'
+
+import { OverLay } from '@/ui/atom/OverLay'
+
+const color = colors.black
+const style = {
+  width: 'fit-content',
+  margin: 'auto',
+  position: 'absolute',
+  zIndex: '200'
+}
+
+export const LoadingRing = ({ visible = true }: { visible?: boolean }) => {
+  const searchQuery = useRecoilValue(searchQueryState)
+  const inset = searchQuery ? '0' : '40% 0 0'
+
+  return (
+    <>
+      {searchQuery ? (
+        <MagnifyingGlass glassColor="transparent" color={color} wrapperStyle={{ ...style, inset }} visible={visible} />
+      ) : (
+        <Triangle color={color} wrapperStyle={{ ...style, inset }} visible={visible} />
+      )}
+      {visible && <OverLay />}
+    </>
+  )
+}

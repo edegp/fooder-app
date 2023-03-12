@@ -8,12 +8,13 @@ import styled from 'styled-components'
 import { useOpenState } from '@/lib/hooks/useOpenState'
 import { imageLoader } from '@/lib/modules/imageLoader'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
-import { isLoadingState, makersLocationState, mapState, placeDetailState } from '@/lib/recoil/state'
+import { mapState, markersLocationState, placeDetailState } from '@/lib/recoil/mapState'
+
 import { Button } from '@/ui/atom/Button'
+import { InfoWindow } from '@/ui/atom/InfoWindow'
+import { Marker } from '@/ui/atom/Marker'
 import { Modal } from '@/ui/atom/Modal'
-import { Star } from '@/ui/components/Star'
-import { InfoWindow } from '@/ui/googleMap/components/InfoWindow'
-import { Marker } from '@/ui/googleMap/components/Marker'
+import { Star } from '@/ui/atom/Star'
 
 const WindowContainer = styled.div`
   display: flex;
@@ -47,20 +48,18 @@ const getGoogleMapUrl = (lat?: number, lng?: number, place_id?: string) =>
 
 /** レコメンドした場所をwindowで表示 */
 export const MarkerAndInfoWindows = memo(function InfoWindows() {
-  const makersLocation = useRecoilValue(makersLocationState)
+  const makersLocation = useRecoilValue(markersLocationState)
   const placeNames = makersLocation?.map((place: google.maps.places.PlaceResult) => [place.name, false]) || [[]]
   const placeObj = Object.fromEntries(placeNames)
   const [openList, setOpenList] = useState<{ [key: string]: boolean }>(placeObj)
   const { isOpen, handleClose, handleOpen } = useOpenState()
   const map = useRecoilValue(mapState)
   const setDetail = useSetRecoilState(placeDetailState)
-  const setIsLoading = useSetRecoilState(isLoadingState)
 
   const detailCallback = useCallback(
     (result: google.maps.places.PlaceResult | null, status: google.maps.places.PlacesServiceStatus) => {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         setDetail(result)
-        setIsLoading(false)
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -71,7 +70,6 @@ export const MarkerAndInfoWindows = memo(function InfoWindows() {
       if (!placeId) {
         throw new Error('読み込みエラー。詳細情報が得られませんでした。')
       }
-      setIsLoading(true)
       const request = {
         placeId,
         fields: [

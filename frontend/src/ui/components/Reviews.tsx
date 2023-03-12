@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import { memo } from 'react'
 
 import Image from 'next/image'
 
@@ -8,9 +8,10 @@ import styled from 'styled-components'
 import { getDiffDate } from '@/lib/modules/getDiffDate'
 import { imageLoader } from '@/lib/modules/imageLoader'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'
-import { placeDetailState } from '@/lib/recoil/state'
+import { placeDetailState } from '@/lib/recoil/mapState'
+
+import { Star } from '@/ui/atom/Star'
 import { Text } from '@/ui/atom/Text'
-import { Star } from '@/ui/components/Star'
 
 const ReviewWrap = styled.div`
   display: flex;

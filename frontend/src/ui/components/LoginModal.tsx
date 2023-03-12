@@ -1,9 +1,10 @@
-import { memo } from 'react'
+import { memo, useEffect } from 'react'
 
 import { useRecoilValue } from 'recoil'
 
 import { useOpenState } from '@/lib/hooks/useOpenState'
-import { loginStatus } from '@/lib/recoil/state'
+import { userStatus } from '@/lib/recoil/state'
+
 import { Modal } from '@/ui/atom/Modal'
 import { OverLay } from '@/ui/atom/OverLay'
 
@@ -34,12 +35,17 @@ const KeyFrame = () => (
   </style>
 )
 export const LoginModal = memo(function LoginModal() {
-  const login = useRecoilValue(loginStatus)
-  const { isOpen, handleClose } = useOpenState(login)
+  const isLogin = useRecoilValue(userStatus)
+  const { isOpen, setIsOpen, handleClose } = useOpenState()
   const style = {
     animation: isOpen ? '0.5s ease Pop' : '0.5s ease PopReverse',
     opacity: isOpen ? '1' : '0'
   }
+  useEffect(() => {
+    setIsOpen(isLogin)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLogin])
+
   return (
     <>
       <KeyFrame />
