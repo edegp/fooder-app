@@ -1,4 +1,5 @@
 FROM gcr.io/cloudsql-docker/gce-proxy:1.33.4-alpine
+USER root
 ENV GOOGLE_APPLICATION_CREDENTIALS="/service_account/key.json"
 ENV DB_USER=admin
 ENV DB_PASS="=75(FG1lzOtMdk_e"

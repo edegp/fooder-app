@@ -37,6 +37,7 @@ yarn-error.log*
 
 # tailwind
 .turbo
+!settings.json
 .vscode
 styles/dist.css
 
@@ -49,3 +50,5 @@ ui-debug.log
 
 dockerfile.dev.remote
 /backend/cloudsql/fooder*
+
+.node-version
