@@ -1,4 +1,4 @@
-import { memo, ReactNode, useMemo } from 'react'
+import { forwardRef, memo, ReactNode, useMemo } from 'react'
 
 import styled from 'styled-components'
 
@@ -12,13 +12,14 @@ const InputBase = styled.input`
   border: 1px solid ${colors.gray[600]};
 `
 
-const InputWrapper = styled.div`
+const InputWrapper = styled.div<{ width: string }>`
   height: 48px;
   border-radius: 8px;
-  width: 75vw;
+  width: ;
   max-width: 420px;
   display: flex;
   position: relative;
+  width: ${({ width }) => (width ? width : '75vw')};
   > svg {
     position: absolute;
     right: 2vw;
@@ -26,27 +27,39 @@ const InputWrapper = styled.div`
   }
 `
 
-export const Input = memo(function Input({
-  isShowPassword,
-  endAdornment,
-  type,
-  ...props
-}: React.ComponentProps<'input'> & {
-  isShowPassword?: boolean
-  endAdornment?: ReactNode
-}) {
-  const inputType = useMemo(() => {
-    if (type === 'password') {
-      return isShowPassword ? 'password' : 'text'
+export const Input = memo(
+  forwardRef<
+    HTMLInputElement,
+    React.ComponentProps<'input'> & {
+      isShowPassword?: boolean
+      endAdornment?: ReactNode
     }
-    return type
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isShowPassword])
+  >(function Input(
+    {
+      isShowPassword,
+      endAdornment,
+      type,
+      width,
+      ...props
+    }: React.ComponentProps<'input'> & {
+      isShowPassword?: boolean
+      endAdornment?: ReactNode
+    },
+    ref
+  ) {
+    const inputType = useMemo(() => {
+      if (type === 'password') {
+        return isShowPassword ? 'password' : 'text'
+      }
+      return type
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isShowPassword])
 
-  return (
-    <InputWrapper>
-      <InputBase type={inputType} {...props} />
-      {endAdornment}
-    </InputWrapper>
-  )
-})
+    return (
+      <InputWrapper width={width}>
+        <InputBase type={inputType} ref={ref} {...props} />
+        {endAdornment}
+      </InputWrapper>
+    )
+  })
+)

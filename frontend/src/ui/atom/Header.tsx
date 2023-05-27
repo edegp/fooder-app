@@ -14,6 +14,7 @@ import { auth } from '@/lib/firebase'
 import { useOpenState } from '@/lib/hooks/useOpenState'
 import { loginStatus } from '@/lib/recoil/state'
 import { Drawer } from '@/ui/atom/Drawer'
+import { SearchInput } from '@/ui/components/SearchInput'
 
 type Menu = {
   wording: string
@@ -50,7 +51,7 @@ const HeaderShadow = styled.div`
 const Title = styled.h1`
   font-size: 18px;
   font-weight: bold;
-  margin: 0 10px;
+  margin: 0 16px;
 `
 
 export const Header = memo(function Header() {
@@ -99,7 +100,8 @@ export const Header = memo(function Header() {
         <Link href="/">
           <Title className="no-underline">Fooder</Title>
         </Link>
-        <HiOutlineMenuAlt4 onClick={handleOpen} className="mr-6 h-9 w-9 text-lg" />
+        {pathname === '/' && <SearchInput />}
+        <HiOutlineMenuAlt4 onClick={handleOpen} className="mx-6 h-9 w-9 text-lg" />
         {pathname !== '/' && <HeaderShadow />}
       </HeadContainer>
       <Drawer handleClose={handleClose} isOpen={nullableIsOpen} className="p-12 md:p-24">

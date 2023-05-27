@@ -71,7 +71,6 @@ const ModalContainer = styled(ModalComponent)`
 const TitleContainer = styled.div`
   height: 100%;
   display: flex;
-  align-self: flex-end;
   align-items: center;
 `
 
