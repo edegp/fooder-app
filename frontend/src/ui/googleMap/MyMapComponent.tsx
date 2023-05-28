@@ -84,7 +84,6 @@ export const MyMapComponent = memo(function MyMapComponent() {
     textSearch()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, textSearch, query])
-  console.log(query)
 
   return (
     <>

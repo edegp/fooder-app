@@ -422,6 +422,33 @@ func HasUserWith(preds ...predicate.User) predicate.Record {
 	})
 }
 
+// HasStore applies the HasEdge predicate on the "store" edge.
+func HasStore() predicate.Record {
+	return predicate.Record(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, StoreTable, StoreColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStoreWith applies the HasEdge predicate on the "store" edge with a given conditions (other predicates).
+func HasStoreWith(preds ...predicate.Store) predicate.Record {
+	return predicate.Record(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(StoreInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, StoreTable, StoreColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Record) predicate.Record {
 	return predicate.Record(func(s *sql.Selector) {

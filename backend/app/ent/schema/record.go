@@ -17,7 +17,7 @@ type Record struct {
 	ent.Schema
 }
 
-// Fields of the User.
+// Fields of the Record.
 func (Record) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
@@ -58,6 +58,11 @@ func (Record) Edges() []ent.Edge {
 			Unique().
 			Required().
 			Field("user_id"),
+		edge.From("store", Store.Type).
+			Ref("record").
+			Unique().
+			Required().
+			Field("place_id"),
 	}
 }
 

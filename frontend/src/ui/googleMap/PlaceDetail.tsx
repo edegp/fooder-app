@@ -32,7 +32,6 @@ export const PlaceDetail = memo(function PlaceDetail() {
   const [detail, setDetail] = useRecoilState(placeDetailState)
   // first renderingで表示しない
   const isOpen = useMemo(() => (detail === null ? null : !!detail), [detail])
-
   const slideOptions: Options = {
     type: 'fade',
     fixedWidth: '100%',
@@ -99,7 +98,8 @@ export const PlaceDetail = memo(function PlaceDetail() {
             <p>
               {detail.business_status === google.maps.places.BusinessStatus.CLOSED_TEMPORARILY
                 ? '一時休業中'
-                : detail.business_status === google.maps.places.BusinessStatus.CLOSED_PERMANENTLY && '閉店'}
+                : detail.business_status === google.maps.places.BusinessStatus.CLOSED_PERMANENTLY &&
+                  '閉店'}
             </p>
           </Container>
         </>

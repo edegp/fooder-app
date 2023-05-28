@@ -28,10 +28,12 @@ type config struct {
 type (
 	hooks struct {
 		Record []ent.Hook
+		Store  []ent.Hook
 		User   []ent.Hook
 	}
 	inters struct {
 		Record []ent.Interceptor
+		Store  []ent.Interceptor
 		User   []ent.Interceptor
 	}
 )

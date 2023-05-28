@@ -25,6 +25,8 @@ const (
 	FieldEvaluation = "evaluation"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeStore holds the string denoting the store edge name in mutations.
+	EdgeStore = "store"
 	// Table holds the table name of the record in the database.
 	Table = "records"
 	// UserTable is the table that holds the user relation/edge.
@@ -34,6 +36,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
+	// StoreTable is the table that holds the store relation/edge.
+	StoreTable = "records"
+	// StoreInverseTable is the table name for the Store entity.
+	// It exists in this package in order to avoid circular dependency with the "store" package.
+	StoreInverseTable = "stores"
+	// StoreColumn is the table column denoting the store relation/edge.
+	StoreColumn = "place_id"
 )
 
 // Columns holds all SQL columns for record fields.

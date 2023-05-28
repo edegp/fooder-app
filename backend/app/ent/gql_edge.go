@@ -16,6 +16,26 @@ func (r *Record) User(ctx context.Context) (*User, error) {
 	return result, err
 }
 
+func (r *Record) Store(ctx context.Context) (*Store, error) {
+	result, err := r.Edges.StoreOrErr()
+	if IsNotLoaded(err) {
+		result, err = r.QueryStore().Only(ctx)
+	}
+	return result, err
+}
+
+func (s *Store) Record(ctx context.Context) (result []*Record, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = s.NamedRecord(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = s.Edges.RecordOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = s.QueryRecord().All(ctx)
+	}
+	return result, err
+}
+
 func (u *User) Record(ctx context.Context) (result []*Record, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = u.NamedRecord(graphql.GetFieldContext(ctx).Field.Alias)

@@ -5,6 +5,7 @@ package ent
 import (
 	"backend/app/ent/predicate"
 	"backend/app/ent/record"
+	"backend/app/ent/store"
 	"backend/app/ent/user"
 	"context"
 	"fmt"
@@ -23,6 +24,7 @@ type RecordQuery struct {
 	inters     []Interceptor
 	predicates []predicate.Record
 	withUser   *UserQuery
+	withStore  *StoreQuery
 	modifiers  []func(*sql.Selector)
 	loadTotal  []func(context.Context, []*Record) error
 	// intermediate query (i.e. traversal path).
@@ -76,6 +78,28 @@ func (rq *RecordQuery) QueryUser() *UserQuery {
 			sqlgraph.From(record.Table, record.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, record.UserTable, record.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryStore chains the current query on the "store" edge.
+func (rq *RecordQuery) QueryStore() *StoreQuery {
+	query := (&StoreClient{config: rq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(record.Table, record.FieldID, selector),
+			sqlgraph.To(store.Table, store.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, record.StoreTable, record.StoreColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -276,6 +300,7 @@ func (rq *RecordQuery) Clone() *RecordQuery {
 		inters:     append([]Interceptor{}, rq.inters...),
 		predicates: append([]predicate.Record{}, rq.predicates...),
 		withUser:   rq.withUser.Clone(),
+		withStore:  rq.withStore.Clone(),
 		// clone intermediate query.
 		sql:  rq.sql.Clone(),
 		path: rq.path,
@@ -290,6 +315,17 @@ func (rq *RecordQuery) WithUser(opts ...func(*UserQuery)) *RecordQuery {
 		opt(query)
 	}
 	rq.withUser = query
+	return rq
+}
+
+// WithStore tells the query-builder to eager-load the nodes that are connected to
+// the "store" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RecordQuery) WithStore(opts ...func(*StoreQuery)) *RecordQuery {
+	query := (&StoreClient{config: rq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withStore = query
 	return rq
 }
 
@@ -371,8 +407,9 @@ func (rq *RecordQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Recor
 	var (
 		nodes       = []*Record{}
 		_spec       = rq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			rq.withUser != nil,
+			rq.withStore != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -399,6 +436,12 @@ func (rq *RecordQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Recor
 	if query := rq.withUser; query != nil {
 		if err := rq.loadUser(ctx, query, nodes, nil,
 			func(n *Record, e *User) { n.Edges.User = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := rq.withStore; query != nil {
+		if err := rq.loadStore(ctx, query, nodes, nil,
+			func(n *Record, e *Store) { n.Edges.Store = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -432,6 +475,35 @@ func (rq *RecordQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (rq *RecordQuery) loadStore(ctx context.Context, query *StoreQuery, nodes []*Record, init func(*Record), assign func(*Record, *Store)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Record)
+	for i := range nodes {
+		fk := nodes[i].PlaceID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(store.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "place_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"backend/app/ent/record"
+	"backend/app/ent/store"
 	"backend/app/ent/user"
 	"fmt"
 	"strings"
@@ -38,11 +39,13 @@ type Record struct {
 type RecordEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// Store holds the value of the store edge.
+	Store *Store `json:"store,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 	// totalCount holds the count of the edges above.
-	totalCount [1]map[string]int
+	totalCount [2]map[string]int
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -56,6 +59,19 @@ func (e RecordEdges) UserOrErr() (*User, error) {
 		return e.User, nil
 	}
 	return nil, &NotLoadedError{edge: "user"}
+}
+
+// StoreOrErr returns the Store value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RecordEdges) StoreOrErr() (*Store, error) {
+	if e.loadedTypes[1] {
+		if e.Store == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: store.Label}
+		}
+		return e.Store, nil
+	}
+	return nil, &NotLoadedError{edge: "store"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -134,6 +150,11 @@ func (r *Record) assignValues(columns []string, values []any) error {
 // QueryUser queries the "user" edge of the Record entity.
 func (r *Record) QueryUser() *UserQuery {
 	return NewRecordClient(r.config).QueryUser(r)
+}
+
+// QueryStore queries the "store" edge of the Record entity.
+func (r *Record) QueryStore() *StoreQuery {
+	return NewRecordClient(r.config).QueryStore(r)
 }
 
 // Update returns a builder for updating this Record.

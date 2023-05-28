@@ -62,8 +62,8 @@ jobs:
       - id: preview-url
         name: Create Preview URL
         run: echo "value=https://pr-${{ github.event.pull_request.number }}---product-x-drwvbiotlz-an.a.run.app"  >> $GITHUB_OUTPUT
-  call-frontend-preview:
-    uses: edegp/fooder-app/.github/workflows/frontend-preview.yml@main
+  call-frontend_preview:
+    uses: edegp/fooder-app/.github/workflows/frontend_preview.yml@main
     needs: deploy
     with:
       preview-url: ${{ needs.deploy.outputs.preview-url }}

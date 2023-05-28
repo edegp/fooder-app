@@ -1,8 +1,8 @@
 FROM gcr.io/cloudsql-docker/gce-proxy:1.33.4-alpine
 USER root
 ENV GOOGLE_APPLICATION_CREDENTIALS="/service_account/key.json"
-ENV DB_USER=admin
-ENV DB_PASS="=75(FG1lzOtMdk_e"
+ENV DB_USER=root
+ENV DB_PASS="=bv]=[$}#_{.5fRdn"
 ENV INSTANCE_UNIX_SOCKET=/cloudsql/fooder-6493b:us-central1:fooder
 
 RUN apk add --update --no-cache ca-certificates git curl mysql-client

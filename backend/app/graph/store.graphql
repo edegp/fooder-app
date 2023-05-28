@@ -1,0 +1,8 @@
+extend type Mutation {
+  registerStore(id: String!, name: String!): Store
+  updateStore(id: String!): Store
+}
+
+extend type Query {
+  getStoreById(id: String!): Store
+}

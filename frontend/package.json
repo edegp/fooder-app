@@ -16,7 +16,7 @@
     "lint:fix": "yarn lint --fix",
     "format": "prettier --write \"src/**/*.{js,ts,tsx,md}\"",
     "debug": "NODE_OPTIONS='--inspect' next",
-    "codegen": "graphql-codegen --config codegen.ts"
+    "codegen": "graphql-codegen --config src/codegen.ts"
   },
   "prettier": {
     "semi": false,

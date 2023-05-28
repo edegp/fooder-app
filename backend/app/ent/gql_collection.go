@@ -35,6 +35,16 @@ func (r *RecordQuery) collectField(ctx context.Context, op *graphql.OperationCon
 				return err
 			}
 			r.withUser = query
+		case "store":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&StoreClient{config: r.config}).Query()
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			r.withStore = query
 		}
 	}
 	return nil
@@ -87,6 +97,68 @@ func newRecordPaginateArgs(rv map[string]interface{}) *recordPaginateArgs {
 	}
 	if v, ok := rv[whereField].(*RecordWhereInput); ok {
 		args.opts = append(args.opts, WithRecordFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (s *StoreQuery) CollectFields(ctx context.Context, satisfies ...string) (*StoreQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return s, nil
+	}
+	if err := s.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
+func (s *StoreQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+		switch field.Name {
+		case "record":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&RecordClient{config: s.config}).Query()
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			s.WithNamedRecord(alias, func(wq *RecordQuery) {
+				*wq = *query
+			})
+		}
+	}
+	return nil
+}
+
+type storePaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []StorePaginateOption
+}
+
+func newStorePaginateArgs(rv map[string]interface{}) *storePaginateArgs {
+	args := &storePaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[whereField].(*StoreWhereInput); ok {
+		args.opts = append(args.opts, WithStoreFilter(v.Filter))
 	}
 	return args
 }

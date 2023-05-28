@@ -5,6 +5,7 @@ package ent
 import (
 	"backend/app/ent/predicate"
 	"backend/app/ent/record"
+	"backend/app/ent/store"
 	"backend/app/ent/user"
 	"errors"
 	"fmt"
@@ -105,6 +106,10 @@ type RecordWhereInput struct {
 	// "user" edge predicates.
 	HasUser     *bool             `json:"hasUser,omitempty"`
 	HasUserWith []*UserWhereInput `json:"hasUserWith,omitempty"`
+
+	// "store" edge predicates.
+	HasStore     *bool              `json:"hasStore,omitempty"`
+	HasStoreWith []*StoreWhereInput `json:"hasStoreWith,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -407,6 +412,24 @@ func (i *RecordWhereInput) P() (predicate.Record, error) {
 		}
 		predicates = append(predicates, record.HasUserWith(with...))
 	}
+	if i.HasStore != nil {
+		p := record.HasStore()
+		if !*i.HasStore {
+			p = record.Not(p)
+		}
+		predicates = append(predicates, p)
+	}
+	if len(i.HasStoreWith) > 0 {
+		with := make([]predicate.Store, 0, len(i.HasStoreWith))
+		for _, w := range i.HasStoreWith {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'HasStoreWith'", err)
+			}
+			with = append(with, p)
+		}
+		predicates = append(predicates, record.HasStoreWith(with...))
+	}
 	switch len(predicates) {
 	case 0:
 		return nil, ErrEmptyRecordWhereInput
@@ -414,6 +437,430 @@ func (i *RecordWhereInput) P() (predicate.Record, error) {
 		return predicates[0], nil
 	default:
 		return record.And(predicates...), nil
+	}
+}
+
+// StoreWhereInput represents a where input for filtering Store queries.
+type StoreWhereInput struct {
+	Predicates []predicate.Store  `json:"-"`
+	Not        *StoreWhereInput   `json:"not,omitempty"`
+	Or         []*StoreWhereInput `json:"or,omitempty"`
+	And        []*StoreWhereInput `json:"and,omitempty"`
+
+	// "id" field predicates.
+	ID      *string  `json:"id,omitempty"`
+	IDNEQ   *string  `json:"idNEQ,omitempty"`
+	IDIn    []string `json:"idIn,omitempty"`
+	IDNotIn []string `json:"idNotIn,omitempty"`
+	IDGT    *string  `json:"idGT,omitempty"`
+	IDGTE   *string  `json:"idGTE,omitempty"`
+	IDLT    *string  `json:"idLT,omitempty"`
+	IDLTE   *string  `json:"idLTE,omitempty"`
+
+	// "name" field predicates.
+	Name             *string  `json:"name,omitempty"`
+	NameNEQ          *string  `json:"nameNEQ,omitempty"`
+	NameIn           []string `json:"nameIn,omitempty"`
+	NameNotIn        []string `json:"nameNotIn,omitempty"`
+	NameGT           *string  `json:"nameGT,omitempty"`
+	NameGTE          *string  `json:"nameGTE,omitempty"`
+	NameLT           *string  `json:"nameLT,omitempty"`
+	NameLTE          *string  `json:"nameLTE,omitempty"`
+	NameContains     *string  `json:"nameContains,omitempty"`
+	NameHasPrefix    *string  `json:"nameHasPrefix,omitempty"`
+	NameHasSuffix    *string  `json:"nameHasSuffix,omitempty"`
+	NameEqualFold    *string  `json:"nameEqualFold,omitempty"`
+	NameContainsFold *string  `json:"nameContainsFold,omitempty"`
+
+	// "category_id" field predicates.
+	CategoryID      *int  `json:"categoryID,omitempty"`
+	CategoryIDNEQ   *int  `json:"categoryIDNEQ,omitempty"`
+	CategoryIDIn    []int `json:"categoryIDIn,omitempty"`
+	CategoryIDNotIn []int `json:"categoryIDNotIn,omitempty"`
+	CategoryIDGT    *int  `json:"categoryIDGT,omitempty"`
+	CategoryIDGTE   *int  `json:"categoryIDGTE,omitempty"`
+	CategoryIDLT    *int  `json:"categoryIDLT,omitempty"`
+	CategoryIDLTE   *int  `json:"categoryIDLTE,omitempty"`
+
+	// "sub_category_id" field predicates.
+	SubCategoryID      *int  `json:"subCategoryID,omitempty"`
+	SubCategoryIDNEQ   *int  `json:"subCategoryIDNEQ,omitempty"`
+	SubCategoryIDIn    []int `json:"subCategoryIDIn,omitempty"`
+	SubCategoryIDNotIn []int `json:"subCategoryIDNotIn,omitempty"`
+	SubCategoryIDGT    *int  `json:"subCategoryIDGT,omitempty"`
+	SubCategoryIDGTE   *int  `json:"subCategoryIDGTE,omitempty"`
+	SubCategoryIDLT    *int  `json:"subCategoryIDLT,omitempty"`
+	SubCategoryIDLTE   *int  `json:"subCategoryIDLTE,omitempty"`
+
+	// "price" field predicates.
+	Price      *int  `json:"price,omitempty"`
+	PriceNEQ   *int  `json:"priceNEQ,omitempty"`
+	PriceIn    []int `json:"priceIn,omitempty"`
+	PriceNotIn []int `json:"priceNotIn,omitempty"`
+	PriceGT    *int  `json:"priceGT,omitempty"`
+	PriceGTE   *int  `json:"priceGTE,omitempty"`
+	PriceLT    *int  `json:"priceLT,omitempty"`
+	PriceLTE   *int  `json:"priceLTE,omitempty"`
+
+	// "scale" field predicates.
+	Scale      *int  `json:"scale,omitempty"`
+	ScaleNEQ   *int  `json:"scaleNEQ,omitempty"`
+	ScaleIn    []int `json:"scaleIn,omitempty"`
+	ScaleNotIn []int `json:"scaleNotIn,omitempty"`
+	ScaleGT    *int  `json:"scaleGT,omitempty"`
+	ScaleGTE   *int  `json:"scaleGTE,omitempty"`
+	ScaleLT    *int  `json:"scaleLT,omitempty"`
+	ScaleLTE   *int  `json:"scaleLTE,omitempty"`
+
+	// "address" field predicates.
+	Address             *string  `json:"address,omitempty"`
+	AddressNEQ          *string  `json:"addressNEQ,omitempty"`
+	AddressIn           []string `json:"addressIn,omitempty"`
+	AddressNotIn        []string `json:"addressNotIn,omitempty"`
+	AddressGT           *string  `json:"addressGT,omitempty"`
+	AddressGTE          *string  `json:"addressGTE,omitempty"`
+	AddressLT           *string  `json:"addressLT,omitempty"`
+	AddressLTE          *string  `json:"addressLTE,omitempty"`
+	AddressContains     *string  `json:"addressContains,omitempty"`
+	AddressHasPrefix    *string  `json:"addressHasPrefix,omitempty"`
+	AddressHasSuffix    *string  `json:"addressHasSuffix,omitempty"`
+	AddressEqualFold    *string  `json:"addressEqualFold,omitempty"`
+	AddressContainsFold *string  `json:"addressContainsFold,omitempty"`
+
+	// "rating" field predicates.
+	Rating      *int  `json:"rating,omitempty"`
+	RatingNEQ   *int  `json:"ratingNEQ,omitempty"`
+	RatingIn    []int `json:"ratingIn,omitempty"`
+	RatingNotIn []int `json:"ratingNotIn,omitempty"`
+	RatingGT    *int  `json:"ratingGT,omitempty"`
+	RatingGTE   *int  `json:"ratingGTE,omitempty"`
+	RatingLT    *int  `json:"ratingLT,omitempty"`
+	RatingLTE   *int  `json:"ratingLTE,omitempty"`
+
+	// "record" edge predicates.
+	HasRecord     *bool               `json:"hasRecord,omitempty"`
+	HasRecordWith []*RecordWhereInput `json:"hasRecordWith,omitempty"`
+}
+
+// AddPredicates adds custom predicates to the where input to be used during the filtering phase.
+func (i *StoreWhereInput) AddPredicates(predicates ...predicate.Store) {
+	i.Predicates = append(i.Predicates, predicates...)
+}
+
+// Filter applies the StoreWhereInput filter on the StoreQuery builder.
+func (i *StoreWhereInput) Filter(q *StoreQuery) (*StoreQuery, error) {
+	if i == nil {
+		return q, nil
+	}
+	p, err := i.P()
+	if err != nil {
+		if err == ErrEmptyStoreWhereInput {
+			return q, nil
+		}
+		return nil, err
+	}
+	return q.Where(p), nil
+}
+
+// ErrEmptyStoreWhereInput is returned in case the StoreWhereInput is empty.
+var ErrEmptyStoreWhereInput = errors.New("ent: empty predicate StoreWhereInput")
+
+// P returns a predicate for filtering stores.
+// An error is returned if the input is empty or invalid.
+func (i *StoreWhereInput) P() (predicate.Store, error) {
+	var predicates []predicate.Store
+	if i.Not != nil {
+		p, err := i.Not.P()
+		if err != nil {
+			return nil, fmt.Errorf("%w: field 'not'", err)
+		}
+		predicates = append(predicates, store.Not(p))
+	}
+	switch n := len(i.Or); {
+	case n == 1:
+		p, err := i.Or[0].P()
+		if err != nil {
+			return nil, fmt.Errorf("%w: field 'or'", err)
+		}
+		predicates = append(predicates, p)
+	case n > 1:
+		or := make([]predicate.Store, 0, n)
+		for _, w := range i.Or {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'or'", err)
+			}
+			or = append(or, p)
+		}
+		predicates = append(predicates, store.Or(or...))
+	}
+	switch n := len(i.And); {
+	case n == 1:
+		p, err := i.And[0].P()
+		if err != nil {
+			return nil, fmt.Errorf("%w: field 'and'", err)
+		}
+		predicates = append(predicates, p)
+	case n > 1:
+		and := make([]predicate.Store, 0, n)
+		for _, w := range i.And {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'and'", err)
+			}
+			and = append(and, p)
+		}
+		predicates = append(predicates, store.And(and...))
+	}
+	predicates = append(predicates, i.Predicates...)
+	if i.ID != nil {
+		predicates = append(predicates, store.IDEQ(*i.ID))
+	}
+	if i.IDNEQ != nil {
+		predicates = append(predicates, store.IDNEQ(*i.IDNEQ))
+	}
+	if len(i.IDIn) > 0 {
+		predicates = append(predicates, store.IDIn(i.IDIn...))
+	}
+	if len(i.IDNotIn) > 0 {
+		predicates = append(predicates, store.IDNotIn(i.IDNotIn...))
+	}
+	if i.IDGT != nil {
+		predicates = append(predicates, store.IDGT(*i.IDGT))
+	}
+	if i.IDGTE != nil {
+		predicates = append(predicates, store.IDGTE(*i.IDGTE))
+	}
+	if i.IDLT != nil {
+		predicates = append(predicates, store.IDLT(*i.IDLT))
+	}
+	if i.IDLTE != nil {
+		predicates = append(predicates, store.IDLTE(*i.IDLTE))
+	}
+	if i.Name != nil {
+		predicates = append(predicates, store.NameEQ(*i.Name))
+	}
+	if i.NameNEQ != nil {
+		predicates = append(predicates, store.NameNEQ(*i.NameNEQ))
+	}
+	if len(i.NameIn) > 0 {
+		predicates = append(predicates, store.NameIn(i.NameIn...))
+	}
+	if len(i.NameNotIn) > 0 {
+		predicates = append(predicates, store.NameNotIn(i.NameNotIn...))
+	}
+	if i.NameGT != nil {
+		predicates = append(predicates, store.NameGT(*i.NameGT))
+	}
+	if i.NameGTE != nil {
+		predicates = append(predicates, store.NameGTE(*i.NameGTE))
+	}
+	if i.NameLT != nil {
+		predicates = append(predicates, store.NameLT(*i.NameLT))
+	}
+	if i.NameLTE != nil {
+		predicates = append(predicates, store.NameLTE(*i.NameLTE))
+	}
+	if i.NameContains != nil {
+		predicates = append(predicates, store.NameContains(*i.NameContains))
+	}
+	if i.NameHasPrefix != nil {
+		predicates = append(predicates, store.NameHasPrefix(*i.NameHasPrefix))
+	}
+	if i.NameHasSuffix != nil {
+		predicates = append(predicates, store.NameHasSuffix(*i.NameHasSuffix))
+	}
+	if i.NameEqualFold != nil {
+		predicates = append(predicates, store.NameEqualFold(*i.NameEqualFold))
+	}
+	if i.NameContainsFold != nil {
+		predicates = append(predicates, store.NameContainsFold(*i.NameContainsFold))
+	}
+	if i.CategoryID != nil {
+		predicates = append(predicates, store.CategoryIDEQ(*i.CategoryID))
+	}
+	if i.CategoryIDNEQ != nil {
+		predicates = append(predicates, store.CategoryIDNEQ(*i.CategoryIDNEQ))
+	}
+	if len(i.CategoryIDIn) > 0 {
+		predicates = append(predicates, store.CategoryIDIn(i.CategoryIDIn...))
+	}
+	if len(i.CategoryIDNotIn) > 0 {
+		predicates = append(predicates, store.CategoryIDNotIn(i.CategoryIDNotIn...))
+	}
+	if i.CategoryIDGT != nil {
+		predicates = append(predicates, store.CategoryIDGT(*i.CategoryIDGT))
+	}
+	if i.CategoryIDGTE != nil {
+		predicates = append(predicates, store.CategoryIDGTE(*i.CategoryIDGTE))
+	}
+	if i.CategoryIDLT != nil {
+		predicates = append(predicates, store.CategoryIDLT(*i.CategoryIDLT))
+	}
+	if i.CategoryIDLTE != nil {
+		predicates = append(predicates, store.CategoryIDLTE(*i.CategoryIDLTE))
+	}
+	if i.SubCategoryID != nil {
+		predicates = append(predicates, store.SubCategoryIDEQ(*i.SubCategoryID))
+	}
+	if i.SubCategoryIDNEQ != nil {
+		predicates = append(predicates, store.SubCategoryIDNEQ(*i.SubCategoryIDNEQ))
+	}
+	if len(i.SubCategoryIDIn) > 0 {
+		predicates = append(predicates, store.SubCategoryIDIn(i.SubCategoryIDIn...))
+	}
+	if len(i.SubCategoryIDNotIn) > 0 {
+		predicates = append(predicates, store.SubCategoryIDNotIn(i.SubCategoryIDNotIn...))
+	}
+	if i.SubCategoryIDGT != nil {
+		predicates = append(predicates, store.SubCategoryIDGT(*i.SubCategoryIDGT))
+	}
+	if i.SubCategoryIDGTE != nil {
+		predicates = append(predicates, store.SubCategoryIDGTE(*i.SubCategoryIDGTE))
+	}
+	if i.SubCategoryIDLT != nil {
+		predicates = append(predicates, store.SubCategoryIDLT(*i.SubCategoryIDLT))
+	}
+	if i.SubCategoryIDLTE != nil {
+		predicates = append(predicates, store.SubCategoryIDLTE(*i.SubCategoryIDLTE))
+	}
+	if i.Price != nil {
+		predicates = append(predicates, store.PriceEQ(*i.Price))
+	}
+	if i.PriceNEQ != nil {
+		predicates = append(predicates, store.PriceNEQ(*i.PriceNEQ))
+	}
+	if len(i.PriceIn) > 0 {
+		predicates = append(predicates, store.PriceIn(i.PriceIn...))
+	}
+	if len(i.PriceNotIn) > 0 {
+		predicates = append(predicates, store.PriceNotIn(i.PriceNotIn...))
+	}
+	if i.PriceGT != nil {
+		predicates = append(predicates, store.PriceGT(*i.PriceGT))
+	}
+	if i.PriceGTE != nil {
+		predicates = append(predicates, store.PriceGTE(*i.PriceGTE))
+	}
+	if i.PriceLT != nil {
+		predicates = append(predicates, store.PriceLT(*i.PriceLT))
+	}
+	if i.PriceLTE != nil {
+		predicates = append(predicates, store.PriceLTE(*i.PriceLTE))
+	}
+	if i.Scale != nil {
+		predicates = append(predicates, store.ScaleEQ(*i.Scale))
+	}
+	if i.ScaleNEQ != nil {
+		predicates = append(predicates, store.ScaleNEQ(*i.ScaleNEQ))
+	}
+	if len(i.ScaleIn) > 0 {
+		predicates = append(predicates, store.ScaleIn(i.ScaleIn...))
+	}
+	if len(i.ScaleNotIn) > 0 {
+		predicates = append(predicates, store.ScaleNotIn(i.ScaleNotIn...))
+	}
+	if i.ScaleGT != nil {
+		predicates = append(predicates, store.ScaleGT(*i.ScaleGT))
+	}
+	if i.ScaleGTE != nil {
+		predicates = append(predicates, store.ScaleGTE(*i.ScaleGTE))
+	}
+	if i.ScaleLT != nil {
+		predicates = append(predicates, store.ScaleLT(*i.ScaleLT))
+	}
+	if i.ScaleLTE != nil {
+		predicates = append(predicates, store.ScaleLTE(*i.ScaleLTE))
+	}
+	if i.Address != nil {
+		predicates = append(predicates, store.AddressEQ(*i.Address))
+	}
+	if i.AddressNEQ != nil {
+		predicates = append(predicates, store.AddressNEQ(*i.AddressNEQ))
+	}
+	if len(i.AddressIn) > 0 {
+		predicates = append(predicates, store.AddressIn(i.AddressIn...))
+	}
+	if len(i.AddressNotIn) > 0 {
+		predicates = append(predicates, store.AddressNotIn(i.AddressNotIn...))
+	}
+	if i.AddressGT != nil {
+		predicates = append(predicates, store.AddressGT(*i.AddressGT))
+	}
+	if i.AddressGTE != nil {
+		predicates = append(predicates, store.AddressGTE(*i.AddressGTE))
+	}
+	if i.AddressLT != nil {
+		predicates = append(predicates, store.AddressLT(*i.AddressLT))
+	}
+	if i.AddressLTE != nil {
+		predicates = append(predicates, store.AddressLTE(*i.AddressLTE))
+	}
+	if i.AddressContains != nil {
+		predicates = append(predicates, store.AddressContains(*i.AddressContains))
+	}
+	if i.AddressHasPrefix != nil {
+		predicates = append(predicates, store.AddressHasPrefix(*i.AddressHasPrefix))
+	}
+	if i.AddressHasSuffix != nil {
+		predicates = append(predicates, store.AddressHasSuffix(*i.AddressHasSuffix))
+	}
+	if i.AddressEqualFold != nil {
+		predicates = append(predicates, store.AddressEqualFold(*i.AddressEqualFold))
+	}
+	if i.AddressContainsFold != nil {
+		predicates = append(predicates, store.AddressContainsFold(*i.AddressContainsFold))
+	}
+	if i.Rating != nil {
+		predicates = append(predicates, store.RatingEQ(*i.Rating))
+	}
+	if i.RatingNEQ != nil {
+		predicates = append(predicates, store.RatingNEQ(*i.RatingNEQ))
+	}
+	if len(i.RatingIn) > 0 {
+		predicates = append(predicates, store.RatingIn(i.RatingIn...))
+	}
+	if len(i.RatingNotIn) > 0 {
+		predicates = append(predicates, store.RatingNotIn(i.RatingNotIn...))
+	}
+	if i.RatingGT != nil {
+		predicates = append(predicates, store.RatingGT(*i.RatingGT))
+	}
+	if i.RatingGTE != nil {
+		predicates = append(predicates, store.RatingGTE(*i.RatingGTE))
+	}
+	if i.RatingLT != nil {
+		predicates = append(predicates, store.RatingLT(*i.RatingLT))
+	}
+	if i.RatingLTE != nil {
+		predicates = append(predicates, store.RatingLTE(*i.RatingLTE))
+	}
+
+	if i.HasRecord != nil {
+		p := store.HasRecord()
+		if !*i.HasRecord {
+			p = store.Not(p)
+		}
+		predicates = append(predicates, p)
+	}
+	if len(i.HasRecordWith) > 0 {
+		with := make([]predicate.Record, 0, len(i.HasRecordWith))
+		for _, w := range i.HasRecordWith {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'HasRecordWith'", err)
+			}
+			with = append(with, p)
+		}
+		predicates = append(predicates, store.HasRecordWith(with...))
+	}
+	switch len(predicates) {
+	case 0:
+		return nil, ErrEmptyStoreWhereInput
+	case 1:
+		return predicates[0], nil
+	default:
+		return store.And(predicates...), nil
 	}
 }
 

@@ -1,7 +1,7 @@
 import { gql } from 'graphql-tag'
 
-export const getAllUsers = gql`
-  query getAllUsers {
+export const GetAllUsers = gql`
+  query GetAllUsers {
     users {
       id
       createAt
@@ -10,9 +10,9 @@ export const getAllUsers = gql`
   }
 `
 
-export const getUserRecords = gql`
-  query getUserRecords($userId: String!) {
-    records(userId: $userId) {
+export const GetUserRecords = gql`
+  query GetUserRecords($userID: String!) {
+    getUserRecords(userID: $userID) {
       id
       paymentAmount
       evaluation
@@ -20,9 +20,9 @@ export const getUserRecords = gql`
   }
 `
 
-export const getPlaceRecords = gql`
-  query getPlaceRecords($placeId: String!) {
-    records(placeId: $placeId) {
+export const GetPlaceRecords = gql`
+  query GetPlaceRecords($placeID: String!) {
+    getPlaceRecords(placeID: $placeID) {
       id
       paymentAmount
       evaluation
@@ -30,12 +30,20 @@ export const getPlaceRecords = gql`
   }
 `
 
-export const getUserParticularPlaceRecords = gql`
-  query getUserParticularPlaceRecords($userId: String!, $placeId: String!) {
-    records(placeId: $placeId) {
+export const GetUserParticularPlaceRecords = gql`
+  query GetUserParticularPlaceRecords($userID: String!, $placeID: String!) {
+    getUserParticularPlaceRecords(userID: $userID, placeID: $placeID) {
       id
       paymentAmount
       evaluation
+    }
+  }
+`
+
+export const GetStoreById = gql`
+  query GetStoreById($id: String!) {
+    getStoreById(id: $id) {
+      id
     }
   }
 `
