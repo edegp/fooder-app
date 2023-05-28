@@ -2,7 +2,7 @@ name: Deploy
 on:
   pull_request_target:
     paths:
-      - 'backend/app/**'
+      - "backend/**"
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,10 +20,10 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name}}
           ref: ${{ github.event.pull_request.head.ref}}
-      - id: 'auth'
+      - id: "auth"
         uses: google-github-actions/auth@v1
         with:
-          token_format: 'access_token'
+          token_format: "access_token"
           workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUM }}/locations/global/workloadIdentityPools/my-pool/providers/my-provider
           service_account: ci-user@${{ secrets.GCP_PROJECT }}.iam.gserviceaccount.com
       - id: image-url
@@ -32,9 +32,9 @@ jobs:
       - name: Login docker
         uses: docker/login-action@v2
         with:
-          registry: 'gcr.io' # or REGION-docker.pkg.dev
-          username: 'oauth2accesstoken'
-          password: '${{ steps.auth.outputs.access_token }}'
+          registry: "gcr.io" # or REGION-docker.pkg.dev
+          username: "oauth2accesstoken"
+          password: "${{ steps.auth.outputs.access_token }}"
       - run: echo '${{ steps.auth.outputs.access_token }}' | docker login -u oauth2accesstoken --password-stdin https://gcr.io
 
       - name: Set up Docker Buildx
