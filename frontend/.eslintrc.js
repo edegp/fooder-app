@@ -3,9 +3,20 @@ module.exports = {
     es2020: true,
     node: true
   },
-  extends: ['next', 'plugin:@typescript-eslint/recommended', 'plugin:tailwindcss/recommended', 'prettier'],
+  extends: [
+    'next',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:tailwindcss/recommended',
+    'prettier'
+  ],
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'unused-imports', 'no-relative-import-paths', 'import', 'tailwindcss'],
+  plugins: [
+    '@typescript-eslint',
+    'unused-imports',
+    'no-relative-import-paths',
+    'import',
+    'tailwindcss'
+  ],
   rules: {
     'no-relative-import-paths/no-relative-import-paths': [
       'error',
@@ -21,7 +32,15 @@ module.exports = {
     'import/order': [
       'error',
       {
-        groups: ['builtin', 'external', 'internal', ['parent', 'sibling'], 'object', 'type', 'index'],
+        groups: [
+          'builtin',
+          'external',
+          'internal',
+          ['parent', 'sibling'],
+          'object',
+          'type',
+          'index'
+        ],
         pathGroups: [
           {
             pattern: 'react',
@@ -61,7 +80,7 @@ module.exports = {
     ],
     // no-var warningをunderscoreで回避する設定
     '@typescript-eslint/no-unused-vars': [
-      'warn', // or "error"
+      'error', // or "error"
       {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',

@@ -2,8 +2,6 @@ import { FirebaseError } from 'firebase/app'
 
 import { isFirebaseError } from '@/lib/firebase'
 
-const showErrorList = ['EMAIL_NOT_FOUND', 'auth/wrong-password']
-
 type JpErrorMessageObj = {
   [key: string]: string
 }
