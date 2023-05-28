@@ -1,6 +1,6 @@
 FROM node:16-slim
 
-ENV GCLOUD_PROJECT="demo-fooder-379012"
+ENV GCLOUD_PROJECT="demo-fooder-6493b"
 
 RUN npm add -g firebase-tools@latest
 WORKDIR /opt/workspace

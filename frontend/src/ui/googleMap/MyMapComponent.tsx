@@ -24,7 +24,7 @@ const mapContainerClassName = 'z-10 relative w-full h-full overflow-hidden touch
 type Library = 'places' | 'drawing' | 'geometry' | 'localContext' | 'visualization'
 const loaderOptions = {
   id: 'google-map-script',
-  apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY || '',
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '',
   version: 'weekly',
   libraries: ['places'] as Library[]
 }
@@ -61,7 +61,10 @@ export const MyMapComponent = memo(function MyMapComponent() {
     a: google.maps.places.PlaceResult[] | null,
     b: google.maps.places.PlacesServiceStatus,
     c: google.maps.places.PlaceSearchPagination | null
-  ) => void = (results: google.maps.places.PlaceResult[] | null, status: google.maps.places.PlacesServiceStatus) => {
+  ) => void = (
+    results: google.maps.places.PlaceResult[] | null,
+    status: google.maps.places.PlacesServiceStatus
+  ) => {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
       setMakersLocation(results)
     } else {
