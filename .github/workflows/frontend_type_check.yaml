@@ -1,6 +1,9 @@
 name: "check-ts"
 on:
   pull_request:
+    paths:
+      - "frontend/**/*.ts"
+      - "frontend/**/*.tsx"
 jobs:
   ts:
     runs-on: ubuntu-latest
