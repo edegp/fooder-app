@@ -28,7 +28,6 @@ jobs:
       - uses: Arhia/action-check-typescript@v1.0.0
         with:
           directory: "./frontend"
-          ts-config-path: "./frontend/tsconfig.json"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           use-check: true
           check-fail-mode: added
