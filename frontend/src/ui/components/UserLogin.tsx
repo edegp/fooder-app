@@ -32,7 +32,6 @@ const Form = styled.form`
   display: inline-flex;
   flex-wrap: wrap;
   flex-direction: column;
-  padding: 0 48px;
   margin-bottom: 16px;
   align-content: center;
   > *:not(:last-child) {
@@ -74,10 +73,12 @@ export const UserLogin = memo(function UserLogin() {
   const [isShowPassword, setIsShowPassword] = useState(true)
   const [_createUserResult, createUser] = useMutation(CreateUser)
   const [_updateUserResult, updateUser] = useMutation(UpdateUser)
+  const [errorMessage, setErrorMessage] = useState('')
   const handleSubmit = useCallback(
     async (event: FormEvent) => {
       event.preventDefault()
-      const { email, password }: { email: HTMLInputElement; password: HTMLInputElement } = event.target as userForm
+      const { email, password }: { email: HTMLInputElement; password: HTMLInputElement } =
+        event.target as userForm
       setEmail(email.value)
       if (email && password) {
         try {
@@ -97,7 +98,8 @@ export const UserLogin = memo(function UserLogin() {
             }
           }
         } catch (err: unknown) {
-          handleError(err)
+          const showErrorMessage = handleError(err)
+          setErrorMessage(showErrorMessage)
         }
       }
     },
@@ -105,15 +107,26 @@ export const UserLogin = memo(function UserLogin() {
     [router, pathname]
   )
 
-  const handleShowPassWord = useCallback(() => setIsShowPassword(prev => !prev), [setIsShowPassword])
-  const handleFogetPassClick = useCallback(async () => {
+  const handleShowPassWord = useCallback(
+    () => setIsShowPassword(prev => !prev),
+    [setIsShowPassword]
+  )
+
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      setEmail(e.target.value)
+    },
+    [setEmail]
+  )
+
+  const handleForgetPassClick = useCallback(async () => {
     if (!email) {
       router.push('/signin')
       throw new Error('メールの取得に失敗しました')
     }
     try {
       await sendPasswordResetEmail(auth, email, actionCodeSettings)
-      router.push('/forgetpass')
+      router.push('/forget-password')
     } catch (err) {
       router.push('/signin')
       handleError(err)
@@ -122,9 +135,17 @@ export const UserLogin = memo(function UserLogin() {
   }, [email, router])
 
   return (
-    <div className="flex h-[calc(100%-100px)] w-full flex-col items-center justify-center">
+    <div className="mx-[10vw] flex h-[calc(100%-100px)] flex-col items-center justify-center">
       <Form onSubmit={handleSubmit}>
-        <Input name="email" id="email" type="email" defaultValue={email} placeholder="メールアドレス" required />
+        <Input
+          name="email"
+          id="email"
+          type="email"
+          onBlur={handleBlur}
+          defaultValue={email}
+          placeholder="メールアドレス"
+          required
+        />
         <Input
           name="password"
           id="password"
@@ -146,6 +167,7 @@ export const UserLogin = memo(function UserLogin() {
           {pathname === '/signup' ? '新規登録' : 'ログイン'}
         </Button>
       </Form>
+      {errorMessage && <p className="mb-4 text-red-500">{errorMessage}</p>}
       {pathname === '/signin' ? (
         <HereList>
           <li>
@@ -153,7 +175,7 @@ export const UserLogin = memo(function UserLogin() {
           </li>
           <li>
             パスワードをお忘れの方は
-            <span className="underline" onClick={handleFogetPassClick}>
+            <span className="underline" onClick={handleForgetPassClick}>
               こちら
             </span>
             から

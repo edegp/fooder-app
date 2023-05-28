@@ -27,18 +27,20 @@ class UserObject {
   emailVerified: boolean
   isAnonymous: boolean
   metadata: UserMetadata
-  public providerData: UserInfo[]
+  providerData: UserInfo[]
   refreshToken: string
   tenantId: string | null
-  public loginStatus?: boolean
+  email: string | null
+  loginStatus?: boolean
 
-  constructor(user: User & { email?: string; loginStatus?: boolean }) {
+  constructor(user: User & { loginStatus?: boolean }) {
     this.emailVerified = user.emailVerified
     this.isAnonymous = user.isAnonymous
     this.metadata = user.metadata
     this.providerData = user.providerData
     this.refreshToken = user.refreshToken
     this.tenantId = user.tenantId
+    this.email = user.email
     this.loginStatus = user.loginStatus
   }
 }
@@ -174,19 +176,12 @@ const loginStatus = selector<boolean>({
 const emailState = selector<string>({
   key: 'emailState',
   get: ({ get }) => {
-    const user = get(currentUserInfo)
-    return user?.providerData[0].email ?? ''
+    return get(currentUserInfo)?.email ?? ''
   },
   set: ({ set, get }, newValue) => {
     const user = get(currentUserInfo)
     if (newValue instanceof DefaultValue) return
-    if (user) {
-      const newObj: UserObject = {
-        ...user,
-        providerData: [{ ...user.providerData[0], email: newValue }]
-      }
-      set(currentUserInfo, newObj)
-    }
+    set(currentUserInfo, { ...user, email: newValue } as UserObject)
   }
 })
 
@@ -231,6 +226,11 @@ const isLoadingState = selector<boolean>({
   }
 })
 
+const errorMessageState = atom<string>({
+  key: 'errorMessageState',
+  default: ''
+})
+
 export {
   clientSize,
   isPcBrowser,
@@ -244,5 +244,6 @@ export {
   emailState,
   loginStatus,
   currentUserInfo,
-  isLoadingState
+  isLoadingState,
+  errorMessageState
 }
