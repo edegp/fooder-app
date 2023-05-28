@@ -4,6 +4,7 @@ package ent
 
 import (
 	"backend/app/ent/record"
+	"backend/app/ent/store"
 	"backend/app/ent/user"
 	"context"
 	"fmt"
@@ -20,6 +21,9 @@ type Noder interface {
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *Record) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *Store) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *User) IsNode() {}
@@ -86,6 +90,18 @@ func (c *Client) noder(ctx context.Context, table string, id string) (Noder, err
 		query := c.Record.Query().
 			Where(record.ID(id))
 		query, err := query.CollectFields(ctx, "Record")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case store.Table:
+		query := c.Store.Query().
+			Where(store.ID(id))
+		query, err := query.CollectFields(ctx, "Store")
 		if err != nil {
 			return nil, err
 		}
@@ -183,6 +199,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []string) ([]Node
 		query := c.Record.Query().
 			Where(record.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "Record")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case store.Table:
+		query := c.Store.Query().
+			Where(store.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Store")
 		if err != nil {
 			return nil, err
 		}

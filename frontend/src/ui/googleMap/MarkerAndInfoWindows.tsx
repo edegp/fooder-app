@@ -89,7 +89,8 @@ export const MarkerAndInfoWindows = memo(function InfoWindows() {
           'business_status',
           'reviews',
           'website',
-          'photos'
+          'photos',
+          'price_level'
         ]
       }
       if (map) {

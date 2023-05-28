@@ -8,7 +8,6 @@ import (
 	"backend/app/ent"
 	"backend/app/graph"
 	"context"
-	"fmt"
 )
 
 // Node is the resolver for the node field.
@@ -29,6 +28,12 @@ func (r *queryResolver) Records(ctx context.Context) ([]*ent.Record, error) {
 	return client.Debug().Record.Query().All(ctx)
 }
 
+// Stores is the resolver for the stores field.
+func (r *queryResolver) Stores(ctx context.Context) ([]*ent.Store, error) {
+	client := ent.FromContext(ctx)
+	return client.Debug().Store.Query().All(ctx)
+}
+
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*ent.User, error) {
 	client := ent.FromContext(ctx)
@@ -46,25 +51,6 @@ type queryResolver struct{ *Resolver }
 //   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //     it when you're done.
 //   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *recordResolver) StayTime(ctx context.Context, obj *ent.Record) (*int32, error) {
-	panic(fmt.Errorf("not implemented: StayTime - stayTime"))
-}
-func (r *userResolver) Age(ctx context.Context, obj *ent.User) (*int32, error) {
-	panic(fmt.Errorf("not implemented: Age - age"))
-}
-func (r *createRecordInputResolver) StayTime(ctx context.Context, obj *ent.CreateRecordInput, data *int32) error {
-	panic(fmt.Errorf("not implemented: StayTime - stayTime"))
-}
-func (r *createUserInputResolver) Age(ctx context.Context, obj *ent.CreateUserInput, data *int32) error {
-	panic(fmt.Errorf("not implemented: Age - age"))
-}
-func (r *updateRecordInputResolver) StayTime(ctx context.Context, obj *ent.UpdateRecordInput, data *int32) error {
-	panic(fmt.Errorf("not implemented: StayTime - stayTime"))
-}
-func (r *updateUserInputResolver) Age(ctx context.Context, obj *ent.UpdateUserInput, data *int32) error {
-	panic(fmt.Errorf("not implemented: Age - age"))
-}
-
 type recordResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
 type createRecordInputResolver struct{ *Resolver }

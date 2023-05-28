@@ -11,11 +11,11 @@ var (
 	// RecordsColumns holds the columns for the "records" table.
 	RecordsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
-		{Name: "place_id", Type: field.TypeString},
 		{Name: "visit_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "payment_amount", Type: field.TypeInt, Nullable: true},
 		{Name: "leave_at", Type: field.TypeInt, Nullable: true},
 		{Name: "evaluation", Type: field.TypeInt, Default: 3},
+		{Name: "place_id", Type: field.TypeString},
 		{Name: "user_id", Type: field.TypeString},
 	}
 	// RecordsTable holds the schema information for the "records" table.
@@ -25,12 +25,39 @@ var (
 		PrimaryKey: []*schema.Column{RecordsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
+				Symbol:     "records_stores_record",
+				Columns:    []*schema.Column{RecordsColumns[5]},
+				RefColumns: []*schema.Column{StoresColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
 				Symbol:     "records_users_record",
 				Columns:    []*schema.Column{RecordsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
+	}
+	// StoresColumns holds the columns for the "stores" table.
+	StoresColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "category_id", Type: field.TypeInt},
+		{Name: "sub_category_id", Type: field.TypeInt},
+		{Name: "price", Type: field.TypeInt},
+		{Name: "payments", Type: field.TypeJSON},
+		{Name: "scale", Type: field.TypeInt},
+		{Name: "address", Type: field.TypeString},
+		{Name: "rating", Type: field.TypeInt},
+		{Name: "nearby_stores", Type: field.TypeJSON},
+		{Name: "business_hours", Type: field.TypeJSON},
+		{Name: "types", Type: field.TypeJSON},
+	}
+	// StoresTable holds the schema information for the "stores" table.
+	StoresTable = &schema.Table{
+		Name:       "stores",
+		Columns:    StoresColumns,
+		PrimaryKey: []*schema.Column{StoresColumns[0]},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -48,10 +75,12 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		RecordsTable,
+		StoresTable,
 		UsersTable,
 	}
 )
 
 func init() {
-	RecordsTable.ForeignKeys[0].RefTable = UsersTable
+	RecordsTable.ForeignKeys[0].RefTable = StoresTable
+	RecordsTable.ForeignKeys[1].RefTable = UsersTable
 }

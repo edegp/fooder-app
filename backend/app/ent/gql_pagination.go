@@ -4,6 +4,7 @@ package ent
 
 import (
 	"backend/app/ent/record"
+	"backend/app/ent/store"
 	"backend/app/ent/user"
 	"context"
 	"encoding/base64"
@@ -541,6 +542,237 @@ func (r *Record) ToEdge(order *RecordOrder) *RecordEdge {
 	return &RecordEdge{
 		Node:   r,
 		Cursor: order.Field.toCursor(r),
+	}
+}
+
+// StoreEdge is the edge representation of Store.
+type StoreEdge struct {
+	Node   *Store `json:"node"`
+	Cursor Cursor `json:"cursor"`
+}
+
+// StoreConnection is the connection containing edges to Store.
+type StoreConnection struct {
+	Edges      []*StoreEdge `json:"edges"`
+	PageInfo   PageInfo     `json:"pageInfo"`
+	TotalCount int          `json:"totalCount"`
+}
+
+func (c *StoreConnection) build(nodes []*Store, pager *storePager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *Store
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *Store {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *Store {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*StoreEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &StoreEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// StorePaginateOption enables pagination customization.
+type StorePaginateOption func(*storePager) error
+
+// WithStoreOrder configures pagination ordering.
+func WithStoreOrder(order *StoreOrder) StorePaginateOption {
+	if order == nil {
+		order = DefaultStoreOrder
+	}
+	o := *order
+	return func(pager *storePager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultStoreOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithStoreFilter configures pagination filter.
+func WithStoreFilter(filter func(*StoreQuery) (*StoreQuery, error)) StorePaginateOption {
+	return func(pager *storePager) error {
+		if filter == nil {
+			return errors.New("StoreQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type storePager struct {
+	order  *StoreOrder
+	filter func(*StoreQuery) (*StoreQuery, error)
+}
+
+func newStorePager(opts []StorePaginateOption) (*storePager, error) {
+	pager := &storePager{}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultStoreOrder
+	}
+	return pager, nil
+}
+
+func (p *storePager) applyFilter(query *StoreQuery) (*StoreQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *storePager) toCursor(s *Store) Cursor {
+	return p.order.Field.toCursor(s)
+}
+
+func (p *storePager) applyCursors(query *StoreQuery, after, before *Cursor) *StoreQuery {
+	for _, predicate := range cursorsToPredicates(
+		p.order.Direction, after, before,
+		p.order.Field.field, DefaultStoreOrder.Field.field,
+	) {
+		query = query.Where(predicate)
+	}
+	return query
+}
+
+func (p *storePager) applyOrder(query *StoreQuery, reverse bool) *StoreQuery {
+	direction := p.order.Direction
+	if reverse {
+		direction = direction.reverse()
+	}
+	query = query.Order(direction.orderFunc(p.order.Field.field))
+	if p.order.Field != DefaultStoreOrder.Field {
+		query = query.Order(direction.orderFunc(DefaultStoreOrder.Field.field))
+	}
+	return query
+}
+
+func (p *storePager) orderExpr(reverse bool) sql.Querier {
+	direction := p.order.Direction
+	if reverse {
+		direction = direction.reverse()
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.field).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultStoreOrder.Field {
+			b.Comma().Ident(DefaultStoreOrder.Field.field).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to Store.
+func (s *StoreQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...StorePaginateOption,
+) (*StoreConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newStorePager(opts)
+	if err != nil {
+		return nil, err
+	}
+	if s, err = pager.applyFilter(s); err != nil {
+		return nil, err
+	}
+	conn := &StoreConnection{Edges: []*StoreEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = s.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+
+	s = pager.applyCursors(s, after, before)
+	s = pager.applyOrder(s, last != nil)
+	if limit := paginateLimit(first, last); limit != 0 {
+		s.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := s.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+
+	nodes, err := s.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// StoreOrderField defines the ordering field of Store.
+type StoreOrderField struct {
+	field    string
+	toCursor func(*Store) Cursor
+}
+
+// StoreOrder defines the ordering of Store.
+type StoreOrder struct {
+	Direction OrderDirection   `json:"direction"`
+	Field     *StoreOrderField `json:"field"`
+}
+
+// DefaultStoreOrder is the default ordering of Store.
+var DefaultStoreOrder = &StoreOrder{
+	Direction: OrderDirectionAsc,
+	Field: &StoreOrderField{
+		field: store.FieldID,
+		toCursor: func(s *Store) Cursor {
+			return Cursor{ID: s.ID}
+		},
+	},
+}
+
+// ToEdge converts Store into StoreEdge.
+func (s *Store) ToEdge(order *StoreOrder) *StoreEdge {
+	if order == nil {
+		order = DefaultStoreOrder
+	}
+	return &StoreEdge{
+		Node:   s,
+		Cursor: order.Field.toCursor(s),
 	}
 }
 

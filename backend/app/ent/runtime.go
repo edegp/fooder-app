@@ -5,6 +5,7 @@ package ent
 import (
 	"backend/app/ent/record"
 	"backend/app/ent/schema"
+	"backend/app/ent/store"
 	"backend/app/ent/user"
 	"time"
 )
@@ -29,6 +30,12 @@ func init() {
 	recordDescID := recordFields[0].Descriptor()
 	// record.DefaultID holds the default value on creation for the id field.
 	record.DefaultID = recordDescID.Default.(string)
+	storeFields := schema.Store{}.Fields()
+	_ = storeFields
+	// storeDescID is the schema descriptor for id field.
+	storeDescID := storeFields[0].Descriptor()
+	// store.DefaultID holds the default value on creation for the id field.
+	store.DefaultID = storeDescID.Default.(string)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescAge is the schema descriptor for age field.

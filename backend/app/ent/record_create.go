@@ -4,6 +4,7 @@ package ent
 
 import (
 	"backend/app/ent/record"
+	"backend/app/ent/store"
 	"backend/app/ent/user"
 	"context"
 	"errors"
@@ -108,6 +109,17 @@ func (rc *RecordCreate) SetUser(u *User) *RecordCreate {
 	return rc.SetUserID(u.ID)
 }
 
+// SetStoreID sets the "store" edge to the Store entity by ID.
+func (rc *RecordCreate) SetStoreID(id string) *RecordCreate {
+	rc.mutation.SetStoreID(id)
+	return rc
+}
+
+// SetStore sets the "store" edge to the Store entity.
+func (rc *RecordCreate) SetStore(s *Store) *RecordCreate {
+	return rc.SetStoreID(s.ID)
+}
+
 // Mutation returns the RecordMutation object of the builder.
 func (rc *RecordCreate) Mutation() *RecordMutation {
 	return rc.mutation
@@ -179,6 +191,9 @@ func (rc *RecordCreate) check() error {
 	if _, ok := rc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Record.user"`)}
 	}
+	if _, ok := rc.mutation.StoreID(); !ok {
+		return &ValidationError{Name: "store", err: errors.New(`ent: missing required edge "Record.store"`)}
+	}
 	return nil
 }
 
@@ -214,10 +229,6 @@ func (rc *RecordCreate) createSpec() (*Record, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := rc.mutation.PlaceID(); ok {
-		_spec.SetField(record.FieldPlaceID, field.TypeString, value)
-		_node.PlaceID = value
-	}
 	if value, ok := rc.mutation.VisitAt(); ok {
 		_spec.SetField(record.FieldVisitAt, field.TypeTime, value)
 		_node.VisitAt = value
@@ -252,6 +263,26 @@ func (rc *RecordCreate) createSpec() (*Record, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.UserID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rc.mutation.StoreIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   record.StoreTable,
+			Columns: []string{record.StoreColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: store.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.PlaceID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

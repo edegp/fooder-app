@@ -5,6 +5,7 @@ package ent
 import (
 	"backend/app/ent/predicate"
 	"backend/app/ent/record"
+	"backend/app/ent/store"
 	"backend/app/ent/user"
 	"context"
 	"errors"
@@ -135,6 +136,17 @@ func (ru *RecordUpdate) SetUser(u *User) *RecordUpdate {
 	return ru.SetUserID(u.ID)
 }
 
+// SetStoreID sets the "store" edge to the Store entity by ID.
+func (ru *RecordUpdate) SetStoreID(id string) *RecordUpdate {
+	ru.mutation.SetStoreID(id)
+	return ru
+}
+
+// SetStore sets the "store" edge to the Store entity.
+func (ru *RecordUpdate) SetStore(s *Store) *RecordUpdate {
+	return ru.SetStoreID(s.ID)
+}
+
 // Mutation returns the RecordMutation object of the builder.
 func (ru *RecordUpdate) Mutation() *RecordMutation {
 	return ru.mutation
@@ -143,6 +155,12 @@ func (ru *RecordUpdate) Mutation() *RecordMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (ru *RecordUpdate) ClearUser() *RecordUpdate {
 	ru.mutation.ClearUser()
+	return ru
+}
+
+// ClearStore clears the "store" edge to the Store entity.
+func (ru *RecordUpdate) ClearStore() *RecordUpdate {
+	ru.mutation.ClearStore()
 	return ru
 }
 
@@ -183,6 +201,9 @@ func (ru *RecordUpdate) check() error {
 	if _, ok := ru.mutation.UserID(); ru.mutation.UserCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Record.user"`)
 	}
+	if _, ok := ru.mutation.StoreID(); ru.mutation.StoreCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Record.store"`)
+	}
 	return nil
 }
 
@@ -197,9 +218,6 @@ func (ru *RecordUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := ru.mutation.PlaceID(); ok {
-		_spec.SetField(record.FieldPlaceID, field.TypeString, value)
 	}
 	if value, ok := ru.mutation.VisitAt(); ok {
 		_spec.SetField(record.FieldVisitAt, field.TypeTime, value)
@@ -255,6 +273,41 @@ func (ru *RecordUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeString,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ru.mutation.StoreCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   record.StoreTable,
+			Columns: []string{record.StoreColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: store.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.StoreIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   record.StoreTable,
+			Columns: []string{record.StoreColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: store.FieldID,
 				},
 			},
 		}
@@ -389,6 +442,17 @@ func (ruo *RecordUpdateOne) SetUser(u *User) *RecordUpdateOne {
 	return ruo.SetUserID(u.ID)
 }
 
+// SetStoreID sets the "store" edge to the Store entity by ID.
+func (ruo *RecordUpdateOne) SetStoreID(id string) *RecordUpdateOne {
+	ruo.mutation.SetStoreID(id)
+	return ruo
+}
+
+// SetStore sets the "store" edge to the Store entity.
+func (ruo *RecordUpdateOne) SetStore(s *Store) *RecordUpdateOne {
+	return ruo.SetStoreID(s.ID)
+}
+
 // Mutation returns the RecordMutation object of the builder.
 func (ruo *RecordUpdateOne) Mutation() *RecordMutation {
 	return ruo.mutation
@@ -397,6 +461,12 @@ func (ruo *RecordUpdateOne) Mutation() *RecordMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (ruo *RecordUpdateOne) ClearUser() *RecordUpdateOne {
 	ruo.mutation.ClearUser()
+	return ruo
+}
+
+// ClearStore clears the "store" edge to the Store entity.
+func (ruo *RecordUpdateOne) ClearStore() *RecordUpdateOne {
+	ruo.mutation.ClearStore()
 	return ruo
 }
 
@@ -450,6 +520,9 @@ func (ruo *RecordUpdateOne) check() error {
 	if _, ok := ruo.mutation.UserID(); ruo.mutation.UserCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Record.user"`)
 	}
+	if _, ok := ruo.mutation.StoreID(); ruo.mutation.StoreCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Record.store"`)
+	}
 	return nil
 }
 
@@ -481,9 +554,6 @@ func (ruo *RecordUpdateOne) sqlSave(ctx context.Context) (_node *Record, err err
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := ruo.mutation.PlaceID(); ok {
-		_spec.SetField(record.FieldPlaceID, field.TypeString, value)
 	}
 	if value, ok := ruo.mutation.VisitAt(); ok {
 		_spec.SetField(record.FieldVisitAt, field.TypeTime, value)
@@ -539,6 +609,41 @@ func (ruo *RecordUpdateOne) sqlSave(ctx context.Context) (_node *Record, err err
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeString,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ruo.mutation.StoreCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   record.StoreTable,
+			Columns: []string{record.StoreColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: store.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.StoreIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   record.StoreTable,
+			Columns: []string{record.StoreColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: store.FieldID,
 				},
 			},
 		}

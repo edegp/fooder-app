@@ -8,17 +8,16 @@ import (
 
 // CreateRecordInput represents a mutation input for creating records.
 type CreateRecordInput struct {
-	PlaceID       string
 	VisitAt       *time.Time
 	PaymentAmount *int
 	LeaveAt       *int
 	Evaluation    *int
 	UserID        string
+	StoreID       string
 }
 
 // Mutate applies the CreateRecordInput on the RecordMutation builder.
 func (i *CreateRecordInput) Mutate(m *RecordMutation) {
-	m.SetPlaceID(i.PlaceID)
 	if v := i.VisitAt; v != nil {
 		m.SetVisitAt(*v)
 	}
@@ -32,6 +31,7 @@ func (i *CreateRecordInput) Mutate(m *RecordMutation) {
 		m.SetEvaluation(*v)
 	}
 	m.SetUserID(i.UserID)
+	m.SetStoreID(i.StoreID)
 }
 
 // SetInput applies the change-set in the CreateRecordInput on the RecordCreate builder.
@@ -42,7 +42,6 @@ func (c *RecordCreate) SetInput(i CreateRecordInput) *RecordCreate {
 
 // UpdateRecordInput represents a mutation input for updating records.
 type UpdateRecordInput struct {
-	PlaceID            *string
 	VisitAt            *time.Time
 	ClearPaymentAmount bool
 	PaymentAmount      *int
@@ -51,13 +50,12 @@ type UpdateRecordInput struct {
 	Evaluation         *int
 	ClearUser          bool
 	UserID             *string
+	ClearStore         bool
+	StoreID            *string
 }
 
 // Mutate applies the UpdateRecordInput on the RecordMutation builder.
 func (i *UpdateRecordInput) Mutate(m *RecordMutation) {
-	if v := i.PlaceID; v != nil {
-		m.SetPlaceID(*v)
-	}
 	if v := i.VisitAt; v != nil {
 		m.SetVisitAt(*v)
 	}
@@ -82,6 +80,12 @@ func (i *UpdateRecordInput) Mutate(m *RecordMutation) {
 	if v := i.UserID; v != nil {
 		m.SetUserID(*v)
 	}
+	if i.ClearStore {
+		m.ClearStore()
+	}
+	if v := i.StoreID; v != nil {
+		m.SetStoreID(*v)
+	}
 }
 
 // SetInput applies the change-set in the UpdateRecordInput on the RecordUpdate builder.
@@ -92,6 +96,146 @@ func (c *RecordUpdate) SetInput(i UpdateRecordInput) *RecordUpdate {
 
 // SetInput applies the change-set in the UpdateRecordInput on the RecordUpdateOne builder.
 func (c *RecordUpdateOne) SetInput(i UpdateRecordInput) *RecordUpdateOne {
+	i.Mutate(c.Mutation())
+	return c
+}
+
+// CreateStoreInput represents a mutation input for creating stores.
+type CreateStoreInput struct {
+	Name          string
+	CategoryID    int
+	SubCategoryID int
+	Price         int
+	Payments      []string
+	Scale         int
+	Address       string
+	Rating        int
+	NearbyStores  []string
+	BusinessHours []int
+	Types         []string
+	RecordIDs     []string
+}
+
+// Mutate applies the CreateStoreInput on the StoreMutation builder.
+func (i *CreateStoreInput) Mutate(m *StoreMutation) {
+	m.SetName(i.Name)
+	m.SetCategoryID(i.CategoryID)
+	m.SetSubCategoryID(i.SubCategoryID)
+	m.SetPrice(i.Price)
+	if v := i.Payments; v != nil {
+		m.SetPayments(v)
+	}
+	m.SetScale(i.Scale)
+	m.SetAddress(i.Address)
+	m.SetRating(i.Rating)
+	if v := i.NearbyStores; v != nil {
+		m.SetNearbyStores(v)
+	}
+	if v := i.BusinessHours; v != nil {
+		m.SetBusinessHours(v)
+	}
+	if v := i.Types; v != nil {
+		m.SetTypes(v)
+	}
+	if v := i.RecordIDs; len(v) > 0 {
+		m.AddRecordIDs(v...)
+	}
+}
+
+// SetInput applies the change-set in the CreateStoreInput on the StoreCreate builder.
+func (c *StoreCreate) SetInput(i CreateStoreInput) *StoreCreate {
+	i.Mutate(c.Mutation())
+	return c
+}
+
+// UpdateStoreInput represents a mutation input for updating stores.
+type UpdateStoreInput struct {
+	Name                *string
+	CategoryID          *int
+	SubCategoryID       *int
+	Price               *int
+	Payments            []string
+	AppendPayments      []string
+	Scale               *int
+	Address             *string
+	Rating              *int
+	NearbyStores        []string
+	AppendNearbyStores  []string
+	BusinessHours       []int
+	AppendBusinessHours []int
+	Types               []string
+	AppendTypes         []string
+	ClearRecord         bool
+	AddRecordIDs        []string
+	RemoveRecordIDs     []string
+}
+
+// Mutate applies the UpdateStoreInput on the StoreMutation builder.
+func (i *UpdateStoreInput) Mutate(m *StoreMutation) {
+	if v := i.Name; v != nil {
+		m.SetName(*v)
+	}
+	if v := i.CategoryID; v != nil {
+		m.SetCategoryID(*v)
+	}
+	if v := i.SubCategoryID; v != nil {
+		m.SetSubCategoryID(*v)
+	}
+	if v := i.Price; v != nil {
+		m.SetPrice(*v)
+	}
+	if v := i.Payments; v != nil {
+		m.SetPayments(v)
+	}
+	if i.AppendPayments != nil {
+		m.AppendPayments(i.Payments)
+	}
+	if v := i.Scale; v != nil {
+		m.SetScale(*v)
+	}
+	if v := i.Address; v != nil {
+		m.SetAddress(*v)
+	}
+	if v := i.Rating; v != nil {
+		m.SetRating(*v)
+	}
+	if v := i.NearbyStores; v != nil {
+		m.SetNearbyStores(v)
+	}
+	if i.AppendNearbyStores != nil {
+		m.AppendNearbyStores(i.NearbyStores)
+	}
+	if v := i.BusinessHours; v != nil {
+		m.SetBusinessHours(v)
+	}
+	if i.AppendBusinessHours != nil {
+		m.AppendBusinessHours(i.BusinessHours)
+	}
+	if v := i.Types; v != nil {
+		m.SetTypes(v)
+	}
+	if i.AppendTypes != nil {
+		m.AppendTypes(i.Types)
+	}
+	if i.ClearRecord {
+		m.ClearRecord()
+	}
+	if v := i.AddRecordIDs; len(v) > 0 {
+		m.AddRecordIDs(v...)
+	}
+	if v := i.RemoveRecordIDs; len(v) > 0 {
+		m.RemoveRecordIDs(v...)
+	}
+}
+
+// SetInput applies the change-set in the UpdateStoreInput on the StoreUpdate builder.
+func (c *StoreUpdate) SetInput(i UpdateStoreInput) *StoreUpdate {
+	i.Mutate(c.Mutation())
+	return c
+}
+
+// SetInput applies the change-set in the UpdateStoreInput on the StoreUpdateOne builder.
+func (c *StoreUpdateOne) SetInput(i UpdateStoreInput) *StoreUpdateOne {
 	i.Mutate(c.Mutation())
 	return c
 }

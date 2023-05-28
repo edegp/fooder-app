@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Record is the client for interacting with the Record builders.
 	Record *RecordClient
+	// Store is the client for interacting with the Store builders.
+	Store *StoreClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -148,6 +150,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Record = NewRecordClient(tx.config)
+	tx.Store = NewStoreClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

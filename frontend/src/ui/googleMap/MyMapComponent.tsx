@@ -66,6 +66,7 @@ export const MyMapComponent = memo(function MyMapComponent() {
     status: google.maps.places.PlacesServiceStatus
   ) => {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
+      console.log(results)
       setMakersLocation(results)
     } else {
       // 失敗した場合再帰的に検索

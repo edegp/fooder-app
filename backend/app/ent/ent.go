@@ -4,6 +4,7 @@ package ent
 
 import (
 	"backend/app/ent/record"
+	"backend/app/ent/store"
 	"backend/app/ent/user"
 	"context"
 	"errors"
@@ -41,6 +42,7 @@ type OrderFunc func(*sql.Selector)
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		record.Table: record.ValidColumn,
+		store.Table:  store.ValidColumn,
 		user.Table:   user.ValidColumn,
 	}
 	check, ok := checks[table]

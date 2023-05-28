@@ -11,7 +11,7 @@ import { useRecoilState } from 'recoil'
 import styled from 'styled-components'
 import { useMutation } from 'urql'
 
-import { CreateUser, UpdateUser } from '@/graphql/mutaion'
+import { CreateUser, UpdateUser } from '@/graphql/mutation'
 import { auth, signIn, signUp } from '@/lib/firebase'
 import { handleError } from '@/lib/modules/handleError'
 import { mediaQueryPc } from '@/lib/modules/mediaQuery'

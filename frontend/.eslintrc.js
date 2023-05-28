@@ -27,7 +27,7 @@ module.exports = {
       }
     ],
     'unused-imports/no-unused-imports': 'error',
-    'no-console': ['warn', { allow: ['info', 'error'] }],
+    'no-console': ['error', { allow: ['info', 'error'] }],
     // importの並び順設定
     'import/order': [
       'error',

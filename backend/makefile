@@ -18,6 +18,6 @@ bs:
 bsfb:
 	docker exec -it $(FIREBASE_CONTAINER_NAME) bash
 gogen:
-	cd ~/fooder/backend/app && go generate ./... && go generate ./...
+	cd ~/fooder-app/backend/app && go generate ./...
 tidy:
-	cd ~/fooder/backend/app && go mod tidy
+	cd ~/fooder-app/backend/app && go mod tidy
