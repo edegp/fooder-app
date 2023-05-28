@@ -66,7 +66,6 @@ export const MyMapComponent = memo(function MyMapComponent() {
     status: google.maps.places.PlacesServiceStatus
   ) => {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
-      console.log(results)
       setMakersLocation(results)
     } else {
       // 失敗した場合再帰的に検索
@@ -85,7 +84,6 @@ export const MyMapComponent = memo(function MyMapComponent() {
     textSearch()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, textSearch, query])
-  console.log(query)
 
   return (
     <>

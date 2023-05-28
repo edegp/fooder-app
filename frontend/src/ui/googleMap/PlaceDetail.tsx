@@ -32,7 +32,6 @@ export const PlaceDetail = memo(function PlaceDetail() {
   const [detail, setDetail] = useRecoilState(placeDetailState)
   // first renderingで表示しない
   const isOpen = useMemo(() => (detail === null ? null : !!detail), [detail])
-  console.log(detail)
   const slideOptions: Options = {
     type: 'fade',
     fixedWidth: '100%',
