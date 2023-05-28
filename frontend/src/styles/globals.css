@@ -8,9 +8,9 @@
   html,
   body,
   #__next {
-    font-family: 'Noto Sans JP', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-      'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-      'Noto Color Emoji';
+    font-family: 'Noto Sans JP', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+      'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     position: relative;
     width: 100%;
     height: 100vh;
@@ -39,5 +39,12 @@
     font-size: 28px;
     padding-bottom: 0.5rem;
     letter-spacing: 0.08rem;
+  }
+  .gm-ui-hover-effect:hover {
+    border: none;
+    opacity: 0.6;
+  }
+  :focus-visible {
+    outline: none;
   }
 }

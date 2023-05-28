@@ -1,9 +1,9 @@
 'use client'
 
-import { memo, useEffect, useMemo, useRef } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { Loader } from '@googlemaps/js-api-loader'
-import { useRecoilState, useRecoilValue } from 'recoil'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
 import useSWR from 'swr'
 
 import {
@@ -12,7 +12,8 @@ import {
   makersLocationState,
   mapOptionsState,
   mapState,
-  placeDetailState
+  queryState,
+  requestState
 } from '@/lib/recoil/state'
 import { LoadingRing } from '@/ui/atom/Loading'
 import { PlaceDetail } from '@/ui/googleMap/PlaceDetail'
@@ -23,13 +24,12 @@ const mapContainerClassName = 'z-10 relative w-full h-full overflow-hidden touch
 type Library = 'places' | 'drawing' | 'geometry' | 'localContext' | 'visualization'
 const loaderOptions = {
   id: 'google-map-script',
-  apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAP_APIKEY || '',
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY || '',
   version: 'weekly',
   libraries: ['places'] as Library[]
 }
 /** mapロードfetcher */
-const fetcher = ([loader, mapElement, mapOptions]: [Loader, HTMLDivElement, google.maps.MapOptions]) =>
-  loader.load().then((google: any) => new google.maps.Map(mapElement, mapOptions)) as Promise<google.maps.Map>
+const fetcher = ([loader]: [Loader]) => loader.load()
 
 export const MyMapComponent = memo(function MyMapComponent() {
   const ref = useRef<HTMLDivElement>(null)
@@ -37,22 +37,25 @@ export const MyMapComponent = memo(function MyMapComponent() {
   const center = useRecoilValue(geoLocation)
   const [map, setMap] = useRecoilState(mapState)
   const mapOptions = useRecoilValue(mapOptionsState)
+  const isLoading = useRecoilValue(isLoadingState)
+  const setMakersLocation = useSetRecoilState(makersLocationState)
+  const request = useRecoilValue(requestState)
+  const query = useRecoilValue(queryState)
   // swrでフェッチすることでキャッシュ化・suspenseに対応
-  const { data: _, isLoading: isMapLoading } = useSWR(ref.current ? [loader, ref.current, mapOptions] : null, fetcher, {
+  const { data: googleScript } = useSWR([loader, ref.current, mapOptions], fetcher, {
     focusThrottleInterval: 2000,
-    keepPreviousData: true,
-    loadingTimeout: 2510,
-    onSuccess: data => setMap(data)
+    loadingTimeout: 2510
   })
+  /** 検索関数 */
+  const textSearch: () => void = useCallback(() => {
+    setMakersLocation(null)
+    if (map && request) {
+      const service = new window.google.maps.places.PlacesService(map)
+      service.textSearch(request, callback)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, request])
 
-  const [makersLocation, setMakersLocation] = useRecoilState<google.maps.places.PlaceResult[] | null>(
-    makersLocationState
-  )
-  const detail = useRecoilValue(placeDetailState)
-  const clickable = useMemo(() => !!detail, [detail])
-  const [isLoading, setIsLoading] = useRecoilState(isLoadingState)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => setIsLoading(isMapLoading || !makersLocation), [isMapLoading, makersLocation])
   /** 検索結果のcallback */
   const callback: (
     a: google.maps.places.PlaceResult[] | null,
@@ -66,34 +69,19 @@ export const MyMapComponent = memo(function MyMapComponent() {
       textSearch()
     }
   }
-  /** 検索関数 */
-  const textSearch: () => void = () => {
-    if (center) {
-      const request = {
-        location: center,
-        radius: 500,
-        type: 'restaurant'
-      }
-      if (map) {
-        const service = new window.google.maps.places.PlacesService(map)
-        service.textSearch(request, callback)
-      }
+  useEffect(() => {
+    if (ref.current && googleScript) {
+      const map = new googleScript.maps.Map(ref.current, mapOptions)
+      setMap(map)
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [googleScript])
 
   useEffect(() => {
-    if (map && center) {
-      map.setCenter(center)
-    }
     textSearch()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [center, map])
-
-  useEffect(() => {
-    if (map && clickable) {
-      map.setClickableIcons(clickable)
-    }
-  }, [map, clickable])
+  }, [map, textSearch, query])
+  console.log(query)
 
   return (
     <>
