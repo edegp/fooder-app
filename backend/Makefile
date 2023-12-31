@@ -2,9 +2,9 @@ include .env
 include .env.remote
 
 up:
-	docker-compose up --remove-orphans
+	docker-compose -f docker-compose.yml up  --remove-orphans
 bd:
-	docker-compose build 
+	docker-compose -f docker-compose.yml build 
 bdsw:
 	docker-compose build --progress=plain --no-cache
 dp:

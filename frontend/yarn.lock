@@ -6268,11 +6268,6 @@ strip-json-comments@^3.1.0, strip-json-comments@^3.1.1:
   resolved "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-3.1.1.tgz"
   integrity sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==
 
-style-jsx@0.0.0:
-  version "0.0.0"
-  resolved "https://registry.yarnpkg.com/style-jsx/-/style-jsx-0.0.0.tgz#a8ad27acd0e48c96bb2da5186f64045430ebe363"
-  integrity sha512-LedoRiOZKJ+dsYn45RiTxAhUc725+c3ZEiKr0o2lUQvL3jTz9YmhmmIkdGmhBoSA1pY85vyNgrJSYM7tEi2upQ==
-
 styled-components@6.0.0-beta.2:
   version "6.0.0-beta.2"
   resolved "https://registry.npmjs.org/styled-components/-/styled-components-6.0.0-beta.2.tgz"
@@ -6297,6 +6292,13 @@ styled-jsx@5.1.1:
   version "5.1.1"
   resolved "https://registry.npmjs.org/styled-jsx/-/styled-jsx-5.1.1.tgz"
   integrity sha512-pW7uC1l4mBZ8ugbiZrcIsiIvVx1UmTfw7UkC3Um2tmfUq9Bhk8IiyEIPl6F8agHgjzku6j0xQEZbfA5uSgSaCw==
+  dependencies:
+    client-only "0.0.1"
+
+styled-jsx@5.1.2:
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/styled-jsx/-/styled-jsx-5.1.2.tgz#55020c50da54d2b225750bd7aaab57d511724060"
+  integrity sha512-FI5r0a5ED2/+DSdG2ZRz3a4FtNQnKPLadauU5v76a9QsscwZrWggQKOmyxGGP5EWKbyY3bsuWAJYzyKaDAVAcw==
   dependencies:
     client-only "0.0.1"
 

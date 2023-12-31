@@ -29,6 +29,7 @@ func connectSQL(env string) (client *ent.Client, err error) {
 	if env == "development" {
 		// open mysql server
 		url := fmt.Sprintf("%s:%s@tcp(mysql_host)/%s?parseTime=true", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_DATABASE"))
+		ent.Open("mysql", )
 		return ent.Open("mysql", url, entOptions...)
 	}
 	return ConnectUnixSocket(entOptions...)
@@ -39,9 +40,11 @@ const defaultPort = "8080"
 func main() {
 	port := os.Getenv("PORT")
 	env := os.Getenv("ENV")
+
 	if port == "" {
 		port = defaultPort
 	}
+
 	client, err := connectSQL(env)
 	if err != nil {
 		log.Fatalf("Fatal to connect mysql. %s", err)

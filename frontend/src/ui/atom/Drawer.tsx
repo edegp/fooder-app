@@ -23,45 +23,6 @@ type Props = {
   className?: string
 }
 
-const KeyFrame = ({ width }: { width: string }) => (
-  <style jsx>
-    {`
-      @keyframes LeftToFadeIn {
-        0% {
-          transform: translateX(${width});
-        }
-        100% {
-          transform: translateX(0);
-        }
-      }
-      @keyframes LeftToFadeOut {
-        0% {
-          transform: translateX(0);
-        }
-        100% {
-          transform: translateX(${width});
-        }
-      }
-      @keyframes BottomToFadeIn {
-        0% {
-          transform: translateY(90vh);
-        }
-        100% {
-          transform: translateY(65px);
-        }
-      }
-      @keyframes BottomToFadeOut {
-        0% {
-          transform: translateY(65px);
-        }
-        100% {
-          transform: translateY(90vh);
-        }
-      }
-    `}
-  </style>
-)
-
 // no recommend var in reactの対策
 const Swiper = forwardRef<HTMLDivElement, SwiperProps>(function Swiper(
   { isVertical: _isVertical, width: _width, ...props },
@@ -78,11 +39,12 @@ const SwiperComponent = styled(Swiper)`
   top: ${({ isVertical }) => (isVertical ? 'calc(5vh + 65px)' : 0)};
   left: ${({ isVertical, width }) => (isVertical ? '0' : `calc(100vw - ${width})`)};
   color: black;
-  overflow-y: scroll;
-  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   border-radius: ${({ isVertical }) => (isVertical ? '8px;' : '0')};
+  touch-action: none;
+  transform: translate3d(0, 100%, 0);
+  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
   background-color: white;
   ${mediaQueryPc} {
     top: 0;
@@ -91,11 +53,17 @@ const SwiperComponent = styled(Swiper)`
   }
 `
 
+const SwaiperContainer = styled.div`
+  overflow-y: scroll;
+  overflow-x: hidden;
+  height: 100%;
+`
+
 const Puller = styled.div`
   width: 32px;
   height: 6px;
   border-radius: 8px;
-  position: absolute;
+  position: fixed;
   background-color: #a5a5a5;
   top: 8px;
   left: calc(50% - 15px);
@@ -115,7 +83,12 @@ const Touchable = styled.div`
   touch-action: auto;
 `
 
-const upperOffset = 107
+const FakeKeyFrame = () => (
+  <style jsx>{`
+    @keyframes fake-animation {
+    }
+  `}</style>
+)
 
 export const Drawer = memo(function Drawer({
   children,
@@ -131,37 +104,62 @@ export const Drawer = memo(function Drawer({
   const [stopScroll, setStopScroll] = useState<boolean>(false)
   const [clientWidth, clientHeight] = useRecoilValue(clientSize)
   const width = `${widthPercent}vw`
+
+  const wappedHandleClose = useCallback(() => {
+    setStopScroll(false)
+    setMoveDistance(-1)
+    handleClose()
+  }, [handleClose])
+
   const handleTouchMove = useCallback(
     (event: React.TouchEvent) => {
       if (stopScroll) {
         const { clientY, clientX } = event?.touches?.[0]
-        const distance = isVertical ? (clientY - upperOffset - 130) * 1.3 : clientX - touchPosition
-        if (distance > 0) setMoveDistance(distance)
-        const closeBoundary = isVertical ? clientY > (clientHeight * 3) / 4 : clientX > (clientWidth * 4) / 5
+        const { innerHeight } = event.view as unknown as Window
+        let yDistance = clientY - innerHeight * 0.1 - 65
+        if (yDistance < -10) {
+          yDistance = -(10 + Math.sqrt(Math.abs(yDistance + 10)))
+        }
+        const distance = isVertical ? yDistance : clientX - touchPosition
+
+        setMoveDistance(distance)
+        const closeBoundary = isVertical
+          ? clientY > clientHeight / 2
+          : clientX > (clientWidth * 2) / 5
         if (closeBoundary) {
-          handleClose()
+          wappedHandleClose()
         }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [handleClose, touchPosition, stopScroll]
+    [wappedHandleClose, touchPosition, stopScroll]
   )
 
   const handleTouchEnd = useCallback(
     async (event: React.TouchEvent) => {
+      const t = event.target as HTMLElement
+      event.preventDefault()
+      t.style.transform = 'translateY(-2000px)'
+      t.focus()
+      requestAnimationFrame(() => {
+        t.style.transform = ''
+      })
       const touch = event?.changedTouches?.[0]
       if (touch && stopScroll) {
         const { clientY, clientX } = touch
-        const closeBoundary = isVertical ? clientY > (clientHeight * 1) / 2 : clientX > (clientWidth * 2) / 3
+        const closeBoundary = isVertical
+          ? clientY > clientHeight / 2
+          : clientX > (clientWidth * 2) / 3
         if (closeBoundary) {
-          handleClose()
+          wappedHandleClose()
         }
       }
-      setMoveDistance(isVertical ? 65 : 0)
+      // isVertical ? 65 : 0
+      setMoveDistance(0)
       setStopScroll(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [handleClose]
+    [wappedHandleClose]
   )
   const handleTouchStart = useCallback(() => {
     if (!isVertical) {
@@ -175,34 +173,38 @@ export const Drawer = memo(function Drawer({
   const animation = useCallback(() => {
     // 初回表示時はアニメーションを発火しない
     if (typeof isOpen !== 'boolean') {
-      return { transform: `translate${isVertical ? 'Y(90vh)' : `X(${width})`}` }
+      return {
+        transform: `translate${isVertical ? 'Y(90vh)' : `X(${width})`}`,
+        transition: 'transform 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0s'
+      }
     }
     if (isOpen) {
       // ポインターに追従するアニメーション
       if (stopScroll) {
         return {
           transform: `translate${isVertical ? 'Y' : 'X'}(${moveDistance}px)`,
-          transitionDuration: '0.2s'
+          transition: 'none 0s ease 0s'
         }
       }
       // fadeIn
       if (moveDistance < 0) {
-        return { animation: isVertical ? '0.6s ease BottomToFadeIn' : '0.6s ease LeftToFadeIn' }
+        return {
+          transform: 'translate3d(0,var(--snap-point-height, 0),0)'
+        }
       }
       // 閉じてない場合元に戻る（reset）
       return {
         transform: `translate${isVertical ? 'Y' : 'X'}(0)`,
-        transitionDuration: '0.4s'
+        transition: 'transform 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0s'
       }
     }
     // fadeOut
     return isVertical
       ? {
-          animation: '0.5s ease BottomToFadeOut',
-          transform: `translateY(90vh)`
+          transform: `translateY(90vh)`,
+          transition: `transform 1s cubic-bezier(0.32,0.72, 0, 1)`
         }
       : {
-          animation: '0.5s ease LeftToFadeOut',
           transform: `translateX(${width})`
         }
 
@@ -215,17 +217,17 @@ export const Drawer = memo(function Drawer({
       ...(stopScroll || !isVertical ? { overflowY: 'hidden' } : {}),
       ...animation(),
       // 初回はheaderを非表示
-      ...(typeof isOpen === 'boolean'
-        ? { display: 'block', visibility: 'visible', opacity: 1 }
-        : { display: 'none', visibility: 'none', opacity: 0 })
+      display: 'block',
+      visibility: 'visible',
+      opacity: 1
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [animation, isOpen, stopScroll]
   )
   return (
     <>
-      <KeyFrame width={width} />
-      {isOpen && <OverLay onClick={handleClose} />}
+      <FakeKeyFrame />
+      {isOpen && <OverLay onClick={wappedHandleClose} />}
       <SwiperComponent
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -241,7 +243,7 @@ export const Drawer = memo(function Drawer({
             <Touchable />
           </Puller>
         )}
-        {children}
+        <SwaiperContainer>{children}</SwaiperContainer>
       </SwiperComponent>
     </>
   )

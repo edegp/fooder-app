@@ -47,19 +47,10 @@ services:
     ports:
       - 4000:4000
       - 9099:9099
-    # ip固定
-    networks:
-      backend_default:
-        ipv4_address: 172.21.0.3
     volumes:
       - user-data:/opt/workspace/firebase/data
+
 volumes:
   data-volume:
   user-data:
-networks:
-  backend_default:
-    name: backend_default
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.21.0.0/16
+
