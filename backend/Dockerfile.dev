@@ -19,13 +19,3 @@ RUN go mod download && go mod verify && go mod tidy
 COPY app .
 # hotreload
 CMD ["air","-c",".air.toml"]
-# -----------------------------------------------------------------------------
-# build
-
-
-# -----------------------------------------------------------------------------
-# step 2: exec
-# FROM scratch
-# COPY --from=build-step /go/bin/app /go/bin/app
-# EXPOSE 8080
-# ENTRYPOINT ["/go/bin/app"]

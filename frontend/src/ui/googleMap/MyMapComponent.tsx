@@ -24,7 +24,7 @@ const mapContainerClassName = 'z-10 relative w-full h-full overflow-hidden touch
 type Library = 'places' | 'drawing' | 'geometry' | 'localContext' | 'visualization'
 const loaderOptions = {
   id: 'google-map-script',
-  apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '',
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY as string,
   version: 'weekly',
   libraries: ['places'] as Library[]
 }

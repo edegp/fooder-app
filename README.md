@@ -53,11 +53,13 @@ You should change [GCLOUD_PROJECT](https://github.com/edegp/fooder-app/blob/1f8c
 
 ※ **Don't forget to change GCLOUD_PROJECT in ./firebase/dockerfile**
 
-And you have to docker-compose file setting.
+## Development
 
-```shell
-export COMPOSE_FILE=docker-compose.dev.yml
-```
+On vscode setting tasks in `.vscode/tasks.json`.
+you can run tasks this command.
+`ctl + shift + b`
+
+Then `yarn run dev` and `docker-compose up` same time and split terminal in vscode.
 
 ### Using firebase Emulator (Optional)
 
